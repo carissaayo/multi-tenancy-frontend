@@ -1,0 +1,90 @@
+import { apiClient } from './client';
+
+export interface Channel {
+  id: string;
+  name: string;
+  description?: string;
+  isPrivate: boolean;
+  workspaceId: string;
+  createdAt: string;
+  updatedAt: string;
+  memberCount?: number;
+  unreadCount?: number;
+}
+
+export interface CreateChannelDto {
+  name: string;
+  description?: string;
+  isPrivate?: boolean;
+}
+
+export interface UpdateChannelDto {
+  name?: string;
+  description?: string;
+  isPrivate?: boolean;
+}
+
+export interface ChannelResponse {
+  channel: Channel;
+}
+
+export interface ChannelsResponse {
+  channels: Channel[];
+}
+
+export interface ChannelMember {
+  id: string;
+  userId: string;
+  channelId: string;
+  joinedAt: string;
+  user: {
+    id: string;
+    email: string;
+    fullName: string;
+    avatarUrl?: string;
+  };
+}
+
+export interface ChannelMembersResponse {
+  members: ChannelMember[];
+}
+
+export const channelsApi = {
+  list: async (): Promise<ChannelsResponse> => {
+    const response = await apiClient.instance.get('/channels');
+    return response.data;
+  },
+
+  get: async (id: string): Promise<ChannelResponse> => {
+    const response = await apiClient.instance.get(`/channels/${id}`);
+    return response.data;
+  },
+
+  create: async (data: CreateChannelDto): Promise<ChannelResponse> => {
+    const response = await apiClient.instance.post('/channels', data);
+    return response.data;
+  },
+
+  update: async (id: string, data: UpdateChannelDto): Promise<ChannelResponse> => {
+    const response = await apiClient.instance.patch(`/channels/${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await apiClient.instance.delete(`/channels/${id}`);
+  },
+
+  join: async (id: string): Promise<ChannelResponse> => {
+    const response = await apiClient.instance.patch(`/channels/${id}/join`);
+    return response.data;
+  },
+
+  leave: async (id: string): Promise<void> => {
+    await apiClient.instance.patch(`/channels/${id}/leave`);
+  },
+
+  getMembers: async (id: string): Promise<ChannelMembersResponse> => {
+    const response = await apiClient.instance.get(`/channels/${id}/members`);
+    return response.data;
+  },
+};
