@@ -1,5 +1,30 @@
+import type { User } from '@/store/auth-store';
 import { apiClient } from './client';
 
+
+export interface UserProfile {
+    id: string;
+    email: string;
+    fullName: string;
+    phoneNumber?: string;
+    avatarUrl?: string;
+    bio?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    isEmailVerified?: boolean;
+    isActive?: boolean;
+    lastLoginAt?: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface AuthResponse {
+    accessToken: string;
+    refreshToken: string;
+    profile: UserProfile;
+    message: string;
+}
 export interface RegisterDto {
     email: string;
     password: string;
@@ -16,11 +41,7 @@ export interface LoginDto {
 export interface AuthResponse {
     accessToken: string;
     refreshToken: string;
-    profile: {
-        id: string;
-        email: string;
-        fullName: string;
-    };
+    profile:User;
     message: string;
 }
 

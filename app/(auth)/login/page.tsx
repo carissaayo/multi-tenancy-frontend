@@ -1,33 +1,14 @@
 'use client';
 
-import { useState } from 'react';
 import { Loader2, Sparkles, Users, Zap, Shield, Mail, Lock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { useLoginPage } from '@/hooks/pages/use-login';
 
 export default function LoginPage() {
-    const [formData, setFormData] = useState({ email: '', password: '' });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+    const { formData, setFormData, error, loading, handleSubmit } = useLoginPage();
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
-
-        // Simulate API call
-        setTimeout(() => {
-            if (formData.email && formData.password) {
-                // Success - would redirect to /select-workspace
-                console.log('Login successful');
-                setLoading(false);
-            } else {
-                setError('Please enter your credentials');
-                setLoading(false);
-            }
-        }, 1500);
-    };
 
     return (
         <div className="min-h-screen flex bg-linear-to-br from-blue-50 via-white to-purple-50">
@@ -147,6 +128,7 @@ export default function LoginPage() {
                                     <Input
                                         id="email"
                                         type="email"
+                                        required
                                         placeholder="name@company.com"
                                         className="h-12 pl-12 rounded-xl text-gray-900 font-medium placeholder:text-gray-400"
                                         value={formData.email}
@@ -178,6 +160,7 @@ export default function LoginPage() {
                                     <Input
                                         id="password"
                                         type="password"
+                                        required
                                         placeholder="••••••••"
                                         className="h-12 pl-12 rounded-xl text-gray-900 font-medium placeholder:text-gray-400"
                                         value={formData.password}
@@ -189,17 +172,6 @@ export default function LoginPage() {
                                 </div>
                             </div>
 
-                            {/* Remember me */}
-                            <div className="flex items-center gap-2">
-                                <Input
-                                    id="remember"
-                                    type="checkbox"
-                                    className="h-4 w-4"
-                                />
-                                <Label htmlFor="remember" className="text-sm text-gray-600 cursor-pointer">
-                                    Keep me signed in for a day
-                                </Label>
-                            </div>
 
                             {/* Submit */}
                             <Button

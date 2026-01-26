@@ -1,11 +1,22 @@
+import { UserProfile } from '@/lib/api/auth';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-interface User {
+export interface User {
     id: string;
     email: string;
     fullName: string;
+    phoneNumber?: string;
     avatarUrl?: string;
+    bio?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    isEmailVerified?: boolean;
+    isActive?: boolean;
+    lastLoginAt?: string;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 interface Workspace {
@@ -21,7 +32,7 @@ interface AuthState {
     currentWorkspace: Workspace | null;
     workspaces: Workspace[];
     isAuthenticated: boolean;
-    setUser: (user: User | null) => void;
+    setUser: (user: UserProfile | null) => void;
     setCurrentWorkspace: (workspace: Workspace | null) => void;
     setWorkspaces: (workspaces: Workspace[]) => void;
     logout: () => void;
