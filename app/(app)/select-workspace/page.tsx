@@ -1,81 +1,58 @@
 'use client';
 
-import { useState } from 'react';
 import { Loader2, Plus, Building2, Users, ArrowRight, Sparkles, Search } from 'lucide-react';
+import { useSelectWorkspacePage } from '@/hooks/pages/use-select-workspace';
+
+// optional: deterministic color from slug
+function workspaceColor(slug: string) {
+  const colors = ['bg-blue-500', 'bg-purple-500', 'bg-pink-500', 'bg-green-500', 'bg-orange-500'];
+  let n = 0;
+  for (let i = 0; i < slug.length; i++) n += slug.charCodeAt(i);
+  return colors[n % colors.length];
+}
 
 export default function SelectWorkspacePage() {
-  const [loading, setLoading] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const {
+    workspaces,
+    isLoading,
+    error,
+    searchQuery,
+    setSearchQuery,
+    selectedId,
+    selectWorkspace,
+    handleSelectWorkspace,
+    handleCreateWorkspace,
+  } = useSelectWorkspacePage();
 
-  // Mock data - replace with actual API call
-  const workspaces = [
-    {
-      id: '1',
-      name: 'Acme Corporation',
-      slug: 'acme-corp',
-      description: 'Main company workspace for all product development',
-      memberCount: 42,
-      color: 'bg-blue-500'
-    },
-    {
-      id: '2',
-      name: 'Design Team',
-      slug: 'design-team',
-      description: 'Creative workspace for design collaboration',
-      memberCount: 12,
-      color: 'bg-purple-500'
-    },
-    {
-      id: '3',
-      name: 'Marketing Squad',
-      slug: 'marketing-squad',
-      description: 'Content creation and marketing campaigns',
-      memberCount: 8,
-      color: 'bg-pink-500'
-    },
-    {
-      id: '4',
-      name: 'Engineering',
-      slug: 'engineering',
-      description: 'Backend and frontend development teams',
-      memberCount: 28,
-      color: 'bg-green-500'
-    },
-    {
-      id: '5',
-      name: 'Customer Success',
-      slug: 'customer-success',
-      description: 'Support and customer relationship management',
-      memberCount: 15,
-      color: 'bg-orange-500'
-    },
-  ];
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto" />
+          <p className="mt-4 text-gray-600">Loading workspaces...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const handleSelectWorkspace = (workspace: any) => {
-    setSelectedId(workspace.id);
-    setLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Selected workspace:', workspace.slug);
-      // window.location.href = getWorkspaceUrl(workspace.slug, '/workspace/channels');
-      setLoading(false);
-    }, 1500);
-  };
-
-  const filteredWorkspaces = workspaces.filter(ws =>
-    ws.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    ws.slug.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  if (error) {
+    return (
+      <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full p-8 bg-white rounded-2xl shadow-xl border border-gray-100 text-center">
+          <p className="text-red-600 mb-4">Failed to load workspaces. Please try again.</p>
+          {/* optional: retry button that refetches */}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <div className="w-full max-w-6xl">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-linear-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
               <Sparkles className="w-7 h-7 text-white" />
             </div>
             <h1 className="text-3xl font-black tracking-tighter text-slate-900">
@@ -90,7 +67,7 @@ export default function SelectWorkspacePage() {
           </p>
         </div>
 
-        {/* Search Bar */}
+        {/* Search */}
         <div className="max-w-2xl mx-auto mb-8">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -104,70 +81,58 @@ export default function SelectWorkspacePage() {
           </div>
         </div>
 
-        {/* Workspaces Grid */}
+        {/* Grid */}
         <div className="bg-white rounded-3xl shadow-xl shadow-blue-500/5 p-8 border border-gray-100">
-          {filteredWorkspaces.length > 0 ? (
+          {workspaces.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredWorkspaces.map((workspace) => (
+              {workspaces.map((workspace) => (
                 <button
                   key={workspace.id}
                   onClick={() => handleSelectWorkspace(workspace)}
-                  disabled={loading}
+                  disabled={selectWorkspace.isPending}
                   className="group relative p-6 border-2 border-gray-200 rounded-2xl hover:border-blue-500 hover:shadow-lg transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed bg-white hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50"
                 >
-                  {/* Loading overlay */}
-                  {loading && selectedId === workspace.id && (
+                  {selectWorkspace.isPending && selectedId === workspace.id && (
                     <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-2xl flex items-center justify-center z-10">
                       <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
                     </div>
                   )}
 
-                  {/* Workspace Icon */}
                   <div className="flex items-start gap-4 mb-4">
-                    <div className={`w-14 h-14 ${workspace.color} rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
+                    <div className={`w-14 h-14 ${workspaceColor(workspace.slug)} rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
                       <Building2 className="w-7 h-7 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-lg text-gray-900 mb-1 truncate">
-                        {workspace.name}
-                      </h3>
+                      <h3 className="font-bold text-lg text-gray-900 mb-1 truncate">{workspace.name}</h3>
                       <p className="text-sm text-gray-500">@{workspace.slug}</p>
                     </div>
                   </div>
 
-                  {/* Description */}
                   {workspace.description && (
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                      {workspace.description}
-                    </p>
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{workspace.description}</p>
                   )}
 
-                  {/* Footer */}
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                    {/* API has no memberCount; omit or use placeholder */}
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                       <Users className="w-4 h-4" />
-                      <span>{workspace.memberCount} members</span>
+                      <span>Workspace</span>
                     </div>
                     <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
                   </div>
                 </button>
               ))}
 
-              {/* Create New Workspace Card */}
               <button
-                onClick={() => console.log('Create new workspace')}
+                onClick={handleCreateWorkspace}
                 className="group relative p-6 border-2 border-dashed border-gray-300 rounded-2xl hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 transition-all text-left"
               >
                 <div className="flex flex-col items-center justify-center h-full min-h-[200px] text-center">
-                  <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <div className="w-14 h-14 bg-linear-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                     <Plus className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="font-bold text-lg text-gray-900 mb-2">
-                    Create New Workspace
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    Start fresh with a new team space
-                  </p>
+                  <h3 className="font-bold text-lg text-gray-900 mb-2">Create New Workspace</h3>
+                  <p className="text-sm text-gray-500">Start fresh with a new team space</p>
                 </div>
               </button>
             </div>
@@ -176,30 +141,23 @@ export default function SelectWorkspacePage() {
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Search className="w-8 h-8 text-gray-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                No workspaces found
-              </h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No workspaces found</h3>
               <p className="text-gray-500 mb-6">
                 Try adjusting your search or create a new workspace
               </p>
               <button
-                onClick={() => console.log('Create workspace')}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
+                onClick={handleCreateWorkspace}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
               >
-                <Plus className="w-5 h-5" />
-                Create Workspace
+                <Plus className="w-5 h-5" /> Create Workspace
               </button>
             </div>
           )}
         </div>
 
-        {/* Footer */}
         <div className="text-center mt-8">
           <p className="text-sm text-gray-500">
-            Need help?{' '}
-            <a href="/support" className="text-blue-600 hover:text-blue-700 font-semibold">
-              Contact Support
-            </a>
+            Need help? <a href="/support" className="text-blue-600 hover:text-blue-700 font-semibold">Contact Support</a>
           </p>
         </div>
       </div>
