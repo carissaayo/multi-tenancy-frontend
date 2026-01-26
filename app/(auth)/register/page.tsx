@@ -1,60 +1,23 @@
 'use client';
-import { useState } from 'react';
-import { Loader2, CheckCircle2, Sparkles, Users, Zap, Shield } from 'lucide-react';
+import Link from 'next/link';
+import { Loader2, Sparkles, Users, Zap, Shield } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 
+import { useRegisterPage } from '@/hooks/pages/use-register';
+
 export default function RegisterPage() {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    fullName: '',
-    phoneNumber: '',
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  const { formData, setFormData, error, success, loading, handleSubmit } = useRegisterPage();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      setLoading(false);
-      return;
+  useEffect(() => {
+    if (success) {
+      toast.success('Account created! You will be redirected to the login page.');
     }
-
-    // Simulate API call
-    setTimeout(() => {
-      setSuccess(true);
-    }, 1500);
-  };
-
-  if (success) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-purple-50">
-        <div className="max-w-md w-full text-center space-y-6 p-8">
-          <div className="relative">
-            <div className="absolute inset-0 bg-green-500/20 blur-3xl rounded-full animate-pulse"></div>
-            <CheckCircle2 className="relative mx-auto h-20 w-20 text-green-500 animate-in zoom-in duration-500" />
-          </div>
-          <div className="space-y-2">
-            <h2 className="text-4xl font-bold tracking-tight text-gray-900">Welcome aboard! 🎉</h2>
-            <p className="text-lg text-gray-600">Your workspace is being prepared...</p>
-          </div>
-          <div className="flex items-center justify-center gap-1">
-            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
-            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  }, [success]);
 
   return (
     <div className="min-h-screen flex bg-linear-to-br from-blue-50 via-white to-purple-50">
@@ -283,12 +246,9 @@ export default function RegisterPage() {
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
                 Already have an account?{' '}
-                <a
-                  href="/login"
-                  className="font-semibold text-blue-600 hover:text-blue-700"
-                >
+                <Link href="/login" className="font-semibold text-blue-600 hover:text-blue-700">
                   Sign in
-                </a>
+                </Link>
               </p>
             </div>
 
