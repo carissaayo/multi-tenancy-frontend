@@ -135,7 +135,10 @@ export default function LoginPage() {
                         <form onSubmit={handleSubmit} className="space-y-5">
                             {/* Email */}
                             <div className="space-y-2">
-                                <Label htmlFor="email" className="text-sm font-semibold text-gray-700">
+                                <Label
+                                    htmlFor="email"
+                                    className="text-sm font-semibold text-gray-900"
+                                >
                                     Email Address
                                 </Label>
 
@@ -145,7 +148,7 @@ export default function LoginPage() {
                                         id="email"
                                         type="email"
                                         placeholder="name@company.com"
-                                        className="h-12 pl-12 rounded-xl"
+                                        className="h-12 pl-12 rounded-xl text-gray-900 font-medium placeholder:text-gray-400"
                                         value={formData.email}
                                         onChange={(e) =>
                                             setFormData({ ...formData, email: e.target.value })
@@ -157,7 +160,9 @@ export default function LoginPage() {
                             {/* Password */}
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
-                                    <Label htmlFor="password" className="text-sm font-semibold text-gray-700">
+                                    <Label htmlFor="password"
+                                        className="text-sm font-semibold text-gray-900"
+                                    >
                                         Password
                                     </Label>
                                     <a
@@ -174,12 +179,13 @@ export default function LoginPage() {
                                         id="password"
                                         type="password"
                                         placeholder="••••••••"
-                                        className="h-12 pl-12 rounded-xl"
+                                        className="h-12 pl-12 rounded-xl text-gray-900 font-medium placeholder:text-gray-400"
                                         value={formData.password}
                                         onChange={(e) =>
                                             setFormData({ ...formData, password: e.target.value })
                                         }
                                     />
+
                                 </div>
                             </div>
 
