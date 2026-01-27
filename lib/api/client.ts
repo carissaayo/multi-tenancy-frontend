@@ -11,7 +11,8 @@ class ApiClient {
                 'Content-Type': 'application/json',
             },
         });
-
+       
+        
         // Request interceptor to add auth token, refresh token, and workspace context
         this.client.interceptors.request.use(
             (config: InternalAxiosRequestConfig) => {
@@ -26,10 +27,25 @@ class ApiClient {
                     config.headers['x-refresh-token'] = refreshToken;
                 }
 
-                // Add workspace context from subdomain or header
+                // Build baseURL with workspace slug as subdomain
                 const workspaceSlug = this.getWorkspaceSlug();
-                if (workspaceSlug && config.headers) {
-                    config.headers['x-workspace-slug'] = workspaceSlug;
+                if (workspaceSlug) {
+                    const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                    const url = new URL(baseApiUrl);
+
+                    // For localhost: workspace-slug.localhost:port
+                    // For production: workspace-slug.domain.com
+                    if (url.hostname === 'localhost' || url.hostname.includes('localhost')) {
+                        config.baseURL = `${url.protocol}//${workspaceSlug}.localhost${url.port ? `:${url.port}` : ''}${url.pathname}`;
+                    } else {
+                        // Production: extract root domain and prepend workspace slug
+                        const hostParts = url.hostname.split('.');
+                        const rootDomain = hostParts.slice(-2).join('.');
+                        config.baseURL = `${url.protocol}//${workspaceSlug}.${rootDomain}${url.port ? `:${url.port}` : ''}${url.pathname}`;
+                    }
+                } else {
+                    // No workspace slug, use original baseURL
+                    config.baseURL = process.env.NEXT_PUBLIC_API_URL;
                 }
 
                 return config;
