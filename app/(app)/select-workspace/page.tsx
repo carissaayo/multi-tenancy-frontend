@@ -45,8 +45,7 @@ export default function SelectWorkspacePage() {
       </div>
     );
   }
-
-  console.log(workspaces, 'workspaces');
+  
   
 
   return (

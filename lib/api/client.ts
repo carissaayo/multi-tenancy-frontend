@@ -32,31 +32,22 @@ class ApiClient {
     );
 
     // Response interceptor for token refresh
-    this.client.interceptors.response.use(
-      (response) => response,
-      async (error) => {
-        const originalRequest = error.config;
+      this.client.interceptors.response.use(
+          (response) => response,
+          async (error) => {
+              const originalRequest = error.config;
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
-          originalRequest._retry = true;
-          
-          try {
-            const newToken = await this.refreshAccessToken();
-            if (newToken) {
-              originalRequest.headers.Authorization = `Bearer ${newToken}`;
-              return this.client(originalRequest);
-            }
-          } catch (refreshError) {
-            this.clearAuth();
-            if (typeof window !== 'undefined') {
-              window.location.href = '/login';
-            }
+              // If 401, just clear auth and redirect to login
+              if (error.response?.status === 401) {
+                  this.clearAuth();
+                  if (typeof window !== 'undefined') {
+                      window.location.href = '/login';
+                  }
+              }
+
+              return Promise.reject(error);
           }
-        }
-
-        return Promise.reject(error);
-      }
-    );
+      );
   }
 
   private getAccessToken(): string | null {
@@ -88,28 +79,6 @@ class ApiClient {
 
     // Fallback to stored workspace slug
     return localStorage.getItem('workspaceSlug');
-  }
-
-  private async refreshAccessToken(): Promise<string | null> {
-    const refreshToken = localStorage.getItem('refreshToken');
-    if (!refreshToken) return null;
-
-    try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-        { refreshToken },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      const { accessToken } = response.data;
-      localStorage.setItem('accessToken', accessToken);
-      return accessToken;
-    } catch {
-      return null;
-    }
   }
 
   private clearAuth(): void {
