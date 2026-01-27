@@ -11,8 +11,7 @@ class ApiClient {
                 'Content-Type': 'application/json',
             },
         });
-       
-        
+
         // Request interceptor to add auth token, refresh token, and workspace context
         this.client.interceptors.request.use(
             (config: InternalAxiosRequestConfig) => {
@@ -27,24 +26,31 @@ class ApiClient {
                     config.headers['x-refresh-token'] = refreshToken;
                 }
 
-                // Build baseURL with workspace slug as subdomain
-                const workspaceSlug = this.getWorkspaceSlug();
-                if (workspaceSlug) {
-                    const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                    const url = new URL(baseApiUrl);
+                // Check if this route should use subdomain
+                const shouldUseSubdomain = this.shouldUseSubdomain(config.url || '');
 
-                    // For localhost: workspace-slug.localhost:port
-                    // For production: workspace-slug.domain.com
-                    if (url.hostname === 'localhost' || url.hostname.includes('localhost')) {
-                        config.baseURL = `${url.protocol}//${workspaceSlug}.localhost${url.port ? `:${url.port}` : ''}${url.pathname}`;
+                if (shouldUseSubdomain) {
+                    // Build baseURL with workspace slug as subdomain
+                    const workspaceSlug = this.getWorkspaceSlug();
+                    if (workspaceSlug) {
+                        const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                        const url = new URL(baseApiUrl);
+
+                        if (url.hostname === 'localhost' || url.hostname.includes('localhost')) {
+                            // Development: nerdy-developers.localhost:8000
+                            config.baseURL = `${url.protocol}//${workspaceSlug}.localhost${url.port ? `:${url.port}` : ''}${url.pathname}`;
+                        } else {
+                            // Production: nerdy-developers.yourdomain.com
+                            const hostParts = url.hostname.split('.');
+                            const rootDomain = hostParts.slice(-2).join('.');
+                            config.baseURL = `${url.protocol}//${workspaceSlug}.${rootDomain}${url.port ? `:${url.port}` : ''}${url.pathname}`;
+                        }
                     } else {
-                        // Production: extract root domain and prepend workspace slug
-                        const hostParts = url.hostname.split('.');
-                        const rootDomain = hostParts.slice(-2).join('.');
-                        config.baseURL = `${url.protocol}//${workspaceSlug}.${rootDomain}${url.port ? `:${url.port}` : ''}${url.pathname}`;
+                        // No workspace slug, use original baseURL
+                        config.baseURL = process.env.NEXT_PUBLIC_API_URL;
                     }
                 } else {
-                    // No workspace slug, use original baseURL
+                    // Route doesn't need subdomain, use original baseURL
                     config.baseURL = process.env.NEXT_PUBLIC_API_URL;
                 }
 
@@ -119,6 +125,48 @@ class ApiClient {
         }
 
         return localStorage.getItem('workspaceSlug');
+    }
+
+    /**
+     * Check if a route should use subdomain-based URL
+     * Returns false for public routes and workspace-optional routes
+     */
+    private shouldUseSubdomain(url: string): boolean {
+        const normalizedUrl = url.split('?')[0];
+
+        // Public routes - no subdomain needed
+        const publicPatterns = [
+            '/api/auth/register',
+            '/api/auth/login',
+            '/api/auth/request-password-reset',
+            '/api/auth/password-reset',
+            '/api/payment/paystack/webhook',
+            '/api/invitations/accept',
+            '/api/docs',
+        ];
+
+        // Workspace-optional routes - no subdomain needed
+        const workspaceOptionalPatterns = [
+            '/api/workspaces',
+            '/api/users',
+            '/api/auth/',
+            '/api/invitations/accept',
+            '/api/channels/invitations/accept',
+            '/api/docs',
+        ];
+
+        // Check public routes
+        if (publicPatterns.some(pattern => normalizedUrl.startsWith(pattern))) {
+            return false;
+        }
+
+        // Check workspace-optional routes
+        if (workspaceOptionalPatterns.some(pattern => normalizedUrl.startsWith(pattern))) {
+            return false;
+        }
+
+        // All other routes (like /api/channels, /api/messages, etc.) use subdomain
+        return true;
     }
 
     private clearAuth(): void {
