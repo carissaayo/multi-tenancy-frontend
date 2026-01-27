@@ -57,7 +57,7 @@ export function useSelectWorkspace() {
         mutationFn: (workspaceId: string) => authApi.selectWorkspace(workspaceId),
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: queryKeys.workspaces.forSelect });
-            router.push(`/workspace/${data.workspace.slug}`);
+            router.push(`/workspace/`);
         },
         
     });
