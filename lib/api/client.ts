@@ -55,16 +55,6 @@ class ApiClient {
                     }
                 }
 
-                // Debug logging
-                console.log('🔍 API Request:', {
-                    url: normalizedUrl,
-                    baseURL: config.baseURL,
-                    hasToken: !!token,
-                    hasRefreshToken: !!refreshToken,
-                    usesSubdomain: shouldUseSubdomain,
-                    workspace: this.getWorkspaceSlug()
-                });
-
                 return config;
             },
             (error) => Promise.reject(error)
@@ -79,19 +69,16 @@ class ApiClient {
 
                 if (newAccessToken) {
                     localStorage.setItem('accessToken', newAccessToken);
-                    console.log('✅ New access token stored');
                 }
 
                 if (newRefreshToken) {
                     localStorage.setItem('refreshToken', newRefreshToken);
-                    console.log('✅ New refresh token stored');
                 }
 
                 // Check for token in headers (middleware auto-refresh)
                 const headerToken = response.headers['x-new-access-token'];
                 if (headerToken) {
                     localStorage.setItem('accessToken', headerToken);
-                    console.log('✅ Access token from header stored');
                 }
 
                 return response;
@@ -101,23 +88,35 @@ class ApiClient {
 
                 // Prevent infinite retry loops
                 if (originalRequest?._retry) {
-                    console.error('❌ Retry failed, logging out');
-                    this.clearAuth();
-                    if (typeof window !== 'undefined') {
-                        window.location.href = '/login';
+                    // Already retried once, check if it's a refresh token issue
+                    const message = (error.response?.data as any)?.message?.toLowerCase() || '';
+                    const refreshTokenExpired =
+                        message.includes('refresh token') ||
+                        message.includes('token expired') ||
+                        message.includes('invalid refresh token') ||
+                        (error.response?.data as any)?.refreshTokenExpired === true;
+
+                    if (refreshTokenExpired) {
+                        console.error('❌ Refresh token expired - logging out');
+                        this.clearAuth();
+                        if (typeof window !== 'undefined') {
+                            window.location.href = '/login';
+                        }
                     }
                     return Promise.reject(error);
                 }
 
                 // Handle 401 Unauthorized
                 if (error.response?.status === 401) {
-                    console.warn('⚠️ 401 Unauthorized - checking if refresh needed');
-
                     const message = (error.response?.data as any)?.message?.toLowerCase() || '';
+                    const refreshTokenExpired =
+                        message.includes('refresh token expired') ||
+                        message.includes('invalid refresh token') ||
+                        (error.response?.data as any)?.refreshTokenExpired === true;
 
-                    // Check if refresh token is expired/invalid
-                    if (message.includes('refresh token') || message.includes('token refresh failed')) {
-                        console.error('❌ Refresh token expired or invalid - logging out');
+                    // If refresh token is explicitly expired, redirect immediately
+                    if (refreshTokenExpired) {
+                        console.error('❌ Refresh token expired - logging out');
                         this.clearAuth();
                         if (typeof window !== 'undefined') {
                             window.location.href = '/login';
@@ -125,39 +124,63 @@ class ApiClient {
                         return Promise.reject(error);
                     }
 
-                    // Mark as retried
+                    // Mark as retried to prevent infinite loops
                     originalRequest._retry = true;
 
-                    try {
-                        // Backend auto-refreshes via middleware with refreshtoken header
-                        // Just retry with current tokens from localStorage
-                        const currentToken = this.getAccessToken();
-                        const currentRefreshToken = this.getRefreshToken();
+                    // Check if we have tokens
+                    const currentToken = this.getAccessToken();
+                    const currentRefreshToken = this.getRefreshToken();
 
-                        if (!currentToken || !currentRefreshToken) {
-                            console.error('❌ No tokens available');
-                            this.clearAuth();
-                            if (typeof window !== 'undefined') {
-                                window.location.href = '/login';
-                            }
-                            return Promise.reject(error);
-                        }
-
-                        // Update headers with current tokens
-                        if (!originalRequest.headers) {
-                            originalRequest.headers = {};
-                        }
-
-                        originalRequest.headers.Authorization = `Bearer ${currentToken}`;
-                        originalRequest.headers['refreshtoken'] = currentRefreshToken;
-
-                        console.log('🔄 Retrying request with current tokens');
-                        return this.client(originalRequest);
-                    } catch (retryError) {
-                        console.error('❌ Retry failed:', retryError);
+                    if (!currentToken || !currentRefreshToken) {
+                        console.error('❌ No tokens available');
                         this.clearAuth();
                         if (typeof window !== 'undefined') {
                             window.location.href = '/login';
+                        }
+                        return Promise.reject(error);
+                    }
+
+                    // Update headers with current tokens (backend will auto-refresh)
+                    if (!originalRequest.headers) {
+                        originalRequest.headers = {} as any;
+                    }
+
+                    originalRequest.headers.Authorization = `Bearer ${currentToken}`;
+                    originalRequest.headers['refreshtoken'] = currentRefreshToken;
+
+                    // Reset baseURL in case it was modified
+                    const requestUrl = originalRequest.url || '';
+                    const normalizedUrl = this.normalizeUrl(requestUrl);
+                    const shouldUseSubdomain = this.shouldUseSubdomain(normalizedUrl);
+
+                    if (shouldUseSubdomain) {
+                        const workspaceSlug = this.getWorkspaceSlug();
+                        if (workspaceSlug) {
+                            originalRequest.baseURL = this.buildSubdomainUrl(workspaceSlug);
+                        }
+                    } else {
+                        originalRequest.baseURL = process.env.NEXT_PUBLIC_API_URL;
+                    }
+
+                    // Retry the request - backend should auto-refresh the token
+                    try {
+                        return await this.client(originalRequest);
+                    } catch (retryError: any) {
+                        // If retry also fails with 401, check if refresh token expired
+                        if (retryError.response?.status === 401) {
+                            const retryMessage = (retryError.response?.data as any)?.message?.toLowerCase() || '';
+                            const retryRefreshExpired =
+                                retryMessage.includes('refresh token expired') ||
+                                retryMessage.includes('invalid refresh token') ||
+                                (retryError.response?.data as any)?.refreshTokenExpired === true;
+
+                            if (retryRefreshExpired) {
+                                console.error('❌ Refresh token expired on retry - logging out');
+                                this.clearAuth();
+                                if (typeof window !== 'undefined') {
+                                    window.location.href = '/login';
+                                }
+                            }
                         }
                         return Promise.reject(retryError);
                     }
@@ -202,14 +225,8 @@ class ApiClient {
 
     /**
      * Determines if a route requires workspace subdomain
-     * Backend has TWO arrays:
-     * 1. publicRoutes - No auth required (not relevant here, handled by backend)
-     * 2. workspaceOptionalRoutes - Auth required but NO subdomain needed
-     * 
-     * Returns FALSE for workspaceOptionalRoutes, TRUE for workspace-scoped routes
      */
     private shouldUseSubdomain(url: string): boolean {
-        // Prepend /api if not present (since baseURL includes /api)
         const fullPath = url.startsWith('/api') ? url : `/api${url}`;
 
         if (!fullPath.startsWith('/api')) {
@@ -227,18 +244,14 @@ class ApiClient {
         ];
 
         for (const pattern of workspaceOptionalPatterns) {
-            // Exact match
             if (fullPath === pattern) {
                 return false;
             }
 
-            // Starts with pattern
             if (fullPath.startsWith(pattern)) {
                 // Special case: /api/workspaces/:id (GET workspace by ID)
                 if (pattern === '/api/workspaces' && fullPath.startsWith('/api/workspaces/')) {
                     const remaining = fullPath.substring('/api/workspaces/'.length);
-
-                    // UUID pattern: 8-4-4-4-12 hex digits
                     const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(\/.*)?$/i;
 
                     if (uuidPattern.test(remaining)) {
@@ -277,15 +290,12 @@ class ApiClient {
         const hostname = window.location.hostname;
         const parts = hostname.split('.');
 
-        // Development: workspace-slug.localhost
         if (hostname.includes('localhost')) {
             const subdomain = parts[0];
             if (subdomain !== 'localhost' && subdomain !== 'www') {
                 return subdomain;
             }
-        }
-        // Production: workspace-slug.yourdomain.com
-        else if (parts.length > 2) {
+        } else if (parts.length > 2) {
             const subdomain = parts[0];
             if (subdomain !== 'www') {
                 return subdomain;
@@ -296,7 +306,6 @@ class ApiClient {
     }
 
     private clearAuth(): void {
-        console.log('🧹 Clearing authentication and redirecting to login');
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('workspaceSlug');
@@ -306,10 +315,8 @@ class ApiClient {
         this.workspaceSlug = slug;
         if (slug) {
             localStorage.setItem('workspaceSlug', slug);
-            console.log(`✅ Workspace slug set: ${slug}`);
         } else {
             localStorage.removeItem('workspaceSlug');
-            console.log('🧹 Workspace slug cleared');
         }
     }
 
