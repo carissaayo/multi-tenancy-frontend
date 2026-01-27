@@ -48,14 +48,37 @@ export interface MessagesResponse {
     totalPages: number;
   };
 }
+export interface GetMessagesDto {
+  channelId: string;
+  cursor?: string;
+  limit?: number;
+  direction?: 'before' | 'after';
+}
+
+export interface MessagesListResponse {
+  messages: Message[];
+  nextCursor: string | null;
+  hasMore: boolean;
+}
+
 
 export const messagesApi = {
-  list: async (channelId: string, page = 1, limit = 50): Promise<MessagesResponse> => {
-    const response = await apiClient.instance.get('/messages', {
-      params: { channelId, page, limit },
-    });
+  list: async (dto: GetMessagesDto): Promise<MessagesListResponse> => {
+    const { channelId, cursor, limit = 50, direction = 'before' } = dto;
+    const response = await apiClient.instance.post<MessagesListResponse>(
+      '/messages/channel/',
+      {
+        params: {
+          channelId,
+          ...(cursor != null && { cursor }),
+          limit: Math.min(limit, 100),
+          direction,
+        },
+      }
+    );
     return response.data;
   },
+
 
   get: async (id: string): Promise<MessageResponse> => {
     const response = await apiClient.instance.get(`/messages/${id}`);
