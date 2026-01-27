@@ -13,5 +13,8 @@ export const queryKeys = {
         members: (id: string) => ['channels', id, 'members'] as const,
     },
     messages: (channelId: string, page?: number) =>
-        (page != null ? ['messages', channelId, page] as const : ['messages', channelId] as const),
+        page != null
+            ? (['messages', channelId, page] as const)
+            : (['messages', channelId] as const),
+    messageDetail: (id: string) => ['messages', 'detail', id] as const,
 };
