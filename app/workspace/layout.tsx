@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
 import { WorkspaceSidebar } from '@/components/workspace/workspace-sidebar';
 
@@ -10,7 +9,7 @@ export default function WorkspaceLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
+
   const { isAuthenticated } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
