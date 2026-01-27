@@ -65,19 +65,19 @@ export interface MessagesListResponse {
 export const messagesApi = {
   list: async (dto: GetMessagesDto): Promise<MessagesListResponse> => {
     const { channelId, cursor, limit = 50, direction = 'before' } = dto;
-    const response = await apiClient.instance.post<MessagesListResponse>(
-      '/messages/channel/',
+    const response = await apiClient.instance.get<MessagesListResponse>(
+      `/messages/channel/${channelId}`,
       {
         params: {
-          channelId,
-          ...(cursor != null && { cursor }),
           limit: Math.min(limit, 100),
+          ...(cursor != null && cursor !== '' && { cursor }),
           direction,
         },
       }
     );
     return response.data;
   },
+
 
 
   get: async (id: string): Promise<MessageResponse> => {

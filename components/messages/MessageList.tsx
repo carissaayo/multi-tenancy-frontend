@@ -18,11 +18,12 @@ export function MessageList({ channelId }: MessageListProps) {
   const { data, isLoading, error } = useQuery({
     queryKey: ['messages', channelId],
     queryFn: async () => {
-      const response = await messagesApi.list(channelId);
+      const response = await messagesApi.list({ channelId });
       return response.messages;
     },
     enabled: !!channelId,
   });
+  console.log(data,"data");
 
   useEffect(() => {
     if (data) {
