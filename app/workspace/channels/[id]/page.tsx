@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { channelsApi } from '@/lib/api/channels';
-import { WorkspaceHeader } from '@/components/workspace/channel-navbar';
+
 import { MessageList } from '@/components/messages/MessageList';
 import { MessageInput } from '@/components/messages/MessageInput';
 import { wsClient } from '@/lib/websocket/client';
@@ -63,7 +63,7 @@ export default function ChannelPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col h-screen">
-        <WorkspaceHeader />
+     
         <div className="flex-1 flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
@@ -74,7 +74,7 @@ export default function ChannelPage() {
   if (!channel) {
     return (
       <div className="flex flex-col h-screen">
-        <WorkspaceHeader />
+   
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <p className="text-red-500">Channel not found</p>
@@ -86,7 +86,6 @@ export default function ChannelPage() {
 
   return (
     <div className="flex flex-col h-screen bg-white">
-      <WorkspaceHeader channel={channel} />
       <MessageList channelId={channelId} />
       <MessageInput channelId={channelId} />
     </div>

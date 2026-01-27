@@ -11,7 +11,7 @@ export default function WorkspaceLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { isAuthenticated, } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Handle responsive sidebar state
@@ -32,8 +32,6 @@ export default function WorkspaceLayout({
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-
 
   if (!isAuthenticated) {
     return (

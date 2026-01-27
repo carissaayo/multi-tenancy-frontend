@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ChannelList } from '@/components/channels/channel-list';
 import { useAuthStore } from '@/store/auth-store';
 import { authApi } from '@/lib/api/auth';
 import { useRouter } from 'next/navigation';
+import { useWorkspaces } from '@/hooks/workspace';
 
 import {
   ChevronDown,
@@ -20,14 +21,33 @@ interface WorkspaceSidebarProps {
 }
 
 export function WorkspaceSidebar({ onClose }: WorkspaceSidebarProps) {
-  const { currentWorkspace, user, logout } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const router = useRouter();
   const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false);
+
+  // Fetch all workspaces
+  const { data: workspacesData, isLoading: isLoadingWorkspaces } = useWorkspaces();
+
+  // Get current workspace slug from localStorage
+  const workspaceSlug = typeof window !== 'undefined'
+    ? localStorage.getItem('workspaceSlug')
+    : null;
+
+  // Find current workspace by slug
+  const currentWorkspace = useMemo(() => {
+    if (!workspacesData?.workspaces || !workspaceSlug) {
+      return null;
+    }
+    return workspacesData.workspaces.find(ws => ws.slug === workspaceSlug) || null;
+  }, [workspacesData, workspaceSlug]);
 
   const handleLogout = () => {
     logout();
     authApi.logout();
   };
+
+  console.log(currentWorkspace,"currentWorkspace");
+  
 
   const handleSwitchWorkspace = () => {
     // Navigate to workspace selection page
@@ -48,6 +68,16 @@ export function WorkspaceSidebar({ onClose }: WorkspaceSidebarProps) {
     ? user.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : user?.email?.charAt(0).toUpperCase() || 'U';
 
+  // Show loading state while fetching workspace
+  if (isLoadingWorkspaces) {
+    return (
+      <div className="w-64 bg-linear-to-b from-purple-900 to-purple-800 text-white flex flex-col h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+        <p className="mt-4 text-sm text-purple-300">Loading workspace...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="w-64 bg-linear-to-b from-purple-900 to-purple-800 text-white flex flex-col h-screen">
       {/* Workspace Header */}
@@ -65,7 +95,7 @@ export function WorkspaceSidebar({ onClose }: WorkspaceSidebarProps) {
                 {currentWorkspace?.name || 'Workspace'}
               </h2>
               <p className="text-xs text-purple-300 truncate">
-                {user?.email}
+                {currentWorkspace?.description || user?.email || ''}
               </p>
             </div>
           </div>
@@ -108,6 +138,11 @@ export function WorkspaceSidebar({ onClose }: WorkspaceSidebarProps) {
           >
             <Users className="w-5 h-5" />
             <span>Members</span>
+            {currentWorkspace?.membersCount !== undefined && (
+              <span className="ml-auto text-xs text-purple-300">
+                {currentWorkspace.membersCount}
+              </span>
+            )}
           </button>
           <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-purple-700/30 rounded-lg transition-colors text-sm">
             <Star className="w-5 h-5" />
@@ -118,7 +153,14 @@ export function WorkspaceSidebar({ onClose }: WorkspaceSidebarProps) {
         {/* Channels Section */}
         <div>
           <div className="flex items-center justify-between px-3 mb-2">
-            <span className="text-xs font-semibold text-purple-300 uppercase tracking-wider">Channels</span>
+            <span className="text-xs font-semibold text-purple-300 uppercase tracking-wider">
+              Channels
+            </span>
+            {currentWorkspace?.channelCount !== undefined && (
+              <span className="text-xs text-purple-300">
+                {currentWorkspace.channelCount}
+              </span>
+            )}
           </div>
           <ChannelList />
         </div>
