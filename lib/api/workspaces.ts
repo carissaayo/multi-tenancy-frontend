@@ -1,5 +1,7 @@
 import { apiClient } from './client';
 
+export type WorkspaceUserRole = 'Owner' | 'Admin' | 'Member' | 'Guest';
+
 export interface Workspace {
   id: string;
   slug: string;
@@ -8,6 +10,11 @@ export interface Workspace {
   logoUrl?: string;
   createdAt: string;
   updatedAt: string;
+  /** From stats; only present when workspace list includes stats */
+  membersCount?: number;
+  channelCount?: number;
+  /** Logged-in user's role in this workspace */
+  userRole?: WorkspaceUserRole;
 }
 
 export interface CreateWorkspaceDto {

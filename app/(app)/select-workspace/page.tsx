@@ -1,6 +1,6 @@
 'use client';
 
-import { Loader2, Plus, Building2, Users, ArrowRight, Sparkles, Search } from 'lucide-react';
+import { Loader2, Plus, Building2, Users, ArrowRight, Sparkles, Search, Hash } from 'lucide-react';
 import { useSelectWorkspacePage } from '@/hooks/pages/use-select-workspace';
 
 // optional: deterministic color from slug
@@ -46,6 +46,9 @@ export default function SelectWorkspacePage() {
     );
   }
 
+  console.log(workspaces, 'workspaces');
+  
+
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <div className="w-full max-w-6xl">
@@ -90,7 +93,7 @@ export default function SelectWorkspacePage() {
                   key={workspace.id}
                   onClick={() => handleSelectWorkspace(workspace)}
                   disabled={selectWorkspace.isPending}
-                  className="group relative p-6 border-2 border-gray-200 rounded-2xl hover:border-blue-500 hover:shadow-lg transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed bg-white hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50"
+                  className="group relative p-6 border-2 border-gray-200 rounded-2xl hover:border-blue-500 hover:shadow-lg transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed bg-white hover:bg-linear-to-br hover:from-blue-50 hover:to-purple-50"
                 >
                   {selectWorkspace.isPending && selectedId === workspace.id && (
                     <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-2xl flex items-center justify-center z-10">
@@ -99,7 +102,7 @@ export default function SelectWorkspacePage() {
                   )}
 
                   <div className="flex items-start gap-4 mb-4">
-                    <div className={`w-14 h-14 ${workspaceColor(workspace.slug)} rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
+                    <div className={`w-14 h-14 ${workspaceColor(workspace.slug)} rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
                       <Building2 className="w-7 h-7 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -113,19 +116,36 @@ export default function SelectWorkspacePage() {
                   )}
 
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    {/* API has no memberCount; omit or use placeholder */}
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <Users className="w-4 h-4" />
-                      <span>Workspace</span>
+                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                      {workspace.membersCount != null && (
+                        <span className="flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          {workspace.membersCount} {workspace.membersCount === 1 ? 'member' : 'members'}
+                        </span>
+                      )}
+                      {workspace.channelCount != null && (
+                        <span className="flex items-center gap-2">
+                          <Hash className="w-4 h-4" />
+                          {workspace.channelCount} {workspace.channelCount === 1 ? 'channel' : 'channels'}
+                        </span>
+                      )}
+                      {workspace.membersCount == null && workspace.channelCount == null && (
+                        <span className="flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          Workspace
+                        </span>
+                      )}
                     </div>
                     <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
                   </div>
+
+
                 </button>
               ))}
 
               <button
                 onClick={handleCreateWorkspace}
-                className="group relative p-6 border-2 border-dashed border-gray-300 rounded-2xl hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 transition-all text-left"
+                className="group relative p-6 border-2 border-dashed border-gray-300 rounded-2xl hover:border-blue-500 hover:bg-linear-to-br hover:from-blue-50 hover:to-purple-50 transition-all text-left"
               >
                 <div className="flex flex-col items-center justify-center h-full min-h-[200px] text-center">
                   <div className="w-14 h-14 bg-linear-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
