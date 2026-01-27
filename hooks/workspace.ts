@@ -27,3 +27,12 @@ export function useCreateWorkspace() {
         },
     });
 }
+
+export function useWorkspacesForSelect() {
+    return useQuery({
+        queryKey: queryKeys.workspaces.forSelect,
+        queryFn: () => workspacesApi.list(),
+        staleTime: 0,
+        gcTime: 0,
+    });
+}

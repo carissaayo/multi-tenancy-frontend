@@ -3,13 +3,13 @@
 import { useState, useMemo } from 'react';
 
 import { useSelectWorkspace } from '@/hooks/auth';
-import { useWorkspaces } from '../workspace';
+import {  useWorkspacesForSelect } from '../workspace';
 
 export function useSelectWorkspacePage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedId, setSelectedId] = useState<string | null>(null);
 
-    const { data, isLoading, error } = useWorkspaces();
+    const { data, isLoading, error } = useWorkspacesForSelect();
     const selectWorkspace = useSelectWorkspace();
 
     const workspaces = data?.workspaces ?? [];

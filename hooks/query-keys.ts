@@ -2,6 +2,7 @@ export const queryKeys = {
     auth: ['auth'] as const,
     workspaces: {
         all: ['workspaces'] as const,
+        forSelect: ['workspaces', 'select'] as const, 
         detail: (id: string) => ['workspaces', id] as const,
     },
     members: ['members'] as const,
