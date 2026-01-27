@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { workspacesApi } from '@/lib/api/workspaces';
 import { useAuthStore } from '@/store/auth-store';
-import { WorkspaceHeader } from '@/components/workspace/WorkspaceHeader';
+import { WorkspaceHeader } from '@/components/workspace/channel-navbar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 

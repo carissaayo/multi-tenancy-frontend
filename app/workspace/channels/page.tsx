@@ -1,6 +1,6 @@
 'use client';
 
-import { WorkspaceHeader } from '@/components/workspace/WorkspaceHeader';
+import { WorkspaceHeader } from '@/components/workspace/channel-navbar';
 
 export default function ChannelsPage() {
   return (

@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { channelsApi } from '@/lib/api/channels';
-import { WorkspaceHeader } from '@/components/workspace/WorkspaceHeader';
+import { WorkspaceHeader } from '@/components/workspace/channel-navbar';
 import { MessageList } from '@/components/messages/MessageList';
 import { MessageInput } from '@/components/messages/MessageInput';
 import { wsClient } from '@/lib/websocket/client';

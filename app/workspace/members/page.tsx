@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { membersApi, MemberRole } from '@/lib/api/members';
-import { WorkspaceHeader } from '@/components/workspace/WorkspaceHeader';
+import { WorkspaceHeader } from '@/components/workspace/channel-navbar';
 import { useAuthStore } from '@/store/auth-store';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';

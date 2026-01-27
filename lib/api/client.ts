@@ -1,104 +1,128 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 
 class ApiClient {
-  private client: AxiosInstance;
-  private workspaceSlug: string | null = null;
+    private client: AxiosInstance;
+    private workspaceSlug: string | null = null;
 
-  constructor() {
-    this.client = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_URL,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    constructor() {
+        this.client = axios.create({
+            baseURL: process.env.NEXT_PUBLIC_API_URL,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
 
-    // Request interceptor to add auth token and workspace context
-    this.client.interceptors.request.use(
-      (config: InternalAxiosRequestConfig) => {
-        const token = this.getAccessToken();
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
+        // Request interceptor to add auth token, refresh token, and workspace context
+        this.client.interceptors.request.use(
+            (config: InternalAxiosRequestConfig) => {
+                const token = this.getAccessToken();
+                if (token && config.headers) {
+                    config.headers.Authorization = `Bearer ${token}`;
+                }
 
-        // Add workspace context from subdomain or header
-        const workspaceSlug = this.getWorkspaceSlug();
-        if (workspaceSlug && config.headers) {
-          config.headers['x-workspace-slug'] = workspaceSlug;
-        }
+                // Add refresh token in header for backend auto-refresh
+                const refreshToken = this.getRefreshToken();
+                if (refreshToken && config.headers) {
+                    config.headers['x-refresh-token'] = refreshToken;
+                }
 
-        return config;
-      },
-      (error) => Promise.reject(error)
-    );
+                // Add workspace context from subdomain or header
+                const workspaceSlug = this.getWorkspaceSlug();
+                if (workspaceSlug && config.headers) {
+                    config.headers['x-workspace-slug'] = workspaceSlug;
+                }
 
-    // Response interceptor for token refresh
-      this.client.interceptors.response.use(
-          (response) => response,
-          async (error) => {
-              const originalRequest = error.config;
+                return config;
+            },
+            (error) => Promise.reject(error)
+        );
 
-              // If 401, just clear auth and redirect to login
-              if (error.response?.status === 401) {
-                  this.clearAuth();
-                  if (typeof window !== 'undefined') {
-                      window.location.href = '/login';
-                  }
-              }
+        // Response interceptor to extract new access token and handle errors
+        this.client.interceptors.response.use(
+            (response) => {
+                // Extract new access token if backend auto-refreshed it
+                const newAccessToken =
+                    response.headers['x-new-access-token'] ||
+                    response.headers['x-access-token'] ||
+                    response.data?.accessToken ||
+                    response.data?.data?.accessToken;
 
-              return Promise.reject(error);
-          }
-      );
-  }
+                if (newAccessToken) {
+                    localStorage.setItem('accessToken', newAccessToken);
+                }
 
-  private getAccessToken(): string | null {
-    if (typeof window === 'undefined') return null;
-    return localStorage.getItem('accessToken');
-  }
+                return response;
+            },
+            async (error) => {
+                const originalRequest = error.config;
 
-  private getWorkspaceSlug(): string | null {
-    if (typeof window === 'undefined') return null;
-    
-    // Extract from subdomain
-    const hostname = window.location.hostname;
-    const parts = hostname.split('.');
-    
-    // For localhost:3000, check if it's a subdomain pattern
-    if (hostname.includes('localhost')) {
-      // In development, you might use a different pattern
-      // e.g., acme.localhost:3000
-      const subdomain = parts[0];
-      if (subdomain !== 'localhost' && subdomain !== 'www') {
-        return subdomain;
-      }
-    } else {
-      // Production: acme.app.com -> acme
-      if (parts.length > 2) {
-        return parts[0];
-      }
+                // If 401, check if refresh token expired
+                if (error.response?.status === 401) {
+                    const refreshTokenExpired =
+                        error.response?.data?.refreshTokenExpired ||
+                        error.response?.data?.message?.toLowerCase().includes('refresh token');
+
+                    if (refreshTokenExpired) {
+                        this.clearAuth();
+                        if (typeof window !== 'undefined') {
+                            window.location.href = '/login';
+                        }
+                    }
+                }
+
+                return Promise.reject(error);
+            }
+        );
     }
 
-    // Fallback to stored workspace slug
-    return localStorage.getItem('workspaceSlug');
-  }
-
-  private clearAuth(): void {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('workspaceSlug');
-  }
-
-  setWorkspaceSlug(slug: string | null): void {
-    this.workspaceSlug = slug;
-    if (slug) {
-      localStorage.setItem('workspaceSlug', slug);
-    } else {
-      localStorage.removeItem('workspaceSlug');
+    private getAccessToken(): string | null {
+        if (typeof window === 'undefined') return null;
+        return localStorage.getItem('accessToken');
     }
-  }
 
-  get instance(): AxiosInstance {
-    return this.client;
-  }
+    private getRefreshToken(): string | null {
+        if (typeof window === 'undefined') return null;
+        return localStorage.getItem('refreshToken');
+    }
+
+    private getWorkspaceSlug(): string | null {
+        if (typeof window === 'undefined') return null;
+
+        const hostname = window.location.hostname;
+        const parts = hostname.split('.');
+
+        if (hostname.includes('localhost')) {
+            const subdomain = parts[0];
+            if (subdomain !== 'localhost' && subdomain !== 'www') {
+                return subdomain;
+            }
+        } else {
+            if (parts.length > 2) {
+                return parts[0];
+            }
+        }
+
+        return localStorage.getItem('workspaceSlug');
+    }
+
+    private clearAuth(): void {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('workspaceSlug');
+    }
+
+    setWorkspaceSlug(slug: string | null): void {
+        this.workspaceSlug = slug;
+        if (slug) {
+            localStorage.setItem('workspaceSlug', slug);
+        } else {
+            localStorage.removeItem('workspaceSlug');
+        }
+    }
+
+    get instance(): AxiosInstance {
+        return this.client;
+    }
 }
 
 export const apiClient = new ApiClient();
