@@ -8,6 +8,7 @@ export const queryKeys = {
     members: ['members'] as const,
     channels: {
         all: ['channels'] as const,
+        forSelect: ['channels', 'select'] as const,  
         detail: (id: string) => ['channels', id] as const,
         members: (id: string) => ['channels', id, 'members'] as const,
     },
