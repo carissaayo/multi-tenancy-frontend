@@ -57,7 +57,7 @@ export function ChannelList() {
             ))}
           </div>
         ) : (
-          <div className="p-4 text-center text-gray-500">
+          <div className="p-4 text-center text-white">
             No channels yet. Create one to get started!
           </div>
         )}

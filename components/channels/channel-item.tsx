@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Channel } from '@/lib/api/channels';
+import { Hash, Lock } from 'lucide-react';
 
 interface ChannelItemProps {
   channel: Channel;
@@ -15,28 +16,29 @@ export function ChannelItem({ channel }: ChannelItemProps) {
   return (
     <Link
       href={`/workspace/channels/${channel.id}`}
-      className={`block px-3 py-2 rounded-md mb-1 transition-colors ${
-        isActive
-          ? 'bg-blue-100 text-blue-900 font-medium'
-          : 'hover:bg-gray-100 text-gray-700'
-      }`}
+      className={`
+        w-full flex items-center justify-between px-3 py-2 rounded-lg 
+        transition-colors text-sm group
+        ${isActive
+          ? 'bg-purple-700/50 text-white'
+          : 'hover:bg-purple-700/30 text-purple-100'
+        }
+      `}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">#</span>
-          <span className="truncate">{channel.name}</span>
-          {channel.isPrivate && (
-            <span className="text-xs text-gray-500" title="Private channel">
-              🔒
-            </span>
-          )}
-        </div>
-        {channel.unreadCount && channel.unreadCount > 0 && (
-          <span className="bg-red-500 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center">
-            {channel.unreadCount}
-          </span>
+      <div className="flex items-center gap-2 min-w-0">
+        {channel.isPrivate ? (
+          <Lock className="w-4 h-4 shrink-0" />
+        ) : (
+          <Hash className="w-4 h-4 shrink-0" />
         )}
+        <span className="truncate">{channel.name}</span>
       </div>
+
+      {channel.unreadCount && channel.unreadCount > 0 && (
+        <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0">
+          {channel.unreadCount}
+        </span>
+      )}
     </Link>
   );
 }
