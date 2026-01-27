@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { ChannelList } from '@/components/channels/ChannelList';
+import { ChannelList } from '@/components/channels/channel-list';
 import { useAuthStore } from '@/store/auth-store';
 import { authApi } from '@/lib/api/auth';
 import { useRouter } from 'next/navigation';
+
 import {
   ChevronDown,
   Settings,
@@ -28,6 +29,17 @@ export function WorkspaceSidebar({ onClose }: WorkspaceSidebarProps) {
     authApi.logout();
   };
 
+  const handleSwitchWorkspace = () => {
+    // Navigate to workspace selection page
+    // Remove subdomain and go to main domain
+    if (typeof window !== 'undefined') {
+      const protocol = window.location.protocol;
+      const port = window.location.port ? `:${window.location.port}` : '';
+      window.location.href = `${protocol}//localhost${port}/select-workspace`;
+    }
+    setShowWorkspaceMenu(false);
+  };
+
   // Get workspace initial for avatar
   const workspaceInitial = currentWorkspace?.name?.charAt(0).toUpperCase() || 'W';
 
@@ -37,7 +49,7 @@ export function WorkspaceSidebar({ onClose }: WorkspaceSidebarProps) {
     : user?.email?.charAt(0).toUpperCase() || 'U';
 
   return (
-    <div className="w-64 bg-gradient-to-b from-purple-900 to-purple-800 text-white flex flex-col h-screen">
+    <div className="w-64 bg-linear-to-b from-purple-900 to-purple-800 text-white flex flex-col h-screen">
       {/* Workspace Header */}
       <div className="p-4 border-b border-purple-700/50">
         <button
@@ -45,7 +57,7 @@ export function WorkspaceSidebar({ onClose }: WorkspaceSidebarProps) {
           className="w-full flex items-center justify-between hover:bg-purple-700/30 rounded-lg p-3 transition-colors group"
         >
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shrink-0">
               <span className="text-purple-900 font-bold text-lg">{workspaceInitial}</span>
             </div>
             <div className="text-left min-w-0">
@@ -57,17 +69,14 @@ export function WorkspaceSidebar({ onClose }: WorkspaceSidebarProps) {
               </p>
             </div>
           </div>
-          <ChevronDown className="w-5 h-5 text-purple-300 group-hover:text-white flex-shrink-0" />
+          <ChevronDown className="w-5 h-5 text-purple-300 group-hover:text-white shrink-0" />
         </button>
 
         {/* Workspace Dropdown Menu */}
         {showWorkspaceMenu && (
           <div className="mt-2 bg-purple-800/50 backdrop-blur-sm rounded-lg border border-purple-700/50 overflow-hidden">
             <button
-              onClick={() => {
-                router.push('/select-workspace');
-                setShowWorkspaceMenu(false);
-              }}
+              onClick={handleSwitchWorkspace}
               className="w-full px-4 py-2 text-sm text-left hover:bg-purple-700/30 transition-colors"
             >
               Switch Workspace
@@ -118,8 +127,8 @@ export function WorkspaceSidebar({ onClose }: WorkspaceSidebarProps) {
       {/* User Profile Footer */}
       <div className="p-4 border-t border-purple-700/50">
         <div className="flex items-center gap-3 mb-3">
-          <div className="relative flex-shrink-0">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+          <div className="relative shrink-0">
+            <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">{userInitials}</span>
             </div>
             <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-purple-900"></div>

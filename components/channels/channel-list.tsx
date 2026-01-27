@@ -1,10 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { channelsApi } from '@/lib/api/channels';
-import { ChannelItem } from './ChannelItem';
-import { CreateChannelModal } from './CreateChannelModal';
-import { useState } from 'react';
+import { ChannelItem } from './channel-item';
+import { CreateChannelModal } from './create-channel-modal';
 import { Button } from '@/components/ui/button';
 
 export function ChannelList() {
