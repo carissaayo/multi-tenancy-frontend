@@ -35,7 +35,7 @@ export function ChannelItem({ channel }: ChannelItemProps) {
       </div>
 
       {channel.unreadCount && channel.unreadCount > 0 && (
-        <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0">
+        <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shrink-0">
           {channel.unreadCount}
         </span>
       )}
