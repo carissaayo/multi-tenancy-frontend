@@ -1,8 +1,9 @@
-import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosError } from 'axios';
 
 class ApiClient {
     private client: AxiosInstance;
     private workspaceSlug: string | null = null;
+    private refreshTokenPromise: Promise<string | null> | null = null;
 
     constructor() {
         this.client = axios.create({
@@ -12,89 +13,245 @@ class ApiClient {
             },
         });
 
-        // Request interceptor to add auth token, refresh token, and workspace context
+        this.setupInterceptors();
+    }
+
+    private setupInterceptors() {
+        // Request interceptor to add auth tokens and workspace context
         this.client.interceptors.request.use(
             (config: InternalAxiosRequestConfig) => {
+                if (!config.headers) {
+                    config.headers = {} as any;
+                }
+
+                // Reset to original baseURL
+                config.baseURL = process.env.NEXT_PUBLIC_API_URL;
+
+                // Add access token
                 const token = this.getAccessToken();
-                if (token && config.headers) {
+                if (token) {
                     config.headers.Authorization = `Bearer ${token}`;
                 }
 
-                // Add refresh token in header for backend auto-refresh
+                // Add refresh token (backend expects lowercase 'refreshtoken')
                 const refreshToken = this.getRefreshToken();
-                if (refreshToken && config.headers) {
-                    config.headers['x-refresh-token'] = refreshToken;
+                if (refreshToken) {
+                    config.headers['refreshtoken'] = refreshToken;
                 }
 
-                // Check if this route should use subdomain
-                const shouldUseSubdomain = this.shouldUseSubdomain(config.url || '');
+                // Normalize URL
+                const requestUrl = config.url || '';
+                const normalizedUrl = this.normalizeUrl(requestUrl);
+
+                // Check if route needs subdomain
+                const shouldUseSubdomain = this.shouldUseSubdomain(normalizedUrl);
 
                 if (shouldUseSubdomain) {
-                    // Build baseURL with workspace slug as subdomain
                     const workspaceSlug = this.getWorkspaceSlug();
                     if (workspaceSlug) {
-                        const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                        const url = new URL(baseApiUrl);
-
-                        if (url.hostname === 'localhost' || url.hostname.includes('localhost')) {
-                            // Development: nerdy-developers.localhost:8000
-                            config.baseURL = `${url.protocol}//${workspaceSlug}.localhost${url.port ? `:${url.port}` : ''}${url.pathname}`;
-                        } else {
-                            // Production: nerdy-developers.yourdomain.com
-                            const hostParts = url.hostname.split('.');
-                            const rootDomain = hostParts.slice(-2).join('.');
-                            config.baseURL = `${url.protocol}//${workspaceSlug}.${rootDomain}${url.port ? `:${url.port}` : ''}${url.pathname}`;
-                        }
+                        config.baseURL = this.buildSubdomainUrl(workspaceSlug);
                     } else {
-                        // No workspace slug, use original baseURL
-                        config.baseURL = process.env.NEXT_PUBLIC_API_URL;
+                        console.error(`❌ Workspace-scoped route ${normalizedUrl} called without workspace slug!`);
                     }
-                } else {
-                    // Route doesn't need subdomain, use original baseURL
-                    config.baseURL = process.env.NEXT_PUBLIC_API_URL;
                 }
+
+                // Debug logging
+                console.log('🔍 API Request:', {
+                    url: normalizedUrl,
+                    baseURL: config.baseURL,
+                    hasToken: !!token,
+                    hasRefreshToken: !!refreshToken,
+                    usesSubdomain: shouldUseSubdomain,
+                    workspace: this.getWorkspaceSlug()
+                });
 
                 return config;
             },
             (error) => Promise.reject(error)
         );
 
-        // Response interceptor to extract new access token and handle errors
+        // Response interceptor to handle token rotation and errors
         this.client.interceptors.response.use(
             (response) => {
-                // Extract new access token if backend auto-refreshed it
-                const newAccessToken =
-                    response.headers['x-new-access-token'] ||
-                    response.headers['x-access-token'] ||
-                    response.data?.accessToken ||
-                    response.data?.data?.accessToken;
+                // Extract new tokens from response body (token rotation)
+                const newAccessToken = response.data?.accessToken;
+                const newRefreshToken = response.data?.refreshToken;
 
                 if (newAccessToken) {
                     localStorage.setItem('accessToken', newAccessToken);
+                    console.log('✅ New access token stored');
+                }
+
+                if (newRefreshToken) {
+                    localStorage.setItem('refreshToken', newRefreshToken);
+                    console.log('✅ New refresh token stored');
+                }
+
+                // Check for token in headers (middleware auto-refresh)
+                const headerToken = response.headers['x-new-access-token'];
+                if (headerToken) {
+                    localStorage.setItem('accessToken', headerToken);
+                    console.log('✅ Access token from header stored');
                 }
 
                 return response;
             },
-            async (error) => {
-                const originalRequest = error.config;
+            async (error: AxiosError) => {
+                const originalRequest: any = error.config;
 
-                // If 401, check if refresh token expired
+                // Prevent infinite retry loops
+                if (originalRequest?._retry) {
+                    console.error('❌ Retry failed, logging out');
+                    this.clearAuth();
+                    if (typeof window !== 'undefined') {
+                        window.location.href = '/login';
+                    }
+                    return Promise.reject(error);
+                }
+
+                // Handle 401 Unauthorized
                 if (error.response?.status === 401) {
-                    const refreshTokenExpired =
-                        error.response?.data?.refreshTokenExpired ||
-                        error.response?.data?.message?.toLowerCase().includes('refresh token');
+                    console.warn('⚠️ 401 Unauthorized - checking if refresh needed');
 
-                    if (refreshTokenExpired) {
+                    const message = (error.response?.data as any)?.message?.toLowerCase() || '';
+
+                    // Check if refresh token is expired/invalid
+                    if (message.includes('refresh token') || message.includes('token refresh failed')) {
+                        console.error('❌ Refresh token expired or invalid - logging out');
                         this.clearAuth();
                         if (typeof window !== 'undefined') {
                             window.location.href = '/login';
                         }
+                        return Promise.reject(error);
+                    }
+
+                    // Mark as retried
+                    originalRequest._retry = true;
+
+                    try {
+                        // Backend auto-refreshes via middleware with refreshtoken header
+                        // Just retry with current tokens from localStorage
+                        const currentToken = this.getAccessToken();
+                        const currentRefreshToken = this.getRefreshToken();
+
+                        if (!currentToken || !currentRefreshToken) {
+                            console.error('❌ No tokens available');
+                            this.clearAuth();
+                            if (typeof window !== 'undefined') {
+                                window.location.href = '/login';
+                            }
+                            return Promise.reject(error);
+                        }
+
+                        // Update headers with current tokens
+                        if (!originalRequest.headers) {
+                            originalRequest.headers = {};
+                        }
+
+                        originalRequest.headers.Authorization = `Bearer ${currentToken}`;
+                        originalRequest.headers['refreshtoken'] = currentRefreshToken;
+
+                        console.log('🔄 Retrying request with current tokens');
+                        return this.client(originalRequest);
+                    } catch (retryError) {
+                        console.error('❌ Retry failed:', retryError);
+                        this.clearAuth();
+                        if (typeof window !== 'undefined') {
+                            window.location.href = '/login';
+                        }
+                        return Promise.reject(retryError);
                     }
                 }
 
                 return Promise.reject(error);
             }
         );
+    }
+
+    /**
+     * Normalize URL to pathname without query params
+     */
+    private normalizeUrl(url: string): string {
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+            try {
+                return new URL(url).pathname;
+            } catch {
+                return url;
+            }
+        }
+        return url.split('?')[0].replace(/\/$/, '');
+    }
+
+    /**
+     * Build subdomain URL for workspace-scoped routes
+     */
+    private buildSubdomainUrl(workspaceSlug: string): string {
+        const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const url = new URL(baseApiUrl);
+
+        if (url.hostname === 'localhost' || url.hostname.includes('localhost')) {
+            // Development: workspace-slug.localhost:8000
+            return `${url.protocol}//${workspaceSlug}.localhost${url.port ? `:${url.port}` : ''}${url.pathname}`;
+        } else {
+            // Production: workspace-slug.yourdomain.com
+            const hostParts = url.hostname.split('.');
+            const rootDomain = hostParts.slice(-2).join('.');
+            return `${url.protocol}//${workspaceSlug}.${rootDomain}${url.port ? `:${url.port}` : ''}${url.pathname}`;
+        }
+    }
+
+    /**
+     * Determines if a route requires workspace subdomain
+     * Backend has TWO arrays:
+     * 1. publicRoutes - No auth required (not relevant here, handled by backend)
+     * 2. workspaceOptionalRoutes - Auth required but NO subdomain needed
+     * 
+     * Returns FALSE for workspaceOptionalRoutes, TRUE for workspace-scoped routes
+     */
+    private shouldUseSubdomain(url: string): boolean {
+        // Prepend /api if not present (since baseURL includes /api)
+        const fullPath = url.startsWith('/api') ? url : `/api${url}`;
+
+        if (!fullPath.startsWith('/api')) {
+            return false;
+        }
+
+        // Workspace-optional routes - authenticated but NO subdomain
+        const workspaceOptionalPatterns = [
+            '/api/workspaces',
+            '/api/users',
+            '/api/auth/',
+            '/api/invitations/accept',
+            '/api/channels/invitations/accept',
+            '/api/docs',
+        ];
+
+        for (const pattern of workspaceOptionalPatterns) {
+            // Exact match
+            if (fullPath === pattern) {
+                return false;
+            }
+
+            // Starts with pattern
+            if (fullPath.startsWith(pattern)) {
+                // Special case: /api/workspaces/:id (GET workspace by ID)
+                if (pattern === '/api/workspaces' && fullPath.startsWith('/api/workspaces/')) {
+                    const remaining = fullPath.substring('/api/workspaces/'.length);
+
+                    // UUID pattern: 8-4-4-4-12 hex digits
+                    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(\/.*)?$/i;
+
+                    if (uuidPattern.test(remaining)) {
+                        return false; // /api/workspaces/:uuid is workspace-optional
+                    }
+                } else {
+                    return false; // Other workspace-optional routes
+                }
+            }
+        }
+
+        // All other /api routes are workspace-scoped and need subdomain
+        return true;
     }
 
     private getAccessToken(): string | null {
@@ -110,66 +267,36 @@ class ApiClient {
     private getWorkspaceSlug(): string | null {
         if (typeof window === 'undefined') return null;
 
+        // Priority 1: localStorage (most reliable)
+        const storedSlug = localStorage.getItem('workspaceSlug');
+        if (storedSlug) {
+            return storedSlug;
+        }
+
+        // Priority 2: Extract from subdomain
         const hostname = window.location.hostname;
         const parts = hostname.split('.');
 
+        // Development: workspace-slug.localhost
         if (hostname.includes('localhost')) {
             const subdomain = parts[0];
             if (subdomain !== 'localhost' && subdomain !== 'www') {
                 return subdomain;
             }
-        } else {
-            if (parts.length > 2) {
-                return parts[0];
+        }
+        // Production: workspace-slug.yourdomain.com
+        else if (parts.length > 2) {
+            const subdomain = parts[0];
+            if (subdomain !== 'www') {
+                return subdomain;
             }
         }
 
-        return localStorage.getItem('workspaceSlug');
-    }
-
-    /**
-     * Check if a route should use subdomain-based URL
-     * Returns false for public routes and workspace-optional routes
-     */
-    private shouldUseSubdomain(url: string): boolean {
-        const normalizedUrl = url.split('?')[0];
-
-        // Public routes - no subdomain needed
-        const publicPatterns = [
-            '/api/auth/register',
-            '/api/auth/login',
-            '/api/auth/request-password-reset',
-            '/api/auth/password-reset',
-            '/api/payment/paystack/webhook',
-            '/api/invitations/accept',
-            '/api/docs',
-        ];
-
-        // Workspace-optional routes - no subdomain needed
-        const workspaceOptionalPatterns = [
-            '/api/workspaces',
-            '/api/users',
-            '/api/auth/',
-            '/api/invitations/accept',
-            '/api/channels/invitations/accept',
-            '/api/docs',
-        ];
-
-        // Check public routes
-        if (publicPatterns.some(pattern => normalizedUrl.startsWith(pattern))) {
-            return false;
-        }
-
-        // Check workspace-optional routes
-        if (workspaceOptionalPatterns.some(pattern => normalizedUrl.startsWith(pattern))) {
-            return false;
-        }
-
-        // All other routes (like /api/channels, /api/messages, etc.) use subdomain
-        return true;
+        return null;
     }
 
     private clearAuth(): void {
+        console.log('🧹 Clearing authentication and redirecting to login');
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('workspaceSlug');
@@ -179,8 +306,10 @@ class ApiClient {
         this.workspaceSlug = slug;
         if (slug) {
             localStorage.setItem('workspaceSlug', slug);
+            console.log(`✅ Workspace slug set: ${slug}`);
         } else {
             localStorage.removeItem('workspaceSlug');
+            console.log('🧹 Workspace slug cleared');
         }
     }
 
