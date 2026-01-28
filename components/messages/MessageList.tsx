@@ -123,7 +123,7 @@ export function MessageList({ channelId }: MessageListProps) {
   // Messages List
   return (
     <div className="flex-1 overflow-y-auto bg-white">
-      <div className="max-w-4xl mx-auto py-4">
+      <div className="mx-4  py-4">
         <div className="space-y-0.5">
           {channelMessages.map((message) => (
             <MessageItem key={message.id} message={message} />
