@@ -3,7 +3,6 @@ import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosError } from 'ax
 class ApiClient {
     private client: AxiosInstance;
     private workspaceSlug: string | null = null;
-    private refreshTokenPromise: Promise<string | null> | null = null;
 
     constructor() {
         this.client = axios.create({
@@ -83,109 +82,13 @@ class ApiClient {
 
                 return response;
             },
-            async (error: AxiosError) => {
-                const originalRequest: any = error.config;
-
-                // Prevent infinite retry loops
-                if (originalRequest?._retry) {
-                    // Already retried once, check if it's a refresh token issue
-                    const message = (error.response?.data as any)?.message?.toLowerCase() || '';
-                    const refreshTokenExpired =
-                        message.includes('refresh token') ||
-                        message.includes('token expired') ||
-                        message.includes('invalid refresh token') ||
-                        (error.response?.data as any)?.refreshTokenExpired === true;
-
-                    if (refreshTokenExpired) {
-                        console.error('❌ Refresh token expired - logging out');
-                        this.clearAuth();
-                        if (typeof window !== 'undefined') {
-                            window.location.href = '/login';
-                        }
-                    }
-                    return Promise.reject(error);
-                }
-
-                // Handle 401 Unauthorized
+            (error: AxiosError) => {
                 if (error.response?.status === 401) {
-                    const message = (error.response?.data as any)?.message?.toLowerCase() || '';
-                    const refreshTokenExpired =
-                        message.includes('refresh token expired') ||
-                        message.includes('invalid refresh token') ||
-                        (error.response?.data as any)?.refreshTokenExpired === true;
-
-                    // If refresh token is explicitly expired, redirect immediately
-                    if (refreshTokenExpired) {
-                        console.error('❌ Refresh token expired - logging out');
-                        this.clearAuth();
-                        if (typeof window !== 'undefined') {
-                            window.location.href = '/login';
-                        }
-                        return Promise.reject(error);
-                    }
-
-                    // Mark as retried to prevent infinite loops
-                    originalRequest._retry = true;
-
-                    // Check if we have tokens
-                    const currentToken = this.getAccessToken();
-                    const currentRefreshToken = this.getRefreshToken();
-
-                    if (!currentToken || !currentRefreshToken) {
-                        console.error('❌ No tokens available');
-                        this.clearAuth();
-                        if (typeof window !== 'undefined') {
-                            window.location.href = '/login';
-                        }
-                        return Promise.reject(error);
-                    }
-
-                    // Update headers with current tokens (backend will auto-refresh)
-                    if (!originalRequest.headers) {
-                        originalRequest.headers = {} as any;
-                    }
-
-                    originalRequest.headers.Authorization = `Bearer ${currentToken}`;
-                    originalRequest.headers['refreshtoken'] = currentRefreshToken;
-
-                    // Reset baseURL in case it was modified
-                    const requestUrl = originalRequest.url || '';
-                    const normalizedUrl = this.normalizeUrl(requestUrl);
-                    const shouldUseSubdomain = this.shouldUseSubdomain(normalizedUrl);
-
-                    if (shouldUseSubdomain) {
-                        const workspaceSlug = this.getWorkspaceSlug();
-                        if (workspaceSlug) {
-                            originalRequest.baseURL = this.buildSubdomainUrl(workspaceSlug);
-                        }
-                    } else {
-                        originalRequest.baseURL = process.env.NEXT_PUBLIC_API_URL;
-                    }
-
-                    // Retry the request - backend should auto-refresh the token
-                    try {
-                        return await this.client(originalRequest);
-                    } catch (retryError: any) {
-                        // If retry also fails with 401, check if refresh token expired
-                        if (retryError.response?.status === 401) {
-                            const retryMessage = (retryError.response?.data as any)?.message?.toLowerCase() || '';
-                            const retryRefreshExpired =
-                                retryMessage.includes('refresh token expired') ||
-                                retryMessage.includes('invalid refresh token') ||
-                                (retryError.response?.data as any)?.refreshTokenExpired === true;
-
-                            if (retryRefreshExpired) {
-                                console.error('❌ Refresh token expired on retry - logging out');
-                                this.clearAuth();
-                                if (typeof window !== 'undefined') {
-                                    window.location.href = '/login';
-                                }
-                            }
-                        }
-                        return Promise.reject(retryError);
+                    this.clearAuth();
+                    if (typeof window !== 'undefined') {
+                        window.location.href = '/login';
                     }
                 }
-
                 return Promise.reject(error);
             }
         );
