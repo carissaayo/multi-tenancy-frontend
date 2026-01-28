@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useAuthStore } from '@/store/auth-store';
+import { useSidebarStore } from '@/store/sidebar-store';
 import { WorkspaceSidebar } from '@/components/workspace/workspace-sidebar';
 
 export default function WorkspaceLayout({
@@ -9,28 +10,22 @@ export default function WorkspaceLayout({
 }: {
   children: React.ReactNode;
 }) {
-
   const { isAuthenticated } = useAuthStore();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { sidebarOpen, setSidebarOpen } = useSidebarStore();
 
-  // Handle responsive sidebar state
   useEffect(() => {
     const handleResize = () => {
-      // Automatically open sidebar on desktop (lg breakpoint = 1024px)
-      if (window.innerWidth >= 1024) {
+      if (window.innerWidth >= 840) {
         setSidebarOpen(true);
       } else {
         setSidebarOpen(false);
       }
     };
 
-    // Set initial state
     handleResize();
-
-    // Listen for resize events
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [setSidebarOpen]);
 
   if (!isAuthenticated) {
     return (
@@ -45,7 +40,6 @@ export default function WorkspaceLayout({
 
   return (
     <div className="h-screen flex overflow-hidden bg-gray-50">
-      {/* Mobile Overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -54,7 +48,6 @@ export default function WorkspaceLayout({
         />
       )}
 
-      {/* Sidebar - Fixed on mobile, static on desktop */}
       <div
         className={`
           fixed lg:static inset-y-0 left-0 z-50 lg:z-auto
@@ -65,7 +58,6 @@ export default function WorkspaceLayout({
         <WorkspaceSidebar />
       </div>
 
-      {/* Main Content Area */}
       <main className="flex-1 flex flex-col overflow-hidden min-w-0">
         {children}
       </main>
