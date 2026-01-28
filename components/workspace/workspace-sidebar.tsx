@@ -15,13 +15,14 @@ import {
   MessageSquare,
   Star
 } from 'lucide-react';
+import { useSidebarStore } from '@/store/sidebar-store';
 
 
 
 export function WorkspaceSidebar() {
   const { user, logout } = useAuthStore();
   const router = useRouter();
-  const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false);
+  const { sidebarOpen, setSidebarOpen } = useSidebarStore();
 
   // Fetch all workspaces
   const { data: workspacesData, isLoading: isLoadingWorkspaces } = useWorkspaces();
@@ -44,8 +45,7 @@ export function WorkspaceSidebar() {
     authApi.logout();
   };
 
-  console.log(currentWorkspace,"currentWorkspace");
-  
+
 
   const handleSwitchWorkspace = () => {
     // Navigate to workspace selection page
@@ -55,7 +55,7 @@ export function WorkspaceSidebar() {
       const port = window.location.port ? `:${window.location.port}` : '';
       window.location.href = `${protocol}//localhost${port}/select-workspace`;
     }
-    setShowWorkspaceMenu(false);
+    setSidebarOpen(false);
   };
 
   // Get workspace initial for avatar
@@ -81,7 +81,7 @@ export function WorkspaceSidebar() {
       {/* Workspace Header */}
       <div className="p-4 border-b border-purple-700/50">
         <button
-          onClick={() => setShowWorkspaceMenu(!showWorkspaceMenu)}
+          onClick={() => setSidebarOpen(!sidebarOpen)}
           className="w-full flex items-center justify-between hover:bg-purple-700/30 rounded-lg p-3 transition-colors group"
         >
           <div className="flex items-center gap-3 min-w-0">
@@ -101,7 +101,7 @@ export function WorkspaceSidebar() {
         </button>
 
         {/* Workspace Dropdown Menu */}
-        {showWorkspaceMenu && (
+        {sidebarOpen && (
           <div className="mt-2 bg-purple-800/50 backdrop-blur-sm rounded-lg border border-purple-700/50 overflow-hidden">
             <button
               onClick={handleSwitchWorkspace}
@@ -112,7 +112,7 @@ export function WorkspaceSidebar() {
             <button
               onClick={() => {
                 router.push('/workspace/settings');
-                setShowWorkspaceMenu(false);
+                setSidebarOpen(false);
               }}
               className="w-full px-4 py-2 text-sm text-left hover:bg-purple-700/30 transition-colors"
             >

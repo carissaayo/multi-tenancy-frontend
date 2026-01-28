@@ -1,9 +1,12 @@
 'use client';
 
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Channel } from '@/lib/api/channels';
+import { useRouter } from 'next/navigation';
 import { Hash, Lock } from 'lucide-react';
+
+import { Channel } from '@/lib/api/channels';
+import { useSidebarStore } from '@/store/sidebar-store';
+import { Button } from '../ui/button';
 
 interface ChannelItemProps {
   channel: Channel;
@@ -11,19 +14,26 @@ interface ChannelItemProps {
 
 export function ChannelItem({ channel }: ChannelItemProps) {
   const pathname = usePathname();
+  const router= useRouter()
+  const {  setSidebarOpen } = useSidebarStore();
   const isActive = pathname === `/workspace/channels/${channel.id}`;
 
+  const handleClick =()=>{
+    setSidebarOpen(false)
+    router.push(`/workspace/channels/${channel.id}`)
+  }
   return (
-    <Link
-      href={`/workspace/channels/${channel.id}`}
+    <button
+      type="button"
+      onClick={handleClick}
       className={`
-        w-full flex items-center justify-between px-3 py-2 rounded-lg 
-        transition-colors text-sm group
-        ${isActive
+      w-full flex items-center justify-between px-3 py-2 rounded-lg 
+      transition-colors text-sm group
+      ${isActive
           ? 'bg-purple-700/50 text-white'
           : 'hover:bg-purple-700/30 text-purple-100'
         }
-      `}
+    `}
     >
       <div className="flex items-center gap-2 min-w-0">
         {channel.isPrivate ? (
@@ -39,6 +49,6 @@ export function ChannelItem({ channel }: ChannelItemProps) {
           {channel.unreadCount}
         </span>
       )}
-    </Link>
+    </button>
   );
 }
