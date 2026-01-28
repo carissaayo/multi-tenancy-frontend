@@ -2,7 +2,8 @@ import { create } from 'zustand';
 
 export interface TypingUser {
   id: string;
-  name: string;
+  username?: string;
+  fullName?: string;
 }
 
 interface TypingState {

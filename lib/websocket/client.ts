@@ -8,7 +8,8 @@ type WorkspaceEventHandler = (workspace: any) => void;
 export interface TypingEventData {
     channelId: string;
     userId: string;
-    userName?: string; // Optional - backend may or may not include this
+    username?: string;  // User's username if available
+    fullName?: string;  // User's full name if available
     isTyping: boolean;
 }
 

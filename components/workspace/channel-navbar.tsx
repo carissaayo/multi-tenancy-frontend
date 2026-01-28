@@ -25,7 +25,8 @@ import { Button } from '@/components/ui/button';
 
 export interface TypingUser {
   id: string;
-  name: string;
+  username?: string;
+  fullName?: string;
 }
 
 interface ChannelNavbarProps {
@@ -54,13 +55,20 @@ export function ChannelNavbar({
   const navBtn =
     'cursor-pointer hover:bg-gray-100 rounded-lg transition-colors';
 
+  // Get display name: username if available, otherwise fullName without spaces
+  const getDisplayName = (user: TypingUser) => {
+    if (user.username) return user.username;
+    if (user.fullName) return user.fullName.replace(/\s+/g, '');
+    return 'Someone';
+  };
+
   // Debug log for typing users
   console.log('⌨️ ChannelNavbar typingUsers:', typingUsers);
 
   return (
-    <div className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 shrink-0">
-      {/* Left */}
-      <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
+    <div className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 shrink-0 gap-2">
+      {/* Left - Channel info */}
+      <div className="flex items-center gap-2 min-w-0 shrink-0">
         {onToggleSidebar && (
           <Button
             variant="ghost"
@@ -77,13 +85,13 @@ export function ChannelNavbar({
           </Button>
         )}
 
-        <div className="flex items-center gap-2 min-w-0 flex-1">
+        <div className="flex items-center gap-2 min-w-0">
           {isPrivate ? (
             <Lock className="w-5 h-5 text-gray-600 shrink-0" />
           ) : (
             <Hash className="w-5 h-5 text-gray-600 shrink-0" />
           )}
-          <h1 className="text-lg md:text-xl font-bold text-gray-900 truncate">
+          <h1 className="text-lg md:text-xl font-bold text-gray-900 truncate max-w-[120px] sm:max-w-[200px] md:max-w-none">
             {channelName}
           </h1>
         </div>
@@ -104,35 +112,30 @@ export function ChannelNavbar({
               }`}
           />
         </Button>
+      </div>
 
-        {channelDescription && !typingUsers.length && (
-          <>
-            <div className="hidden md:block h-6 w-px bg-gray-200" />
-            <p className="hidden lg:block text-sm text-gray-500 truncate max-w-md">
-              {channelDescription}
-            </p>
-          </>
-        )}
-
-        {typingUsers.length > 0 && (
-          <>
-            <div className="hidden md:block h-6 w-px bg-gray-200" />
-            <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500">
-              <span className="flex gap-1">
-                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-              </span>
-              <span className="truncate max-w-[200px]">
-                {typingUsers.length === 1
-                  ? `${typingUsers[0].name} is typing...`
-                  : typingUsers.length === 2
-                    ? `${typingUsers[0].name} and ${typingUsers[1].name} are typing...`
-                    : `${typingUsers[0].name} and ${typingUsers.length - 1} others are typing...`}
-              </span>
-            </div>
-          </>
-        )}
+      {/* Center - Description or Typing indicator */}
+      <div className="flex-1 min-w-0 flex justify-center">
+        {typingUsers.length > 0 ? (
+          <div className="flex items-center gap-1.5 text-sm text-gray-500">
+            <span className="flex gap-0.5">
+              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            </span>
+            <span className="truncate max-w-[100px] sm:max-w-[200px]">
+              {typingUsers.length === 1
+                ? `${getDisplayName(typingUsers[0])} is typing...`
+                : typingUsers.length === 2
+                  ? `${getDisplayName(typingUsers[0])} and ${getDisplayName(typingUsers[1])} are typing...`
+                  : `${getDisplayName(typingUsers[0])} and ${typingUsers.length - 1} others are typing...`}
+            </span>
+          </div>
+        ) : channelDescription ? (
+          <p className="hidden lg:block text-sm text-gray-500 truncate max-w-md">
+            {channelDescription}
+          </p>
+        ) : null}
       </div>
 
       {/* Right */}

@@ -57,8 +57,7 @@ export function useChannelWebSocket(channelId: string | null) {
         });
 
         // Subscribe to typing events
-        // Note: Backend sends { userId, channelId, isTyping } - no userName
-        // We use userId as display name for now (backend should ideally include userName)
+        // Backend should send { userId, channelId, username?, fullName?, isTyping }
         const typingStartUnsubscribe = wsClient.onTypingStart((data) => {
             console.log('⌨️ Hook received typingStart:', data, '| Current channelId:', channelId, '| Current userId:', user?.id);
             if (data.channelId !== channelId) {
@@ -70,10 +69,12 @@ export function useChannelWebSocket(channelId: string | null) {
                 console.log('⌨️ Ignoring - self typing');
                 return;
             }
-            // Use userName from backend if available, otherwise fallback to "Someone"
-            const displayName = data.userName || 'Someone';
-            console.log('⌨️ Adding typing user:', data.userId, 'name:', displayName);
-            addTypingUser(channelId, { id: data.userId, name: displayName });
+            console.log('⌨️ Adding typing user:', data.userId, 'username:', data.username, 'fullName:', data.fullName);
+            addTypingUser(channelId, { 
+                id: data.userId, 
+                username: data.username,
+                fullName: data.fullName,
+            });
         });
 
         const typingStopUnsubscribe = wsClient.onTypingStop((data) => {
