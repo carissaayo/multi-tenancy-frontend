@@ -5,12 +5,23 @@ type MessageEventHandler = (message: Message) => void;
 type ErrorEventHandler = (error: { message: string; code?: string }) => void;
 type WorkspaceEventHandler = (workspace: any) => void;
 
+export interface TypingEventData {
+    channelId: string;
+    userId: string;
+    userName?: string; // Optional - backend may or may not include this
+    isTyping: boolean;
+}
+
+type TypingEventHandler = (data: TypingEventData) => void;
+
 class WebSocketClient {
     private socket: Socket | null = null;
     private workspaceSlug: string | null = null;
     private messageHandlers: Set<MessageEventHandler> = new Set();
     private errorHandlers: Set<ErrorEventHandler> = new Set();
     private workspaceHandlers: Set<WorkspaceEventHandler> = new Set();
+    private typingStartHandlers: Set<TypingEventHandler> = new Set();
+    private typingStopHandlers: Set<TypingEventHandler> = new Set();
     private connectionPromise: Promise<void> | null = null;
 
     connect(workspaceId: string, token: string): Promise<void> {
@@ -60,6 +71,16 @@ class WebSocketClient {
                 console.error('❌ WS backend error:', error); 
                 this.errorHandlers.forEach((h) => h(error));
             });
+
+            /** TYPING EVENTS */
+            this.socket.on('userTyping', (data: TypingEventData) => {
+                console.log('⌨️ Received userTyping event:', data);
+                if (data.isTyping) {
+                    this.typingStartHandlers.forEach((h) => h(data));
+                } else {
+                    this.typingStopHandlers.forEach((h) => h(data));
+                }
+            });
         });
 
         return this.connectionPromise;
@@ -75,6 +96,8 @@ class WebSocketClient {
         this.messageHandlers.clear();
         this.errorHandlers.clear();
         this.workspaceHandlers.clear();
+        this.typingStartHandlers.clear();
+        this.typingStopHandlers.clear();
     }
 
     // Join a channel room
@@ -127,6 +150,26 @@ class WebSocketClient {
         }
     }
 
+    // Emit start typing event
+    startTyping(data: { channelId: string }) {
+        if (this.socket?.connected) {
+            console.log('⌨️ Emitting typing (start):', { channelId: data.channelId, isTyping: true });
+            this.socket.emit('typing', { channelId: data.channelId, isTyping: true });
+        } else {
+            console.warn('⚠️ Cannot emit typing - not connected');
+        }
+    }
+
+    // Emit stop typing event
+    stopTyping(data: { channelId: string }) {
+        if (this.socket?.connected) {
+            console.log('⌨️ Emitting typing (stop):', { channelId: data.channelId, isTyping: false });
+            this.socket.emit('typing', { channelId: data.channelId, isTyping: false });
+        } else {
+            console.warn('⚠️ Cannot emit typing - not connected');
+        }
+    }
+
     // Event handlers
     onMessage(handler: MessageEventHandler) {
         this.messageHandlers.add(handler);
@@ -143,7 +186,16 @@ class WebSocketClient {
         return () => this.workspaceHandlers.delete(handler);
     }
 
- 
+    onTypingStart(handler: TypingEventHandler) {
+        this.typingStartHandlers.add(handler);
+        return () => this.typingStartHandlers.delete(handler);
+    }
+
+    onTypingStop(handler: TypingEventHandler) {
+        this.typingStopHandlers.add(handler);
+        return () => this.typingStopHandlers.delete(handler);
+    }
+
     getSocket(): Socket | null {
         return this.socket;
     }

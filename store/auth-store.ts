@@ -17,6 +17,7 @@ export interface User {
     lastLoginAt?: string;
     createdAt?: string;
     updatedAt?: string;
+    userName:string
 }
 
 interface Workspace {

@@ -17,6 +17,8 @@ export interface UserProfile {
     lastLoginAt?: string;
     createdAt?: string;
     updatedAt?: string;
+    userName: string
+
 }
 
 export interface AuthResponse {
@@ -63,7 +65,7 @@ export const authApi = {
 
     login: async (data: LoginDto): Promise<AuthResponse> => {
         const response = await apiClient.instance.post('/auth/login', data);
-        const { accessToken, refreshToken, profile } = response.data;
+        const { accessToken, refreshToken } = response.data;
 
         // Store tokens
         localStorage.setItem('accessToken', accessToken);

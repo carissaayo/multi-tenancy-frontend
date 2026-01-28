@@ -2,6 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { useShallow } from 'zustand/react/shallow';
 import { channelsApi } from '@/lib/api/channels';
 
 import { MessageList } from '@/components/messages/MessageList';
@@ -9,12 +10,18 @@ import { MessageInput } from '@/components/messages/MessageInput';
 
 import { ChannelNavbar } from '@/components/workspace/channel-navbar';
 import { useSidebarStore } from '@/store/sidebar-store';
+import { useTypingStore, TypingUser } from '@/store/typing-store';
 import { useChannelWebSocket } from '@/hooks/use-channel-websocket';
+
+const EMPTY_TYPING_USERS: TypingUser[] = [];
 
 export default function ChannelPage() {
   const params = useParams();
   const channelId = params.id as string;
   const { sidebarOpen, toggleSidebar } = useSidebarStore();
+  const typingUsers = useTypingStore(
+    useShallow((state) => state.typingUsers[channelId] ?? EMPTY_TYPING_USERS)
+  );
 
   useChannelWebSocket(channelId);
   const { data: channel, isLoading } = useQuery({
@@ -60,6 +67,7 @@ export default function ChannelPage() {
         onToggleSidebar={toggleSidebar}
         sidebarOpen={sidebarOpen}
         hasNotifications={!!(channel.unreadCount && channel.unreadCount > 0)}
+        typingUsers={typingUsers}
       />
       <MessageList channelId={channelId} />
       <MessageInput channelId={channelId} />

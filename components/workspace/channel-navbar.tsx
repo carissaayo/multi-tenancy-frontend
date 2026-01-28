@@ -23,6 +23,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 
+export interface TypingUser {
+  id: string;
+  name: string;
+}
+
 interface ChannelNavbarProps {
   channelName: string;
   channelDescription?: string;
@@ -32,6 +37,7 @@ interface ChannelNavbarProps {
   onToggleSidebar?: () => void;
   sidebarOpen?: boolean;
   hasNotifications?: boolean;
+  typingUsers?: TypingUser[];
 }
 
 export function ChannelNavbar({
@@ -43,9 +49,13 @@ export function ChannelNavbar({
   onToggleSidebar,
   sidebarOpen = true,
   hasNotifications = false,
+  typingUsers = [],
 }: ChannelNavbarProps) {
   const navBtn =
     'cursor-pointer hover:bg-gray-100 rounded-lg transition-colors';
+
+  // Debug log for typing users
+  console.log('⌨️ ChannelNavbar typingUsers:', typingUsers);
 
   return (
     <div className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 shrink-0">
@@ -95,12 +105,32 @@ export function ChannelNavbar({
           />
         </Button>
 
-        {channelDescription && (
+        {channelDescription && !typingUsers.length && (
           <>
             <div className="hidden md:block h-6 w-px bg-gray-200" />
             <p className="hidden lg:block text-sm text-gray-500 truncate max-w-md">
               {channelDescription}
             </p>
+          </>
+        )}
+
+        {typingUsers.length > 0 && (
+          <>
+            <div className="hidden md:block h-6 w-px bg-gray-200" />
+            <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500">
+              <span className="flex gap-1">
+                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              </span>
+              <span className="truncate max-w-[200px]">
+                {typingUsers.length === 1
+                  ? `${typingUsers[0].name} is typing...`
+                  : typingUsers.length === 2
+                    ? `${typingUsers[0].name} and ${typingUsers[1].name} are typing...`
+                    : `${typingUsers[0].name} and ${typingUsers.length - 1} others are typing...`}
+              </span>
+            </div>
           </>
         )}
       </div>

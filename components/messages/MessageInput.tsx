@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, KeyboardEvent } from 'react';
+import { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import { messagesApi } from '@/lib/api/messages';
 import { useMessageStore } from '@/store/message-store';
 import { useAuthStore } from '@/store/auth-store';
@@ -12,13 +12,45 @@ interface MessageInputProps {
   channelId: string;
 }
 
+const TYPING_DEBOUNCE_MS = 2000;
+
 export function MessageInput({ channelId }: MessageInputProps) {
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isTypingRef = useRef(false); // Use ref to avoid stale closures
   const { addMessage } = useMessageStore();
   const { currentWorkspace } = useAuthStore();
   const queryClient = useQueryClient();
+
+  // Stop typing indicator
+  const stopTypingIndicator = () => {
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
+    if (isTypingRef.current) {
+      console.log('⌨️ MessageInput: Stopping typing indicator for channel:', channelId);
+      isTypingRef.current = false;
+      wsClient.stopTyping({ channelId });
+    }
+  };
+
+  // Clean up on unmount or channelId change only
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = null;
+      }
+      if (isTypingRef.current) {
+        console.log('⌨️ MessageInput: Cleanup - stopping typing for channel:', channelId);
+        wsClient.stopTyping({ channelId });
+        isTypingRef.current = false;
+      }
+    };
+  }, [channelId]);
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -27,6 +59,7 @@ export function MessageInput({ channelId }: MessageInputProps) {
     const messageContent = content.trim();
     setContent('');
     setLoading(true);
+    stopTypingIndicator();
 
     const resetHeight = () => {
       if (textareaRef.current) textareaRef.current.style.height = 'auto';
@@ -71,10 +104,33 @@ export function MessageInput({ channelId }: MessageInputProps) {
   };
 
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setContent(e.target.value);
+    const value = e.target.value;
+    setContent(value);
+
     // Auto-resize textarea
     e.target.style.height = 'auto';
     e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
+
+    // Handle typing indicator
+    if (value.trim()) {
+      // Start typing if not already
+      if (!isTypingRef.current) {
+        console.log('⌨️ MessageInput: Starting typing indicator for channel:', channelId);
+        isTypingRef.current = true;
+        wsClient.startTyping({ channelId });
+      }
+
+      // Reset the debounce timer
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      typingTimeoutRef.current = setTimeout(() => {
+        stopTypingIndicator();
+      }, TYPING_DEBOUNCE_MS);
+    } else {
+      // Empty input - stop typing
+      stopTypingIndicator();
+    }
   };
 
   return (
