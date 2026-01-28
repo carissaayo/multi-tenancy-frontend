@@ -16,11 +16,9 @@ import {
   Star
 } from 'lucide-react';
 
-interface WorkspaceSidebarProps {
-  onClose?: () => void;
-}
 
-export function WorkspaceSidebar({ onClose }: WorkspaceSidebarProps) {
+
+export function WorkspaceSidebar() {
   const { user, logout } = useAuthStore();
   const router = useRouter();
   const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false);

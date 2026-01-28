@@ -11,8 +11,17 @@ import {
   Search,
   MoreVertical,
   Menu,
-  X
+  X,
 } from 'lucide-react';
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
 
 interface ChannelNavbarProps {
   channelName: string;
@@ -33,9 +42,8 @@ export function ChannelNavbar({
   onToggleFavorite,
   onToggleSidebar,
   sidebarOpen = true,
-  hasNotifications = false
+  hasNotifications = false,
 }: ChannelNavbarProps) {
-
   const handleStartCall = () => {
     console.log('Starting audio call...');
   };
@@ -56,39 +64,38 @@ export function ChannelNavbar({
     console.log('Open search...');
   };
 
-  const handleMoreOptions = () => {
-    console.log('Open more options...');
-  };
-
   return (
-    <div className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shrink-0">
+    <div className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 shrink-0">
       {/* Left Section */}
-      <div className="flex items-center gap-4">
-        {/* Mobile Sidebar Toggle */}
+      <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
         {onToggleSidebar && (
           <button
             onClick={onToggleSidebar}
-            className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
             aria-label="Toggle sidebar"
           >
-            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {sidebarOpen ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
           </button>
         )}
 
-        {/* Channel Info */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           {isPrivate ? (
-            <Lock className="w-5 h-5 text-gray-600" />
+            <Lock className="w-5 h-5 text-gray-600 flex-shrink-0" />
           ) : (
-            <Hash className="w-5 h-5 text-gray-600" />
+            <Hash className="w-5 h-5 text-gray-600 flex-shrink-0" />
           )}
-          <h1 className="text-xl font-bold text-gray-900">{channelName}</h1>
+          <h1 className="text-lg md:text-xl font-bold text-gray-900 truncate">
+            {channelName}
+          </h1>
         </div>
 
-        {/* Favorite Button */}
         <button
           onClick={onToggleFavorite}
-          className="p-1.5 hover:bg-gray-100 rounded transition-colors"
+          className="hidden sm:block p-1.5 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
           aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
         >
           <Star
@@ -96,13 +103,10 @@ export function ChannelNavbar({
           />
         </button>
 
-        {/* Divider */}
         {channelDescription && (
           <>
-            <div className="h-6 w-px bg-gray-200"></div>
-
-            {/* Channel Description */}
-            <p className="text-sm text-gray-500 hidden md:block truncate max-w-md">
+            <div className="hidden md:block h-6 w-px bg-gray-200 flex-shrink-0" />
+            <p className="hidden lg:block text-sm text-gray-500 truncate max-w-md">
               {channelDescription}
             </p>
           </>
@@ -110,33 +114,32 @@ export function ChannelNavbar({
       </div>
 
       {/* Right Section */}
-      <div className="flex items-center gap-2">
-        {/* Call Buttons */}
+      <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
         <button
           onClick={handleStartCall}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="hidden md:flex p-2 hover:bg-gray-100 rounded-lg transition-colors"
           aria-label="Start audio call"
         >
           <Phone className="w-5 h-5 text-gray-600" />
         </button>
         <button
           onClick={handleStartVideo}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="hidden md:flex p-2 hover:bg-gray-100 rounded-lg transition-colors"
           aria-label="Start video call"
         >
           <Video className="w-5 h-5 text-gray-600" />
         </button>
 
-        <div className="h-6 w-px bg-gray-200 mx-1"></div>
+        <div className="hidden md:block h-6 w-px bg-gray-200 mx-1" />
 
-        {/* Utility Buttons */}
         <button
           onClick={handleTogglePin}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="hidden sm:flex p-2 hover:bg-gray-100 rounded-lg transition-colors"
           aria-label="View pinned messages"
         >
           <Pin className="w-5 h-5 text-gray-600" />
         </button>
+
         <button
           onClick={handleNotifications}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors relative"
@@ -144,9 +147,10 @@ export function ChannelNavbar({
         >
           <Bell className="w-5 h-5 text-gray-600" />
           {hasNotifications && (
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
           )}
         </button>
+
         <button
           onClick={handleSearch}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -154,13 +158,47 @@ export function ChannelNavbar({
         >
           <Search className="w-5 h-5 text-gray-600" />
         </button>
-        <button
-          onClick={handleMoreOptions}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          aria-label="More options"
-        >
-          <MoreVertical className="w-5 h-5 text-gray-600" />
-        </button>
+
+        {/* More options (3-dots) – mobile only, shadcn dropdown with remaining nav items */}
+        <div className="md:hidden">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="h-9 w-9 rounded-lg hover:bg-gray-100"
+                aria-label="More options"
+              >
+                <MoreVertical className="h-5 w-5 text-gray-600" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              sideOffset={4}
+              className="min-w-[180px]"
+            >
+              <DropdownMenuItem onSelect={handleStartCall}>
+                <Phone className="mr-2 h-4 w-4" />
+                Start audio call
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={handleStartVideo}>
+                <Video className="mr-2 h-4 w-4" />
+                Start video call
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={handleTogglePin}>
+                <Pin className="mr-2 h-4 w-4" />
+                Pinned messages
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={onToggleFavorite}>
+                <Star
+                  className={`mr-2 h-4 w-4 ${isFavorite ? 'fill-yellow-400 text-yellow-400' : ''}`}
+                />
+                {isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </div>
   );
