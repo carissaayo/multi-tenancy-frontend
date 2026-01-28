@@ -63,12 +63,12 @@ export function MessageItem({ message }: MessageItemProps) {
   // Own message (right-aligned)
   if (isOwnMessage) {
     return (
-      <div
-        className="group relative px-4 py-2 flex justify-end"
-        onMouseEnter={() => setShowActions(true)}
-        onMouseLeave={() => setShowActions(false)}
-      >
-        <div className="flex gap-3 max-w-[70%] flex-row-reverse">
+      <div className="px-4 py-2 flex justify-end">
+        <div
+          className="group relative flex gap-3 max-w-[70%] flex-row-reverse"
+          onMouseEnter={() => setShowActions(true)}
+          onMouseLeave={() => setShowActions(false)}
+        >
           {/* Avatar */}
           <div className="shrink-0">
             {message.user.avatarUrl ? (
@@ -87,7 +87,7 @@ export function MessageItem({ message }: MessageItemProps) {
           </div>
 
           {/* Message Content */}
-          <div className="flex-1 min-w-0">
+          <div className="flex flex-col items-end min-w-0">
             {/* Header */}
             <div className="flex items-baseline gap-2 mb-1 justify-end">
               {message.isEdited && (
@@ -102,10 +102,42 @@ export function MessageItem({ message }: MessageItemProps) {
             </div>
 
             {/* Message Body */}
-            <div className="bg-gradient-to-br from-purple-600 to-purple-700 text-white px-4 py-2.5 rounded-2xl rounded-tr-sm shadow-sm">
-              <div className="text-[15px] leading-relaxed whitespace-pre-wrap break-words">
-                {message.content}
+            <div className="relative">
+              <div className="bg-gradient-to-br from-purple-600 to-purple-700 text-white px-4 py-2.5 rounded-2xl rounded-tr-sm shadow-sm w-fit max-w-full">
+                <div className="text-[15px] leading-relaxed whitespace-pre-wrap break-words">
+                  {message.content}
+                </div>
               </div>
+
+              {/* Floating Action Buttons - positioned at the start of the message */}
+              {showActions && (
+                <div className="absolute -top-10 left-0 bg-white border border-gray-200 rounded-lg shadow-lg flex items-center divide-x divide-gray-200 z-10">
+                  <button
+                    className="p-2 hover:bg-gray-50 rounded-l-lg transition-colors"
+                    title="Add reaction"
+                  >
+                    <Smile className="w-4 h-4 text-gray-600" />
+                  </button>
+                  <button
+                    className="p-2 hover:bg-gray-50 transition-colors"
+                    title="Reply in thread"
+                  >
+                    <Reply className="w-4 h-4 text-gray-600" />
+                  </button>
+                  <button
+                    className="p-2 hover:bg-gray-50 transition-colors"
+                    title="Save message"
+                  >
+                    <Bookmark className="w-4 h-4 text-gray-600" />
+                  </button>
+                  <button
+                    className="p-2 hover:bg-gray-50 rounded-r-lg transition-colors"
+                    title="More actions"
+                  >
+                    <MoreVertical className="w-4 h-4 text-gray-600" />
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Attachments */}
@@ -139,48 +171,18 @@ export function MessageItem({ message }: MessageItemProps) {
             )}
           </div>
         </div>
-
-        {/* Floating Action Buttons */}
-        {showActions && (
-          <div className="absolute -top-3 left-8 bg-white border border-gray-200 rounded-lg shadow-lg flex items-center divide-x divide-gray-200 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              className="p-2 hover:bg-gray-50 rounded-l-lg transition-colors"
-              title="Add reaction"
-            >
-              <Smile className="w-4 h-4 text-gray-600" />
-            </button>
-            <button
-              className="p-2 hover:bg-gray-50 transition-colors"
-              title="Reply in thread"
-            >
-              <Reply className="w-4 h-4 text-gray-600" />
-            </button>
-            <button
-              className="p-2 hover:bg-gray-50 transition-colors"
-              title="Save message"
-            >
-              <Bookmark className="w-4 h-4 text-gray-600" />
-            </button>
-            <button
-              className="p-2 hover:bg-gray-50 rounded-r-lg transition-colors"
-              title="More actions"
-            >
-              <MoreVertical className="w-4 h-4 text-gray-600" />
-            </button>
-          </div>
-        )}
       </div>
     );
   }
 
   // Other user's message (left-aligned)
   return (
-    <div
-      className="group relative px-4 py-2 hover:bg-gray-50/80 transition-colors rounded-lg"
-      onMouseEnter={() => setShowActions(true)}
-      onMouseLeave={() => setShowActions(false)}
-    >
-      <div className="flex gap-3 max-w-[70%]">
+    <div className="px-4 py-2">
+      <div
+        className="group relative flex gap-3 max-w-[70%]"
+        onMouseEnter={() => setShowActions(true)}
+        onMouseLeave={() => setShowActions(false)}
+      >
         {/* Avatar */}
         <div className="shrink-0">
           {message.user.avatarUrl ? (
@@ -199,7 +201,7 @@ export function MessageItem({ message }: MessageItemProps) {
         </div>
 
         {/* Message Content */}
-        <div className="flex-1 min-w-0">
+        <div className="flex flex-col items-start min-w-0">
           {/* Header */}
           <div className="flex items-baseline gap-2 mb-1">
             <span className="font-semibold text-sm text-gray-900">
@@ -214,10 +216,42 @@ export function MessageItem({ message }: MessageItemProps) {
           </div>
 
           {/* Message Body */}
-          <div className="bg-white border border-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-sm shadow-sm">
-            <div className="text-gray-800 text-[15px] leading-relaxed whitespace-pre-wrap break-words">
-              {message.content}
+          <div className="relative">
+            <div className="bg-white border border-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-sm shadow-sm w-fit max-w-full">
+              <div className="text-gray-800 text-[15px] leading-relaxed whitespace-pre-wrap break-words">
+                {message.content}
+              </div>
             </div>
+
+            {/* Floating Action Buttons - positioned at the end of the message */}
+            {showActions && (
+              <div className="absolute -top-10 right-0 bg-white border border-gray-200 rounded-lg shadow-lg flex items-center divide-x divide-gray-200 z-10">
+                <button
+                  className="p-2 hover:bg-gray-50 rounded-l-lg transition-colors"
+                  title="Add reaction"
+                >
+                  <Smile className="w-4 h-4 text-gray-600" />
+                </button>
+                <button
+                  className="p-2 hover:bg-gray-50 transition-colors"
+                  title="Reply in thread"
+                >
+                  <Reply className="w-4 h-4 text-gray-600" />
+                </button>
+                <button
+                  className="p-2 hover:bg-gray-50 transition-colors"
+                  title="Save message"
+                >
+                  <Bookmark className="w-4 h-4 text-gray-600" />
+                </button>
+                <button
+                  className="p-2 hover:bg-gray-50 rounded-r-lg transition-colors"
+                  title="More actions"
+                >
+                  <MoreVertical className="w-4 h-4 text-gray-600" />
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Attachments */}
@@ -251,36 +285,6 @@ export function MessageItem({ message }: MessageItemProps) {
           )}
         </div>
       </div>
-
-      {/* Floating Action Buttons */}
-      {showActions && (
-        <div className="absolute -top-3 right-8 bg-white border border-gray-200 rounded-lg shadow-lg flex items-center divide-x divide-gray-200 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            className="p-2 hover:bg-gray-50 rounded-l-lg transition-colors"
-            title="Add reaction"
-          >
-            <Smile className="w-4 h-4 text-gray-600" />
-          </button>
-          <button
-            className="p-2 hover:bg-gray-50 transition-colors"
-            title="Reply in thread"
-          >
-            <Reply className="w-4 h-4 text-gray-600" />
-          </button>
-          <button
-            className="p-2 hover:bg-gray-50 transition-colors"
-            title="Save message"
-          >
-            <Bookmark className="w-4 h-4 text-gray-600" />
-          </button>
-          <button
-            className="p-2 hover:bg-gray-50 rounded-r-lg transition-colors"
-            title="More actions"
-          >
-            <MoreVertical className="w-4 h-4 text-gray-600" />
-          </button>
-        </div>
-      )}
     </div>
   );
 }
