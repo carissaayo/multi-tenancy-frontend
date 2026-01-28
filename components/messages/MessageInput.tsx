@@ -3,6 +3,8 @@
 import { useState, useRef, KeyboardEvent } from 'react';
 import { messagesApi } from '@/lib/api/messages';
 import { useMessageStore } from '@/store/message-store';
+import { useAuthStore } from '@/store/auth-store';
+import { wsClient } from '@/lib/websocket/client';
 import { Button } from '@/components/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -15,6 +17,7 @@ export function MessageInput({ channelId }: MessageInputProps) {
   const [loading, setLoading] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { addMessage } = useMessageStore();
+  const { currentWorkspace } = useAuthStore();
   const queryClient = useQueryClient();
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -25,22 +28,35 @@ export function MessageInput({ channelId }: MessageInputProps) {
     setContent('');
     setLoading(true);
 
+    const resetHeight = () => {
+      if (textareaRef.current) textareaRef.current.style.height = 'auto';
+    };
+
+    const useWs =
+      wsClient.isConnected() && currentWorkspace?.id != null;
+
+    if (useWs) {
+      wsClient.sendMessage({
+        channelId,
+        content: messageContent,
+        workspaceId: currentWorkspace!.id,
+      });
+      resetHeight();
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await messagesApi.create({
         content: messageContent,
         channelId,
       });
-      
       addMessage(channelId, response.message);
       queryClient.invalidateQueries({ queryKey: ['messages', channelId] });
-      
-      // Reset textarea height
-      if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
-      }
-    } catch (error: any) {
-      console.error('Failed to send message:', error);
-      setContent(messageContent); // Restore content on error
+      resetHeight();
+    } catch (err) {
+      console.error('Failed to send message:', err);
+      setContent(messageContent);
     } finally {
       setLoading(false);
     }

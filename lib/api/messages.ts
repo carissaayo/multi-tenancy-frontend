@@ -88,21 +88,24 @@ export const messagesApi = {
   },
 
   create: async (data: CreateMessageDto): Promise<MessageResponse> => {
-    const formData = new FormData();
-    formData.append('content', data.content);
-    formData.append('channelId', data.channelId);
-    
-    if (data.attachments) {
-      data.attachments.forEach((file) => {
-        formData.append('attachments', file);
-      });
+    const hasAttachments = !!data.attachments?.length;
+
+    if (hasAttachments) {
+      const formData = new FormData();
+      formData.append('content', data.content);
+      formData.append('channelId', data.channelId);
+      data.attachments!.forEach((file) => formData.append('attachments', file));
+      const response = await apiClient.instance.post<MessageResponse>(
+        '/messages',
+        formData
+      );
+      return response.data;
     }
 
-    const response = await apiClient.instance.post('/messages', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await apiClient.instance.post<MessageResponse>(
+      '/messages',
+      { content: data.content, channelId: data.channelId }
+    );
     return response.data;
   },
 

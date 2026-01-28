@@ -56,10 +56,15 @@ export function useSelectWorkspace() {
     return useMutation({
         mutationFn: (workspaceId: string) => authApi.selectWorkspace(workspaceId),
         onSuccess: (data) => {
+            const w = data.workspace;
+            useAuthStore.getState().setCurrentWorkspace({
+                id: w.id,
+                slug: w.slug,
+                name: w.name,
+            });
             queryClient.invalidateQueries({ queryKey: queryKeys.workspaces.forSelect });
             router.push(`/workspace/`);
         },
-        
     });
 }
 
