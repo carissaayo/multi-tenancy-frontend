@@ -6,7 +6,7 @@ import { Hash, Lock } from 'lucide-react';
 
 import { Channel } from '@/lib/api/channels';
 import { useSidebarStore } from '@/store/sidebar-store';
-import { Button } from '../ui/button';
+
 
 interface ChannelItemProps {
   channel: Channel;
