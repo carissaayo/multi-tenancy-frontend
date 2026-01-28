@@ -7,11 +7,13 @@ export interface Message {
   userId: string;
   createdAt: string;
   updatedAt: string;
+  isEdited: boolean;
   user: {
     id: string;
     email: string;
     fullName: string;
     avatarUrl?: string;
+
   };
   edited?: boolean;
   attachments?: MessageAttachment[];
