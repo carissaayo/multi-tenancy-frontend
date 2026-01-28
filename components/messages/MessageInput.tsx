@@ -41,6 +41,7 @@ export function MessageInput({ channelId }: MessageInputProps) {
         content: messageContent,
         workspaceId: currentWorkspace!.id,
       });
+      queryClient.invalidateQueries({ queryKey: ['messages', channelId] });
       resetHeight();
       setLoading(false);
       return;

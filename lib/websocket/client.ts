@@ -149,13 +149,7 @@ class WebSocketClient {
     }
 
     isConnected(): boolean {
-        const connected = this.socket?.connected ?? false;
-        console.log('🔍 WebSocket connection check:', {
-            hasSocket: !!this.socket,
-            connected,
-            socketId: this.socket?.id,
-        }); 
-        return connected;
+        return this.socket?.connected ?? false;
     }
 
     async waitForConnection(): Promise<boolean> {

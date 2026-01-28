@@ -6,9 +6,9 @@ import { useAuthStore } from '@/store/auth-store';
 import { useMessageStore } from '@/store/message-store';
 
 /**
- * Connects to the messaging WebSocket (if needed), joins the given channel,
- * subscribes to newMessage/error, and updates the message store. Cleans up
- * (leave channel, unsubscribes) on unmount or when channelId/workspace/user change.
+ * Connects to the messaging WebSocket (if needed), joins the given channel
+ * after connection is ready, subscribes to newMessage/error, and updates
+ * the message store. Cleans up on unmount or when channelId/workspace/user change.
  */
 export function useChannelWebSocket(channelId: string | null) {
     const { currentWorkspace, user } = useAuthStore();
@@ -24,11 +24,18 @@ export function useChannelWebSocket(channelId: string | null) {
             return;
         }
 
-        if (!wsClient.isConnected()) {
-            wsClient.connect(currentWorkspace.id, token);
-        }
+        let cancelled = false;
 
-        wsClient.joinChannel(channelId);
+        const run = async () => {
+            if (!wsClient.isConnected()) {
+                wsClient.connect(currentWorkspace.id, token);
+            }
+            const ready = await wsClient.waitForConnection();
+            if (cancelled || !ready) return;
+            wsClient.joinChannel(channelId);
+        };
+
+        run();
 
         const errorUnsubscribe = wsClient.onError((error) => {
             console.error('WebSocket error:', error);
@@ -48,9 +55,10 @@ export function useChannelWebSocket(channelId: string | null) {
         });
 
         return () => {
+            cancelled = true;
             wsClient.leaveChannel(channelId);
             messageUnsubscribe();
             errorUnsubscribe();
         };
-    }, [channelId, currentWorkspace?.id, user?.id, addMessage, updateMessage]);
+    }, [channelId, currentWorkspace, user, addMessage, updateMessage]);
 }
