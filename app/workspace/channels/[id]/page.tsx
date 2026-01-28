@@ -23,6 +23,9 @@ export default function ChannelPage() {
     useShallow((state) => state.typingUsers[channelId] ?? EMPTY_TYPING_USERS)
   );
 
+  // Debug: Log what we're getting from the store
+  console.log('⌨️ Page: channelId=', channelId, 'typingUsers=', JSON.stringify(typingUsers));
+
   useChannelWebSocket(channelId);
   const { data: channel, isLoading } = useQuery({
     queryKey: ['channel', channelId],

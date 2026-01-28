@@ -62,8 +62,13 @@ export function ChannelNavbar({
     return 'Someone';
   };
 
-  // Debug log for typing users
-  console.log('⌨️ ChannelNavbar typingUsers:', typingUsers);
+  // Debug log for typing users - show full details
+  if (typingUsers.length > 0) {
+    console.log('⌨️ ChannelNavbar typingUsers:', JSON.stringify(typingUsers, null, 2));
+    typingUsers.forEach((u, i) => {
+      console.log(`⌨️ User ${i}: id=${u.id}, username=${u.username}, fullName=${u.fullName}, display=${getDisplayName(u)}`);
+    });
+  }
 
   return (
     <div className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 shrink-0 gap-2">
