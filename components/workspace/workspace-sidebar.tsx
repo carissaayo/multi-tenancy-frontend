@@ -1,12 +1,6 @@
 'use client';
 
 import {  useMemo } from 'react';
-import { ChannelList } from '@/components/channels/channel-list';
-import { useAuthStore } from '@/store/auth-store';
-import { authApi } from '@/lib/api/auth';
-import { useRouter } from 'next/navigation';
-import { useWorkspaces } from '@/hooks/workspace';
-
 import {
   ChevronDown,
   Settings,
@@ -15,6 +9,13 @@ import {
   MessageSquare,
   Star
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+
+import { ChannelList } from '@/components/channels/channel-list';
+import { useAuthStore } from '@/store/auth-store';
+import { authApi } from '@/lib/api/auth';
+import { useWorkspaces } from '@/hooks/workspace';
+
 import { useSidebarStore } from '@/store/sidebar-store';
 
 
@@ -24,15 +25,13 @@ export function WorkspaceSidebar() {
   const router = useRouter();
   const { sidebarOpen, setSidebarOpen } = useSidebarStore();
 
-  // Fetch all workspaces
+
   const { data: workspacesData, isLoading: isLoadingWorkspaces } = useWorkspaces();
 
-  // Get current workspace slug from localStorage
   const workspaceSlug = typeof window !== 'undefined'
     ? localStorage.getItem('workspaceSlug')
     : null;
 
-  // Find current workspace by slug
   const currentWorkspace = useMemo(() => {
     if (!workspacesData?.workspaces || !workspaceSlug) {
       return null;
@@ -58,15 +57,13 @@ export function WorkspaceSidebar() {
     setSidebarOpen(false);
   };
 
-  // Get workspace initial for avatar
+
   const workspaceInitial = currentWorkspace?.name?.charAt(0).toUpperCase() || 'W';
 
-  // Get user initials for avatar
   const userInitials = user?.fullName
     ? user.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : user?.email?.charAt(0).toUpperCase() || 'U';
 
-  // Show loading state while fetching workspace
   if (isLoadingWorkspaces) {
     return (
       <div className="w-64 bg-linear-to-b from-purple-900 to-purple-800 text-white flex flex-col h-screen items-center justify-center">

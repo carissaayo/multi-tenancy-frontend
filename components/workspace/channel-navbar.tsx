@@ -55,20 +55,13 @@ export function ChannelNavbar({
   const navBtn =
     'cursor-pointer hover:bg-gray-100 rounded-lg transition-colors';
 
-  // Get display name: username if available, otherwise fullName without spaces
+
   const getDisplayName = (user: TypingUser) => {
     if (user.username) return user.username;
     if (user.fullName) return user.fullName.replace(/\s+/g, '');
     return 'Someone';
   };
 
-  // Debug log for typing users - show full details
-  if (typingUsers.length > 0) {
-    console.log('⌨️ ChannelNavbar typingUsers:', JSON.stringify(typingUsers, null, 2));
-    typingUsers.forEach((u, i) => {
-      console.log(`⌨️ User ${i}: id=${u.id}, username=${u.username}, fullName=${u.fullName}, display=${getDisplayName(u)}`);
-    });
-  }
 
   return (
     <div className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 shrink-0 gap-2">

@@ -26,21 +26,21 @@ export const useTypingStore = create<TypingState>((set) => ({
         console.log('⌨️ Store: User already in typing list:', user.id);
         return state;
       }
-      console.log('⌨️ Store: Adding typing user:', user, 'to channel:', channelId);
+      
       const newState = {
         typingUsers: {
           ...state.typingUsers,
           [channelId]: [...existing, user],
         },
       };
-      console.log('⌨️ Store: New typingUsers state:', newState.typingUsers);
+      
       return newState;
     }),
 
   removeTypingUser: (channelId, userId) =>
     set((state) => {
       const existing = state.typingUsers[channelId] ?? [];
-      console.log('⌨️ Store: Removing typing user:', userId, 'from channel:', channelId);
+      
       return {
         typingUsers: {
           ...state.typingUsers,

@@ -8,8 +8,8 @@ type WorkspaceEventHandler = (workspace: any) => void;
 export interface TypingEventData {
     channelId: string;
     userId: string;
-    username?: string;  // User's username if available
-    fullName?: string;  // User's full name if available
+    username?: string;  
+    fullName?: string;  
     isTyping: boolean;
 }
 
@@ -126,7 +126,6 @@ class WebSocketClient {
         threadId?: string;
     }) {
         if (this.socket?.connected) {
-            console.log('📤 Sending message via WebSocket:', data); 
             this.socket.emit('sendMessage', data);
         } else {
             console.warn('⚠️ Cannot send message - WebSocket not connected. Current state:', {
@@ -154,7 +153,6 @@ class WebSocketClient {
     // Emit start typing event
     startTyping(data: { channelId: string }) {
         if (this.socket?.connected) {
-            console.log('⌨️ Emitting typing (start):', { channelId: data.channelId, isTyping: true });
             this.socket.emit('typing', { channelId: data.channelId, isTyping: true });
         } else {
             console.warn('⚠️ Cannot emit typing - not connected');
@@ -164,7 +162,6 @@ class WebSocketClient {
     // Emit stop typing event
     stopTyping(data: { channelId: string }) {
         if (this.socket?.connected) {
-            console.log('⌨️ Emitting typing (stop):', { channelId: data.channelId, isTyping: false });
             this.socket.emit('typing', { channelId: data.channelId, isTyping: false });
         } else {
             console.warn('⚠️ Cannot emit typing - not connected');

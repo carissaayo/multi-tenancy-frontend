@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+
 import { wsClient } from '@/lib/websocket/client';
 import { useAuthStore } from '@/store/auth-store';
 import { useMessageStore } from '@/store/message-store';
@@ -18,7 +19,6 @@ export function useChannelWebSocket(channelId: string | null) {
 
     useEffect(() => {
         if (!currentWorkspace || !user || !channelId) return;
-
         const token =
             typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
         if (!token) {
@@ -57,19 +57,15 @@ export function useChannelWebSocket(channelId: string | null) {
         });
 
         // Subscribe to typing events
-        // Backend should send { userId, channelId, username?, fullName?, isTyping }
         const typingStartUnsubscribe = wsClient.onTypingStart((data) => {
-            console.log('⌨️ Hook received typingStart:', data, '| Current channelId:', channelId, '| Current userId:', user?.id);
+        
             if (data.channelId !== channelId) {
-                console.log('⌨️ Ignoring - different channel');
                 return;
             }
             // Don't show self as typing
             if (data.userId === user?.id) {
-                console.log('⌨️ Ignoring - self typing');
                 return;
             }
-            console.log('⌨️ Adding typing user:', data.userId, 'username:', data.username, 'fullName:', data.fullName);
             addTypingUser(channelId, { 
                 id: data.userId, 
                 username: data.username,
@@ -78,9 +74,7 @@ export function useChannelWebSocket(channelId: string | null) {
         });
 
         const typingStopUnsubscribe = wsClient.onTypingStop((data) => {
-            console.log('⌨️ Hook received typingStop:', data, '| Current channelId:', channelId);
             if (data.channelId !== channelId) return;
-            console.log('⌨️ Removing typing user:', data.userId);
             removeTypingUser(channelId, data.userId);
         });
 
