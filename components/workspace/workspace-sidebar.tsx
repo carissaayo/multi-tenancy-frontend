@@ -1,20 +1,23 @@
 'use client';
 
-import {  useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   ChevronDown,
   Settings,
   LogOut,
   Users,
   MessageSquare,
-  Star
+  Star,
+  Plus,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { ChannelList } from '@/components/channels/channel-list';
+import { CreateChannelModal } from '@/components/channels/create-channel-modal';
 import { useAuthStore } from '@/store/auth-store';
 import { authApi } from '@/lib/api/auth';
 import { useWorkspaces } from '@/hooks/workspace';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { useSidebarStore } from '@/store/sidebar-store';
 
@@ -24,6 +27,8 @@ export function WorkspaceSidebar() {
   const { user, logout } = useAuthStore();
   const router = useRouter();
   const { sidebarOpen, setSidebarOpen } = useSidebarStore();
+  const [isCreateChannelOpen, setIsCreateChannelOpen] = useState(false);
+  const queryClient = useQueryClient();
 
 
   const { data: workspacesData, isLoading: isLoadingWorkspaces } = useWorkspaces();
@@ -151,11 +156,13 @@ export function WorkspaceSidebar() {
             <span className="text-xs font-semibold text-purple-300 uppercase tracking-wider">
               Channels
             </span>
-            {currentWorkspace?.channelCount !== undefined && (
-              <span className="text-xs text-purple-300">
-                {currentWorkspace.channelCount}
-              </span>
-            )}
+            <button
+              onClick={() => setIsCreateChannelOpen(true)}
+              className="p-1 hover:bg-purple-700/30 rounded transition-colors"
+              title="Create channel"
+            >
+              <Plus className="w-4 h-4 text-purple-300 hover:text-white" />
+            </button>
           </div>
           <ChannelList />
         </div>
@@ -193,6 +200,16 @@ export function WorkspaceSidebar() {
           </button>
         </div>
       </div>
+
+      {/* Create Channel Modal */}
+      <CreateChannelModal
+        isOpen={isCreateChannelOpen}
+        onClose={() => setIsCreateChannelOpen(false)}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['channels'] });
+          setIsCreateChannelOpen(false);
+        }}
+      />
     </div>
   );
 }
