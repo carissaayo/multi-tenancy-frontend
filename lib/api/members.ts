@@ -26,8 +26,8 @@ export interface MembersResponse {
 }
 
 export const membersApi = {
-  list: async (): Promise<MembersResponse> => {
-    const response = await apiClient.instance.get('/members');
+  list: async (workspaceId: string): Promise<MembersResponse> => {
+    const response = await apiClient.instance.get(`/workspaces/${workspaceId}/members`);
     return response.data;
   },
 

@@ -155,7 +155,7 @@ class ApiClient {
                 // Special case: /api/workspaces/:id (GET workspace by ID)
                 if (pattern === '/api/workspaces' && fullPath.startsWith('/api/workspaces/')) {
                     const remaining = fullPath.substring('/api/workspaces/'.length);
-                    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(\/.*)?$/i;
+                    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
                     if (uuidPattern.test(remaining)) {
                         return false; // /api/workspaces/:uuid is workspace-optional

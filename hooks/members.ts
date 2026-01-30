@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { membersApi, WorkspaceMember } from '@/lib/api/members';
+import { useAuthStore } from '@/store/auth-store';
 
 // ============================================================================
 // Query Keys
@@ -10,7 +11,7 @@ import { membersApi, WorkspaceMember } from '@/lib/api/members';
 export const memberKeys = {
   all: ['members'] as const,
   lists: () => [...memberKeys.all, 'list'] as const,
-  list: (filters?: Record<string, unknown>) => [...memberKeys.lists(), filters] as const,
+  list: (workspaceId: string) => [...memberKeys.lists(), workspaceId] as const,
 };
 
 // ============================================================================
@@ -21,12 +22,17 @@ export const memberKeys = {
  * Fetch all workspace members
  */
 export function useWorkspaceMembers() {
+  const { currentWorkspace } = useAuthStore();
+  const workspaceId = currentWorkspace?.id;
+
   return useQuery({
-    queryKey: memberKeys.lists(),
+    queryKey: memberKeys.list(workspaceId || ''),
     queryFn: async () => {
-      const response = await membersApi.list();
+      if (!workspaceId) throw new Error('No workspace selected');
+      const response = await membersApi.list(workspaceId);
       return response.members;
     },
+    enabled: !!workspaceId,
   });
 }
 
