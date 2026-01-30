@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import {
   ChevronDown,
   Settings,
@@ -13,23 +13,16 @@ import {
 import { useRouter } from 'next/navigation';
 
 import { ChannelList } from '@/components/channels/channel-list';
-import { CreateChannelModal } from '@/components/channels/create-channel-modal';
 import { useAuthStore } from '@/store/auth-store';
 import { authApi } from '@/lib/api/auth';
 import { useWorkspaces } from '@/hooks/workspace';
-import { useQueryClient } from '@tanstack/react-query';
 
 import { useSidebarStore } from '@/store/sidebar-store';
-
-
 
 export function WorkspaceSidebar() {
   const { user, logout } = useAuthStore();
   const router = useRouter();
   const { sidebarOpen, setSidebarOpen } = useSidebarStore();
-  const [isCreateChannelOpen, setIsCreateChannelOpen] = useState(false);
-  const queryClient = useQueryClient();
-
 
   const { data: workspacesData, isLoading: isLoadingWorkspaces } = useWorkspaces();
 
@@ -49,11 +42,8 @@ export function WorkspaceSidebar() {
     authApi.logout();
   };
 
-
-
   const handleSwitchWorkspace = () => {
     // Navigate to workspace selection page
-    // Remove subdomain and go to main domain
     if (typeof window !== 'undefined') {
       const protocol = window.location.protocol;
       const port = window.location.port ? `:${window.location.port}` : '';
@@ -62,6 +52,13 @@ export function WorkspaceSidebar() {
     setSidebarOpen(false);
   };
 
+  const handleCreateChannel = () => {
+    router.push('/workspace/channels/create');
+    // Close sidebar on mobile after navigation
+    if (window.innerWidth < 1024) {
+      setSidebarOpen(false);
+    }
+  };
 
   const workspaceInitial = currentWorkspace?.name?.charAt(0).toUpperCase() || 'W';
 
@@ -71,7 +68,7 @@ export function WorkspaceSidebar() {
 
   if (isLoadingWorkspaces) {
     return (
-      <div className="w-64 bg-linear-to-b from-purple-900 to-purple-800 text-white flex flex-col h-screen items-center justify-center">
+      <div className="w-64 bg-gradient-to-b from-purple-900 to-purple-800 text-white flex flex-col h-screen items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
         <p className="mt-4 text-sm text-purple-300">Loading workspace...</p>
       </div>
@@ -79,7 +76,7 @@ export function WorkspaceSidebar() {
   }
 
   return (
-    <div className="w-64 bg-linear-to-b from-purple-900 to-purple-800 text-white flex flex-col h-screen">
+    <div className="w-64 bg-gradient-to-b from-purple-900 to-purple-800 text-white flex flex-col h-screen">
       {/* Workspace Header */}
       <div className="p-4 border-b border-purple-700/50">
         <button
@@ -157,11 +154,11 @@ export function WorkspaceSidebar() {
               Channels
             </span>
             <button
-              onClick={() => setIsCreateChannelOpen(true)}
-              className="p-1 hover:bg-purple-700/30 rounded transition-colors"
+              onClick={handleCreateChannel}
+              className="p-1 hover:bg-purple-700/30 rounded transition-colors group"
               title="Create channel"
             >
-              <Plus className="w-4 h-4 text-purple-300 hover:text-white" />
+              <Plus className="w-4 h-4 text-purple-300 group-hover:text-white" />
             </button>
           </div>
           <ChannelList />
@@ -172,7 +169,7 @@ export function WorkspaceSidebar() {
       <div className="p-4 border-t border-purple-700/50">
         <div className="flex items-center gap-3 mb-3">
           <div className="relative shrink-0">
-            <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">{userInitials}</span>
             </div>
             <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-purple-900"></div>
@@ -200,16 +197,6 @@ export function WorkspaceSidebar() {
           </button>
         </div>
       </div>
-
-      {/* Create Channel Modal */}
-      <CreateChannelModal
-        isOpen={isCreateChannelOpen}
-        onClose={() => setIsCreateChannelOpen(false)}
-        onSuccess={() => {
-          queryClient.invalidateQueries({ queryKey: ['channels'] });
-          setIsCreateChannelOpen(false);
-        }}
-      />
     </div>
   );
 }
