@@ -22,6 +22,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { useSidebarStore } from '@/store/sidebar-store';
+import { useRouter } from 'next/navigation';
 
 export interface TypingUser {
   id: string;
@@ -38,7 +40,8 @@ interface ChannelNavbarProps {
   onToggleSidebar?: () => void;
   sidebarOpen?: boolean;
   hasNotifications?: boolean;
-  typingUsers?: TypingUser[];
+  typingUsers?: TypingUser[]; 
+  channelId: string;
 }
 
 export function ChannelNavbar({
@@ -51,7 +54,10 @@ export function ChannelNavbar({
   sidebarOpen = true,
   hasNotifications = false,
   typingUsers = [],
+  channelId,
 }: ChannelNavbarProps) {
+  const { setSidebarOpen } = useSidebarStore();
+  const router = useRouter();
   const navBtn =
     'cursor-pointer hover:bg-gray-100 rounded-lg transition-colors';
 
@@ -61,6 +67,10 @@ export function ChannelNavbar({
     if (user.fullName) return user.fullName.replace(/\s+/g, '');
     return 'Someone';
   };
+  const redirectToSettings = () => {
+    setSidebarOpen(false)
+    router.push(`/workspace/channels/${channelId}/settings`);
+  }
 
 
   return (
@@ -89,7 +99,7 @@ export function ChannelNavbar({
           ) : (
             <Hash className="w-5 h-5 text-gray-600 shrink-0" />
           )}
-          <h1 className="text-lg md:text-xl font-bold text-gray-900 truncate max-w-[120px] sm:max-w-[200px] md:max-w-none">
+          <h1 className="text-lg md:text-xl font-bold text-gray-900 truncate max-w-[120px] sm:max-w-[200px] md:max-w-none hover:cursor-pointer" onClick={redirectToSettings}>
             {channelName}
           </h1>
         </div>

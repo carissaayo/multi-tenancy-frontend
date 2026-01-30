@@ -68,6 +68,7 @@ export default function ChannelPage() {
         sidebarOpen={sidebarOpen}
         hasNotifications={!!(channel.unreadCount && channel.unreadCount > 0)}
         typingUsers={typingUsers}
+        channelId={channelId}
       />
       <MessageList channelId={channelId} />
       <MessageInput channelId={channelId} />
