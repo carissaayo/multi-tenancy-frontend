@@ -1,97 +1,216 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import {
-    channelsApi,
-    type CreateChannelDto,
-    type UpdateChannelDto,
+  channelsApi,
+  ChannelMemberData,
+  CreateChannelDto,
+  UpdateChannelDto,
+  InviteMemberDto,
 } from '@/lib/api/channels';
-import { queryKeys } from './query-keys';
 
+// ============================================================================
+// Types
+// ============================================================================
+
+export interface ChannelMember {
+  id: string;
+  memberId: string;
+  fullName: string;
+  email: string;
+  avatarUrl: string | null;
+  role: 'owner' | 'admin' | 'member';
+  joinedAt: string;
+  isActive: boolean;
+}
+
+// ============================================================================
+// Transformers
+// ============================================================================
+
+export function transformMember(data: ChannelMemberData): ChannelMember {
+  return {
+    id: data.user.id,
+    memberId: data.member.id,
+    fullName: data.user.fullName,
+    email: data.user.email,
+    avatarUrl: data.user.avatarUrl,
+    role: data.member.role,
+    joinedAt: data.channelMember.joinedAt,
+    isActive: data.member.isActive,
+  };
+}
+
+// ============================================================================
+// Query Keys
+// ============================================================================
+
+export const channelKeys = {
+  all: ['channels'] as const,
+  lists: () => [...channelKeys.all, 'list'] as const,
+  list: (filters?: Record<string, unknown>) => [...channelKeys.lists(), filters] as const,
+  details: () => [...channelKeys.all, 'detail'] as const,
+  detail: (id: string) => [...channelKeys.details(), id] as const,
+  members: (channelId: string) => ['channel-members', channelId] as const,
+};
+
+// ============================================================================
+// Queries
+// ============================================================================
+
+/**
+ * Fetch all channels
+ */
 export function useChannels() {
-    return useQuery({
-        queryKey: queryKeys.channels.all,
-        queryFn: () => channelsApi.list(),
-    });
+  return useQuery({
+    queryKey: channelKeys.lists(),
+    queryFn: async () => {
+      const response = await channelsApi.list();
+      return response.channels;
+    },
+  });
 }
 
-export function useChannel(id: string | null) {
-    return useQuery({
-        queryKey: queryKeys.channels.detail(id!),
-        queryFn: () => channelsApi.get(id!),
-        enabled: !!id,
-    });
+/**
+ * Fetch a single channel by ID
+ */
+export function useChannel(channelId: string | null) {
+  return useQuery({
+    queryKey: channelKeys.detail(channelId!),
+    queryFn: async () => {
+      const response = await channelsApi.get(channelId!);
+      return response.channel;
+    },
+    enabled: !!channelId,
+  });
 }
 
+/**
+ * Fetch channel members
+ */
 export function useChannelMembers(channelId: string | null) {
-    return useQuery({
-        queryKey: queryKeys.channels.members(channelId!),
-        queryFn: () => channelsApi.getMembers(channelId!),
-        enabled: !!channelId,
-    });
+  return useQuery({
+    queryKey: channelKeys.members(channelId!),
+    queryFn: async () => {
+      const response = await channelsApi.getMembers(channelId!);
+      return {
+        members: response.channelMembers.map(transformMember),
+        total: response.totalChannelMembers,
+      };
+    },
+    enabled: !!channelId,
+  });
 }
 
+// ============================================================================
+// Mutations
+// ============================================================================
+
+/**
+ * Create a new channel
+ */
 export function useCreateChannel() {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
+  const router = useRouter();
 
-    return useMutation({
-        mutationFn: (data: CreateChannelDto) => channelsApi.create(data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.channels.all });
-        },
-    });
+  return useMutation({
+    mutationFn: (data: CreateChannelDto) => channelsApi.create(data),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: channelKeys.all });
+      router.push(`/workspace/channels/${response.channel.id}`);
+    },
+  });
 }
 
-export function useUpdateChannel() {
-    const queryClient = useQueryClient();
+/**
+ * Update a channel
+ */
+export function useUpdateChannel(channelId: string) {
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: ({ id, data }: { id: string; data: UpdateChannelDto }) =>
-            channelsApi.update(id, data),
-        onSuccess: (_, { id }) => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.channels.all });
-            queryClient.invalidateQueries({ queryKey: queryKeys.channels.detail(id) });
-        },
-    });
+  return useMutation({
+    mutationFn: (data: UpdateChannelDto) => channelsApi.update(channelId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: channelKeys.detail(channelId) });
+      queryClient.invalidateQueries({ queryKey: channelKeys.all });
+    },
+  });
 }
 
-export function useDeleteChannel() {
-    const queryClient = useQueryClient();
+/**
+ * Delete a channel
+ */
+export function useDeleteChannel(channelId: string) {
+  const queryClient = useQueryClient();
+  const router = useRouter();
 
-    return useMutation({
-        mutationFn: (id: string) => channelsApi.delete(id),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.channels.all });
-        },
-    });
+  return useMutation({
+    mutationFn: () => channelsApi.delete(channelId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: channelKeys.all });
+      router.push('/workspace');
+    },
+  });
 }
 
+/**
+ * Join a channel
+ */
 export function useJoinChannel() {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: (id: string) => channelsApi.join(id),
-        onSuccess: (_, id) => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.channels.all });
-            queryClient.invalidateQueries({ queryKey: queryKeys.channels.detail(id) });
-            queryClient.invalidateQueries({
-                queryKey: queryKeys.channels.members(id),
-            });
-        },
-    });
+  return useMutation({
+    mutationFn: (channelId: string) => channelsApi.join(channelId),
+    onSuccess: (_, channelId) => {
+      queryClient.invalidateQueries({ queryKey: channelKeys.detail(channelId) });
+      queryClient.invalidateQueries({ queryKey: channelKeys.members(channelId) });
+      queryClient.invalidateQueries({ queryKey: channelKeys.all });
+    },
+  });
 }
 
-export function useLeaveChannel() {
-    const queryClient = useQueryClient();
+/**
+ * Leave a channel
+ */
+export function useLeaveChannel(channelId: string) {
+  const queryClient = useQueryClient();
+  const router = useRouter();
 
-    return useMutation({
-        mutationFn: (id: string) => channelsApi.leave(id),
-        onSuccess: (_, id) => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.channels.all });
-            queryClient.invalidateQueries({ queryKey: queryKeys.channels.detail(id) });
-            queryClient.invalidateQueries({
-                queryKey: queryKeys.channels.members(id),
-            });
-        },
-    });
+  return useMutation({
+    mutationFn: () => channelsApi.leave(channelId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: channelKeys.all });
+      queryClient.invalidateQueries({ queryKey: channelKeys.members(channelId) });
+      router.push('/workspace');
+    },
+  });
+}
+
+/**
+ * Invite a member to a channel
+ */
+export function useInviteChannelMember(channelId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: InviteMemberDto) => channelsApi.inviteMember(channelId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: channelKeys.members(channelId) });
+    },
+  });
+}
+
+/**
+ * Remove a member from a channel
+ */
+export function useRemoveChannelMember(channelId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (memberId: string) => channelsApi.removeMember(channelId, memberId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: channelKeys.members(channelId) });
+    },
+  });
 }

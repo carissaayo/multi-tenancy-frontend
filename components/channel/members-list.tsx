@@ -2,7 +2,7 @@
 
 import { Users, X, Crown, Shield, Loader2 } from 'lucide-react';
 import Image from 'next/image';
-import { ChannelMember } from '@/hooks/use-channel-settings';
+import { ChannelMember } from '@/hooks/channel';
 
 interface MembersListProps {
   members: ChannelMember[];

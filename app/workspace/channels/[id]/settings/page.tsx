@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { ChannelNavbar } from '@/components/workspace/channel-navbar';
-import { useChannelSettings } from '@/hooks/use-channel-settings';
+import { useChannelSettings } from '@/hooks/page/use-channel-settings';
 import {
   ChannelHeader,
   ChannelEditForm,
