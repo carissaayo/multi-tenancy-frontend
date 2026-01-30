@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import {
     Hash,
     Lock,
@@ -15,6 +16,7 @@ import { channelsApi } from '@/lib/api/channels';
 
 export default function CreateChannelPage() {
     const router = useRouter();
+    const queryClient = useQueryClient();
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [isPrivate, setIsPrivate] = useState(false);
@@ -32,6 +34,9 @@ export default function CreateChannelPage() {
                 description: description || undefined,
                 isPrivate,
             });
+
+            // Invalidate channels query to refetch the channel list
+            await queryClient.invalidateQueries({ queryKey: ['channels'] });
 
             // Redirect to the newly created channel
             router.push(`/workspace/channels/${response.channel.id}`);

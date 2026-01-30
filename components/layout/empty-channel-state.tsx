@@ -1,5 +1,8 @@
+'use client';
+
 import React from 'react';
-import { MessageSquare, Hash } from 'lucide-react';
+import { MessageSquare, Hash, Menu } from 'lucide-react';
+import { useSidebarStore } from '@/store/sidebar-store';
 
 interface EmptyChannelStateProps {
     appName?: string;
@@ -8,6 +11,8 @@ interface EmptyChannelStateProps {
 export const EmptyChannelState: React.FC<EmptyChannelStateProps> = ({
     appName = 'DevCol'
 }) => {
+    const { setSidebarOpen } = useSidebarStore();
+
     return (
         <div className="flex-1 flex flex-col items-center justify-center bg-linear-to-br from-purple-50 via-white to-blue-50 p-8">
             <div className="max-w-md text-center space-y-6">
@@ -28,6 +33,15 @@ export const EmptyChannelState: React.FC<EmptyChannelStateProps> = ({
                         Select a channel from the sidebar to start collaborating with your team
                     </p>
                 </div>
+
+                {/* Mobile: Open Sidebar Button */}
+                <button
+                    onClick={() => setSidebarOpen(true)}
+                    className="lg:hidden inline-flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition-colors shadow-lg hover:cursor-pointer"
+                >
+                    <Menu className="w-5 h-5" />
+                    Open Sidebar
+                </button>
 
                 <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
                     <h3 className="font-semibold text-gray-900 mb-3">Quick Tips:</h3>
