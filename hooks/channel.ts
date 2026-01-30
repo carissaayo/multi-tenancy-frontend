@@ -7,7 +7,7 @@ import {
   ChannelMemberData,
   CreateChannelDto,
   UpdateChannelDto,
-  InviteMemberDto,
+  AddChannelMemberDto,
 } from '@/lib/api/channels';
 
 // ============================================================================
@@ -188,13 +188,13 @@ export function useLeaveChannel(channelId: string) {
 }
 
 /**
- * Invite a member to a channel
+ * Add a workspace member to a channel
  */
-export function useInviteChannelMember(channelId: string) {
+export function useAddChannelMember(channelId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: InviteMemberDto) => channelsApi.inviteMember(channelId, data),
+    mutationFn: (data: AddChannelMemberDto) => channelsApi.addMember(channelId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: channelKeys.members(channelId) });
     },

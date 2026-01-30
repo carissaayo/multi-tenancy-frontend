@@ -7,7 +7,8 @@ import { useChannelSettings } from '@/hooks/page/use-channel-settings';
 import {
   ChannelHeader,
   ChannelEditForm,
-  InviteMemberForm,
+  AddMemberSection,
+  MemberPickerModal,
   MembersList,
   DangerZone,
   DeleteChannelModal,
@@ -21,34 +22,36 @@ export default function ChannelSettingsPage() {
     channel,
     members,
     totalMembers,
+    workspaceMembers,
+    currentUserId,
     canEdit,
     canDelete,
 
     // Loading states
     isLoading,
+    isLoadingWorkspaceMembers,
     isSaving,
     isDeleting,
     isLeaving,
-    isInviting,
+    isAddingMember,
     isRemovingMember,
 
     // Errors
     error,
-    inviteError,
 
     // UI State
     isEditing,
     setIsEditing,
-    inviteEmail,
-    setInviteEmail,
     showDeleteModal,
     setShowDeleteModal,
     showLeaveModal,
     setShowLeaveModal,
+    showMemberPicker,
+    setShowMemberPicker,
 
     // Handlers
     handleSave,
-    handleInvite,
+    handleAddMember,
     handleDeleteChannel,
     handleLeaveChannel,
     handleRemoveMember,
@@ -149,15 +152,9 @@ export default function ChannelSettingsPage() {
             )}
           </div>
 
-          {/* Invite Members */}
+          {/* Add Members */}
           {canEdit && (
-            <InviteMemberForm
-              email={inviteEmail}
-              isInviting={isInviting}
-              error={inviteError as Error | null}
-              onEmailChange={setInviteEmail}
-              onSubmit={handleInvite}
-            />
+            <AddMemberSection onOpenPicker={() => setShowMemberPicker(true)} />
           )}
 
           {/* Members List */}
@@ -178,7 +175,20 @@ export default function ChannelSettingsPage() {
         </div>
       </div>
 
-      {/* Modals */}
+      {/* Member Picker Modal */}
+      {showMemberPicker && (
+        <MemberPickerModal
+          workspaceMembers={workspaceMembers}
+          channelMembers={members}
+          currentUserId={currentUserId}
+          isLoading={isLoadingWorkspaceMembers}
+          isAdding={isAddingMember}
+          onAddMember={handleAddMember}
+          onClose={() => setShowMemberPicker(false)}
+        />
+      )}
+
+      {/* Delete Modal */}
       {showDeleteModal && (
         <DeleteChannelModal
           channelName={channel.name}
@@ -188,6 +198,7 @@ export default function ChannelSettingsPage() {
         />
       )}
 
+      {/* Leave Modal */}
       {showLeaveModal && (
         <LeaveChannelModal
           channelName={channel.name}

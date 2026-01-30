@@ -9,10 +9,11 @@ import {
   useUpdateChannel,
   useDeleteChannel,
   useLeaveChannel,
-  useInviteChannelMember,
+  useAddChannelMember,
   useRemoveChannelMember,
   ChannelMember,
 } from '@/hooks/channel';
+import { useWorkspaceMembers } from '@/hooks/members';
 import { UpdateChannelDto } from '@/lib/api/channels';
 
 export type { ChannelMember };
@@ -24,9 +25,9 @@ export function useChannelSettings() {
 
   // UI State
   const [isEditing, setIsEditing] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [showMemberPicker, setShowMemberPicker] = useState(false);
 
   // Queries
   const {
@@ -41,11 +42,16 @@ export function useChannelSettings() {
     error: membersError,
   } = useChannelMembers(channelId);
 
+  const {
+    data: workspaceMembers,
+    isLoading: isLoadingWorkspaceMembers,
+  } = useWorkspaceMembers();
+
   // Mutations
   const updateChannelMutation = useUpdateChannel(channelId);
   const deleteChannelMutation = useDeleteChannel(channelId);
   const leaveChannelMutation = useLeaveChannel(channelId);
-  const inviteMemberMutation = useInviteChannelMember(channelId);
+  const addMemberMutation = useAddChannelMember(channelId);
   const removeMemberMutation = useRemoveChannelMember(channelId);
 
   // Determine current user's role
@@ -61,13 +67,13 @@ export function useChannelSettings() {
     });
   };
 
-  const handleInvite = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inviteEmail.trim()) return;
-    inviteMemberMutation.mutate(
-      { email: inviteEmail.trim() },
+  const handleAddMember = (memberId: string) => {
+    addMemberMutation.mutate(
+      { memberId },
       {
-        onSuccess: () => setInviteEmail(''),
+        onSuccess: () => {
+          // Keep modal open to allow adding more members
+        },
       }
     );
   };
@@ -90,6 +96,8 @@ export function useChannelSettings() {
     channel,
     members: membersData?.members || [],
     totalMembers: membersData?.total || 0,
+    workspaceMembers: workspaceMembers || [],
+    currentUserId: user?.id || '',
     currentUserRole,
     canEdit,
     canDelete,
@@ -98,30 +106,31 @@ export function useChannelSettings() {
     isLoading: isLoadingChannel || isLoadingMembers,
     isLoadingChannel,
     isLoadingMembers,
+    isLoadingWorkspaceMembers,
     isSaving: updateChannelMutation.isPending,
     isDeleting: deleteChannelMutation.isPending,
     isLeaving: leaveChannelMutation.isPending,
-    isInviting: inviteMemberMutation.isPending,
+    isAddingMember: addMemberMutation.isPending,
     isRemovingMember: removeMemberMutation.isPending,
 
     // Errors
     error: channelError || membersError,
     updateError: updateChannelMutation.error,
-    inviteError: inviteMemberMutation.error,
+    addMemberError: addMemberMutation.error,
 
     // UI State
     isEditing,
     setIsEditing,
-    inviteEmail,
-    setInviteEmail,
     showDeleteModal,
     setShowDeleteModal,
     showLeaveModal,
     setShowLeaveModal,
+    showMemberPicker,
+    setShowMemberPicker,
 
     // Handlers
     handleSave,
-    handleInvite,
+    handleAddMember,
     handleDeleteChannel,
     handleLeaveChannel,
     handleRemoveMember,

@@ -65,8 +65,8 @@ export interface RemoveMemberResponse {
   message: string;
 }
 
-export interface InviteMemberDto {
-  email: string;
+export interface AddChannelMemberDto {
+  memberId: string;
 }
 
 export const channelsApi = {
@@ -108,8 +108,8 @@ export const channelsApi = {
     return response.data;
   },
 
-  inviteMember: async (channelId: string, data: InviteMemberDto): Promise<{ message: string }> => {
-    const response = await apiClient.instance.post(`/channels/${channelId}/invite`, data);
+  addMember: async (channelId: string, data: AddChannelMemberDto): Promise<{ message: string }> => {
+    const response = await apiClient.instance.post(`/channels/${channelId}/members`, data);
     return response.data;
   },
 
