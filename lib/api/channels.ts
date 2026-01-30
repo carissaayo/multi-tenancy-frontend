@@ -32,21 +32,41 @@ export interface ChannelsResponse {
   channels: Channel[];
 }
 
-export interface ChannelMember {
-  id: string;
-  userId: string;
-  channelId: string;
-  joinedAt: string;
+export interface ChannelMemberData {
+  channelMember: {
+    id: string;
+    channelId: string;
+    memberId: string;
+    joinedAt: string;
+  };
+  member: {
+    id: string;
+    userId: string;
+    role: 'owner' | 'admin' | 'member';
+    isActive: boolean;
+    joinedAt: string;
+  };
   user: {
     id: string;
     email: string;
     fullName: string;
-    avatarUrl?: string;
+    avatarUrl: string | null;
+    isEmailVerified: boolean;
   };
 }
 
 export interface ChannelMembersResponse {
-  members: ChannelMember[];
+  message: string;
+  channelMembers: ChannelMemberData[];
+  totalChannelMembers: number;
+}
+
+export interface RemoveMemberResponse {
+  message: string;
+}
+
+export interface InviteMemberDto {
+  email: string;
 }
 
 export const channelsApi = {
@@ -85,6 +105,16 @@ export const channelsApi = {
 
   getMembers: async (id: string): Promise<ChannelMembersResponse> => {
     const response = await apiClient.instance.get(`/channels/${id}/members`);
+    return response.data;
+  },
+
+  inviteMember: async (channelId: string, data: InviteMemberDto): Promise<{ message: string }> => {
+    const response = await apiClient.instance.post(`/channels/${channelId}/invite`, data);
+    return response.data;
+  },
+
+  removeMember: async (channelId: string, memberId: string): Promise<RemoveMemberResponse> => {
+    const response = await apiClient.instance.delete(`/channels/${channelId}/members/${memberId}`);
     return response.data;
   },
 };
