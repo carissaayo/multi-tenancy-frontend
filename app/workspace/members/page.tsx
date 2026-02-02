@@ -122,9 +122,6 @@ export default function MembersPage() {
                             <SelectItem value="Guest">Guest</SelectItem>
                             <SelectItem value="Member">Member</SelectItem>
                             <SelectItem value="Admin">Admin</SelectItem>
-                            {currentUserMember?.role === 'Owner' && (
-                              <SelectItem value="Owner">Owner</SelectItem>
-                            )}
                           </SelectContent>
                         </Select>
                         {canRemoveMember(member) && (

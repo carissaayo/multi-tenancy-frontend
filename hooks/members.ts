@@ -55,6 +55,7 @@ export function useUpdateMemberRole() {
       if (workspaceId) {
         queryClient.invalidateQueries({ queryKey: memberKeys.list(workspaceId) });
       }
+      toast.success('Role updated successfully', { duration: 3000 });
     },
     onError: (err) => {
       toast.error(getErrorMessage(err, 'Failed to update role'), { duration: 4000 });

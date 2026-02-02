@@ -11,8 +11,9 @@ import { ErrorDisplay } from '@/components/ui/error-display';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { ImageIcon, Loader2, AlertCircle, LogOut, Trash2, Power, PowerOff } from 'lucide-react';
+import { ImageIcon, Loader2, AlertCircle, LogOut, Trash2, Power, PowerOff, Crown } from 'lucide-react';
 import { getErrorMessage } from '@/lib/utils/api-error';
+import { useWorkspaceMembers, memberKeys, type WorkspaceMember } from '@/hooks/members';
 
 function redirectToSelectWorkspace() {
   if (typeof window !== 'undefined') {
@@ -42,7 +43,11 @@ export default function SettingsPage() {
   const [isLeaving, setIsLeaving] = useState(false);
   const [isDeactivating, setIsDeactivating] = useState(false);
   const [isActivating, setIsActivating] = useState(false);
+  const [showTransferModal, setShowTransferModal] = useState(false);
+  const [isTransferring, setIsTransferring] = useState(false);
+  const [selectedTransferTarget, setSelectedTransferTarget] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const { data: members } = useWorkspaceMembers();
 
   const { data: workspace, isLoading, error: queryError } = useQuery({
     queryKey: ['workspace', currentWorkspace?.id],
@@ -178,6 +183,29 @@ export default function SettingsPage() {
       setIsActivating(false);
     }
   };
+
+  const handleTransferOwnership = async () => {
+    if (!selectedTransferTarget) return;
+    setIsTransferring(true);
+    setError('');
+    try {
+      await workspacesApi.transferOwnership(selectedTransferTarget);
+      queryClient.invalidateQueries({ queryKey: ['workspace', currentWorkspace?.id] });
+      queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+      queryClient.invalidateQueries({ queryKey: memberKeys.lists() });
+      setShowTransferModal(false);
+      setSelectedTransferTarget(null);
+      toast.success('Ownership transferred successfully', { duration: 3000 });
+    } catch (err: any) {
+      const msg = getErrorMessage(err, 'Failed to transfer ownership');
+      setError(msg);
+      toast.error(msg, { duration: 4000 });
+    } finally {
+      setIsTransferring(false);
+    }
+  };
+
+  const adminMembers = members?.filter((m) => m.role === 'Admin') ?? [];
 
   if (isLoading) {
     return (
@@ -372,6 +400,27 @@ export default function SettingsPage() {
                 </div>
               )}
 
+              {/* Transfer Ownership - owner only */}
+              {isOwner && (
+                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Transfer Ownership</h3>
+                    <p className="text-sm text-gray-500">
+                      Transfer workspace ownership to an admin. You will become an admin.
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowTransferModal(true)}
+                    disabled={isDeactivated}
+                    className="border-purple-300 text-purple-700 hover:bg-purple-50"
+                  >
+                    <Crown className="w-4 h-4 mr-2" />
+                    Transfer Ownership
+                  </Button>
+                </div>
+              )}
+
               {/* Deactivate / Activate - owner only */}
               {isOwner && (
                 <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
@@ -533,6 +582,73 @@ export default function SettingsPage() {
                 variant="secondary"
                 onClick={() => setShowDeactivateModal(false)}
                 disabled={isDeactivating}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Transfer Ownership Modal */}
+      {showTransferModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <Crown className="w-6 h-6 text-purple-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">Transfer Ownership</h3>
+            </div>
+            <p className="text-gray-600 mb-4">
+              Select an admin to transfer workspace ownership to. You will become an admin.
+            </p>
+            {adminMembers.length === 0 ? (
+              <p className="text-sm text-amber-600 mb-4">
+                No admins available. Promote a member to admin first from the Members page.
+              </p>
+            ) : (
+              <div className="space-y-2 mb-6 max-h-48 overflow-y-auto">
+                {adminMembers.map((member: WorkspaceMember) => (
+                  <button
+                    key={member.id}
+                    type="button"
+                    onClick={() => setSelectedTransferTarget(member.userId)}
+                    className={`w-full flex items-center gap-3 p-3 rounded-lg border text-left transition-colors cursor-pointer ${
+                      selectedTransferTarget === member.userId
+                        ? 'border-purple-500 bg-purple-50'
+                        : 'border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-semibold shrink-0">
+                      {(member.user?.fullName || member.user?.email || '?').charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-medium text-gray-900 truncate">
+                        {member.user?.fullName || member.user?.email || 'Unknown'}
+                      </div>
+                      <div className="text-sm text-gray-500 truncate">{member.user?.email}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-3">
+              <Button
+                onClick={handleTransferOwnership}
+                disabled={!selectedTransferTarget || adminMembers.length === 0 || isTransferring}
+                className="flex-1 bg-purple-600 hover:bg-purple-700"
+              >
+                {isTransferring ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Transfer'}
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setShowTransferModal(false);
+                  setSelectedTransferTarget(null);
+                }}
+                disabled={isTransferring}
                 className="flex-1"
               >
                 Cancel

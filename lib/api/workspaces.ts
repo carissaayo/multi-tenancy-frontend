@@ -134,4 +134,13 @@ export const workspacesApi = {
     const response = await apiClient.instance.patch<WorkspaceSettingsResponse>('/settings/activate');
     return response.data;
   },
+
+  /** Transfer ownership to another member - owner only. Target must be an admin. */
+  transferOwnership: async (targetUserId: string): Promise<WorkspaceSettingsResponse> => {
+    const response = await apiClient.instance.patch<WorkspaceSettingsResponse>(
+      '/management/transfer-ownership',
+      { targetUserId }
+    );
+    return response.data;
+  },
 };
