@@ -53,11 +53,12 @@ export default function UserProfilePage() {
   });
 
   const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
+    password: '',
     newPassword: '',
-    confirmPassword: '',
+    confirmNewPassword: '',
   });
   const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [avatarLoading, setAvatarLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -76,12 +77,11 @@ export default function UserProfilePage() {
     setSuccess('');
 
     try {
-      const { profile } = await usersApi.updateProfile({
+      const { user: updatedUser } = await usersApi.updateProfile({
         fullName: formData.fullName,
         phoneNumber: formData.phoneNumber || undefined,
-        avatarUrl: formData.avatarUrl || undefined,
       });
-      setUser(profile);
+      setUser(updatedUser as Parameters<typeof setUser>[0]);
       setSuccess('Profile updated successfully!');
       setIsEditing(false);
       setTimeout(() => setSuccess(''), 3000);
@@ -95,7 +95,7 @@ export default function UserProfilePage() {
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
+    if (passwordData.newPassword !== passwordData.confirmNewPassword) {
       setError('Passwords do not match');
       return;
     }
@@ -105,12 +105,13 @@ export default function UserProfilePage() {
 
     try {
       await usersApi.changePassword({
-        currentPassword: passwordData.currentPassword,
+        password: passwordData.password,
         newPassword: passwordData.newPassword,
+        confirmNewPassword: passwordData.confirmNewPassword,
       });
       setSuccess('Password changed successfully!');
       setShowPasswordForm(false);
-      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setPasswordData({ password: '', newPassword: '', confirmNewPassword: '' });
       setTimeout(() => setSuccess(''), 3000);
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Failed to change password'));
@@ -119,14 +120,23 @@ export default function UserProfilePage() {
     }
   };
 
-  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, avatarUrl: reader.result as string });
-      };
-      reader.readAsDataURL(file);
+    if (!file || !file.type.startsWith('image/')) return;
+
+    setAvatarLoading(true);
+    setError('');
+
+    try {
+      const { user: updatedUser } = await usersApi.updateAvatar(file);
+      setUser(updatedUser as Parameters<typeof setUser>[0]);
+      setFormData((prev) => ({ ...prev, avatarUrl: updatedUser?.avatarUrl || prev.avatarUrl }));
+      setSuccess('Avatar updated successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to update avatar'));
+    } finally {
+      setAvatarLoading(false);
     }
   };
 
@@ -194,12 +204,21 @@ export default function UserProfilePage() {
                   </div>
                 )}
                 {isEditing && (
-                  <label className="absolute -bottom-2 -right-2 w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-purple-700 transition-colors shadow-lg">
-                    <Camera className="w-5 h-5 text-white" />
+                  <label
+                    className={`absolute -bottom-2 -right-2 w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center transition-colors shadow-lg ${
+                      avatarLoading ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'cursor-pointer hover:bg-purple-700'
+                    }`}
+                  >
+                    {avatarLoading ? (
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Camera className="w-5 h-5 text-white" />
+                    )}
                     <input
                       type="file"
                       accept="image/*"
                       onChange={handleAvatarUpload}
+                      disabled={avatarLoading}
                       className="hidden"
                     />
                   </label>
@@ -313,9 +332,9 @@ export default function UserProfilePage() {
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Current Password</label>
                     <Input
                       type="password"
-                      value={passwordData.currentPassword}
+                      value={passwordData.password}
                       onChange={(e) =>
-                        setPasswordData({ ...passwordData, currentPassword: e.target.value })
+                        setPasswordData({ ...passwordData, password: e.target.value })
                       }
                       required
                     />
@@ -337,7 +356,7 @@ export default function UserProfilePage() {
                       type="password"
                       value={passwordData.confirmPassword}
                       onChange={(e) =>
-                        setPasswordData({ ...passwordData, confirmPassword: e.target.value })
+                        setPasswordData({ ...passwordData, confirmNewPassword: e.target.value })
                       }
                       required
                     />
