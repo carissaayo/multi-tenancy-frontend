@@ -2,6 +2,7 @@
 
 import { Loader2, Plus, Building2, Users, ArrowRight, Sparkles, Search, Hash } from 'lucide-react';
 import { useSelectWorkspacePage } from '@/hooks/pages/use-select-workspace';
+import { ErrorDisplay } from '@/components/ui/error-display';
 
 // optional: deterministic color from slug
 function workspaceColor(slug: string) {
@@ -38,9 +39,14 @@ export default function SelectWorkspacePage() {
   if (error) {
     return (
       <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full p-8 bg-white rounded-2xl shadow-xl border border-gray-100 text-center">
-          <p className="text-red-600 mb-4">Failed to load workspaces. Please try again.</p>
-          {/* optional: retry button that refetches */}
+        <div className="max-w-md w-full p-8 bg-white rounded-2xl shadow-xl border border-gray-100">
+          <ErrorDisplay
+            error={error}
+            fallback="Failed to load workspaces"
+            title="Could not load workspaces"
+            onRetry={() => window.location.reload()}
+            variant="full"
+          />
         </div>
       </div>
     );

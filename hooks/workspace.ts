@@ -1,7 +1,9 @@
 'use client';
+import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { workspacesApi, type CreateWorkspaceDto } from '@/lib/api/workspaces';
 import { queryKeys } from './query-keys';
+import { getErrorMessage } from '@/lib/utils/api-error';
 
 export function useWorkspaces() {
     return useQuery({
@@ -24,6 +26,9 @@ export function useCreateWorkspace() {
         mutationFn: (data: CreateWorkspaceDto) => workspacesApi.create(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.workspaces.all });
+        },
+        onError: (err) => {
+            toast.error(getErrorMessage(err, 'Failed to create workspace'), { duration: 4000 });
         },
     });
 }

@@ -14,6 +14,7 @@ import {
 import { useRouter } from 'next/navigation';
 
 import { ChannelList } from '@/components/channels/channel-list';
+import { getErrorMessage } from '@/lib/utils/api-error';
 import { useAuthStore } from '@/store/auth-store';
 import { authApi } from '@/lib/api/auth';
 import { useWorkspaces } from '@/hooks/workspace';
@@ -25,7 +26,7 @@ export function WorkspaceSidebar() {
   const router = useRouter();
   const { sidebarOpen, setSidebarOpen } = useSidebarStore();
 
-  const { data: workspacesData, isLoading: isLoadingWorkspaces } = useWorkspaces();
+  const { data: workspacesData, isLoading: isLoadingWorkspaces, error: workspacesError } = useWorkspaces();
 
   const workspaceSlug = typeof window !== 'undefined'
     ? localStorage.getItem('workspaceSlug')
@@ -37,6 +38,8 @@ export function WorkspaceSidebar() {
     }
     return workspacesData.workspaces.find(ws => ws.slug === workspaceSlug) || null;
   }, [workspacesData, workspaceSlug]);
+
+  const isWorkspaceDeactivated = currentWorkspace?.isActive === false;
 
   const handleLogout = () => {
     logout();
@@ -72,6 +75,23 @@ export function WorkspaceSidebar() {
       <div className="w-64 bg-gradient-to-b from-purple-900 to-purple-800 text-white flex flex-col h-screen items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
         <p className="mt-4 text-sm text-purple-300">Loading workspace...</p>
+      </div>
+    );
+  }
+
+  if (workspacesError) {
+    const msg = getErrorMessage(workspacesError, 'Failed to load workspace');
+    return (
+      <div className="w-64 bg-gradient-to-b from-purple-900 to-purple-800 text-white flex flex-col h-screen items-center justify-center p-4">
+        <div className="text-center space-y-2">
+          <p className="text-sm text-red-300">{msg}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-xs text-purple-300 hover:text-white underline cursor-pointer"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
@@ -166,13 +186,18 @@ export function WorkspaceSidebar() {
             </span>
             <button
               onClick={handleCreateChannel}
-              className="p-1 hover:bg-purple-700/30  rounded transition-colors group cursor-pointer"
-              title="Create channel"
+              disabled={isWorkspaceDeactivated}
+              className={`p-1 rounded transition-colors group ${
+                isWorkspaceDeactivated
+                  ? 'opacity-50 cursor-not-allowed pointer-events-none'
+                  : 'hover:bg-purple-700/30 cursor-pointer'
+              }`}
+              title={isWorkspaceDeactivated ? 'Workspace is deactivated' : 'Create channel'}
             >
               <Plus className="w-4 h-4 text-purple-300 group-hover:text-white" />
             </button>
           </div>
-          <ChannelList />
+          <ChannelList disabled={isWorkspaceDeactivated} />
         </div>
       </div>
 

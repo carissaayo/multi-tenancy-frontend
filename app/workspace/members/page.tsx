@@ -1,8 +1,11 @@
 'use client';
 
+import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { membersApi, MemberRole } from '@/lib/api/members';
+import { getErrorMessage } from '@/lib/utils/api-error';
 import { WorkspaceHeader } from '@/components/workspace/workspace-header';
+import { ErrorDisplay } from '@/components/ui/error-display';
 import { useAuthStore } from '@/store/auth-store';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -27,7 +30,7 @@ export default function MembersPage() {
       await membersApi.updateRole(userId, { role: newRole });
       queryClient.invalidateQueries({ queryKey: ['members'] });
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to update role');
+      toast.error(getErrorMessage(error, 'Failed to update role'), { duration: 4000 });
     } finally {
       setUpdatingRole(null);
     }
@@ -40,7 +43,7 @@ export default function MembersPage() {
       await membersApi.remove(userId);
       queryClient.invalidateQueries({ queryKey: ['members'] });
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to remove member');
+      toast.error(getErrorMessage(error, 'Failed to remove member'), { duration: 4000 });
     }
   };
 
@@ -63,8 +66,14 @@ export default function MembersPage() {
     return (
       <div className="flex flex-col h-screen">
         <WorkspaceHeader title="Members" />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-red-500">Failed to load members</div>
+        <div className="flex-1 flex items-center justify-center p-6">
+          <ErrorDisplay
+            error={error}
+            fallback="Failed to load members"
+            title="Could not load members"
+            onRetry={() => window.location.reload()}
+            variant="full"
+          />
         </div>
       </div>
     );

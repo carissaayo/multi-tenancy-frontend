@@ -10,25 +10,31 @@ import { useSidebarStore } from '@/store/sidebar-store';
 
 interface ChannelItemProps {
   channel: Channel;
+  /** When true, disables navigation (e.g. workspace deactivated) */
+  disabled?: boolean;
 }
 
-export function ChannelItem({ channel }: ChannelItemProps) {
+export function ChannelItem({ channel, disabled = false }: ChannelItemProps) {
   const pathname = usePathname();
-  const router= useRouter()
-  const {  setSidebarOpen } = useSidebarStore();
+  const router = useRouter();
+  const { setSidebarOpen } = useSidebarStore();
   const isActive = pathname === `/workspace/channels/${channel.id}`;
 
-  const handleClick =()=>{
-    setSidebarOpen(false)
-    router.push(`/workspace/channels/${channel.id}`)
-  }
+  const handleClick = () => {
+    if (disabled) return;
+    setSidebarOpen(false);
+    router.push(`/workspace/channels/${channel.id}`);
+  };
+
   return (
     <button
       type="button"
       onClick={handleClick}
+      disabled={disabled}
       className={`
       w-full flex items-center justify-between px-3 py-2 rounded-lg 
-      transition-colors text-sm group cursor-pointer
+      transition-colors text-sm group
+      ${disabled ? 'opacity-50 cursor-not-allowed pointer-events-none text-purple-100' : 'cursor-pointer'}
       ${isActive
           ? 'bg-purple-700/50 text-white'
           : 'hover:bg-purple-700/30 text-purple-100'

@@ -40,8 +40,10 @@ interface ChannelNavbarProps {
   onToggleSidebar?: () => void;
   sidebarOpen?: boolean;
   hasNotifications?: boolean;
-  typingUsers?: TypingUser[]; 
+  typingUsers?: TypingUser[];
   channelId: string;
+  /** When true, disables all interactive buttons (e.g. workspace deactivated) */
+  disabled?: boolean;
 }
 
 export function ChannelNavbar({
@@ -55,11 +57,13 @@ export function ChannelNavbar({
   hasNotifications = false,
   typingUsers = [],
   channelId,
+  disabled = false,
 }: ChannelNavbarProps) {
   const { setSidebarOpen } = useSidebarStore();
   const router = useRouter();
   const navBtn =
-    'cursor-pointer hover:bg-gray-100 rounded-lg transition-colors';
+    'rounded-lg transition-colors ' +
+    (disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'cursor-pointer hover:bg-gray-100');
 
 
   const getDisplayName = (user: TypingUser) => {
@@ -68,9 +72,10 @@ export function ChannelNavbar({
     return 'Someone';
   };
   const redirectToSettings = () => {
-    setSidebarOpen(false)
+    if (disabled) return;
+    setSidebarOpen(false);
     router.push(`/workspace/channels/${channelId}/settings`);
-  }
+  };
 
 
   return (
@@ -99,7 +104,10 @@ export function ChannelNavbar({
           ) : (
             <Hash className="w-5 h-5 text-gray-600 shrink-0" />
           )}
-          <h1 className="text-lg md:text-xl font-bold text-gray-900 truncate max-w-[120px] sm:max-w-[200px] md:max-w-none hover:cursor-pointer" onClick={redirectToSettings}>
+          <h1
+            className={`text-lg md:text-xl font-bold text-gray-900 truncate max-w-[120px] sm:max-w-[200px] md:max-w-none ${disabled ? 'cursor-not-allowed' : 'hover:cursor-pointer'}`}
+            onClick={redirectToSettings}
+          >
             {channelName}
           </h1>
         </div>

@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useRef, useEffect, KeyboardEvent } from 'react';
+import { toast } from 'sonner';
 import { messagesApi } from '@/lib/api/messages';
+import { getErrorMessage } from '@/lib/utils/api-error';
 import { useMessageStore } from '@/store/message-store';
 import { useAuthStore } from '@/store/auth-store';
 import { wsClient } from '@/lib/websocket/client';
@@ -10,11 +12,13 @@ import { useQueryClient } from '@tanstack/react-query';
 
 interface MessageInputProps {
   channelId: string;
+  /** When true, disables input and send (e.g. workspace deactivated) */
+  disabled?: boolean;
 }
 
 const TYPING_DEBOUNCE_MS = 2000;
 
-export function MessageInput({ channelId }: MessageInputProps) {
+export function MessageInput({ channelId, disabled = false }: MessageInputProps) {
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -54,7 +58,7 @@ export function MessageInput({ channelId }: MessageInputProps) {
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!content.trim() || loading) return;
+    if (disabled || !content.trim() || loading) return;
 
     const messageContent = content.trim();
     setContent('');
@@ -89,7 +93,7 @@ export function MessageInput({ channelId }: MessageInputProps) {
       queryClient.invalidateQueries({ queryKey: ['messages', channelId] });
       resetHeight();
     } catch (err) {
-      console.error('Failed to send message:', err);
+      toast.error(getErrorMessage(err, 'Failed to send message'), { duration: 4000 });
       setContent(messageContent);
     } finally {
       setLoading(false);
@@ -104,6 +108,7 @@ export function MessageInput({ channelId }: MessageInputProps) {
   };
 
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (disabled) return;
     const value = e.target.value;
     setContent(value);
 
@@ -141,12 +146,12 @@ export function MessageInput({ channelId }: MessageInputProps) {
           value={content}
           onChange={handleInput}
           onKeyDown={handleKeyDown}
-          placeholder="Type a message... (Press Enter to send, Shift+Enter for new line)"
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none max-h-[200px]"
+          placeholder={disabled ? 'Workspace is deactivated' : 'Type a message... (Press Enter to send, Shift+Enter for new line)'}
+          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none max-h-[200px] disabled:bg-gray-100 disabled:cursor-not-allowed"
           rows={1}
-          disabled={loading}
+          disabled={disabled || loading}
         />
-        <Button type="submit" disabled={!content.trim() || loading}>
+        <Button type="submit" disabled={disabled || !content.trim() || loading}>
           {loading ? 'Sending...' : 'Send'}
         </Button>
       </form>

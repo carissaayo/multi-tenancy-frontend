@@ -7,9 +7,12 @@ import { workspacesApi, type Workspace } from '@/lib/api/workspaces';
 import { useAuthStore } from '@/store/auth-store';
 import { apiClient } from '@/lib/api/client';
 import { WorkspaceHeader } from '@/components/workspace/workspace-header';
+import { ErrorDisplay } from '@/components/ui/error-display';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import { ImageIcon, Loader2, AlertCircle, LogOut, Trash2, Power, PowerOff } from 'lucide-react';
+import { getErrorMessage } from '@/lib/utils/api-error';
 
 function redirectToSelectWorkspace() {
   if (typeof window !== 'undefined') {
@@ -41,7 +44,7 @@ export default function SettingsPage() {
   const [isActivating, setIsActivating] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: workspace, isLoading } = useQuery({
+  const { data: workspace, isLoading, error: queryError } = useQuery({
     queryKey: ['workspace', currentWorkspace?.id],
     queryFn: async (): Promise<Workspace | null> => {
       if (!currentWorkspace) return null;
@@ -75,7 +78,9 @@ export default function SettingsPage() {
       queryClient.invalidateQueries({ queryKey: ['workspace', currentWorkspace.id] });
       setIsEditing(false);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to update workspace');
+      const msg = getErrorMessage(err, 'Failed to update workspace');
+      setError(msg);
+      toast.error(msg, { duration: 4000 });
     } finally {
       setLoading(false);
     }
@@ -98,7 +103,9 @@ export default function SettingsPage() {
       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
       if (logoInputRef.current) logoInputRef.current.value = '';
     } catch (err: any) {
-      setLogoError(err.response?.data?.message || 'Failed to update logo');
+      const msg = getErrorMessage(err, 'Failed to update logo');
+      setLogoError(msg);
+      toast.error(msg, { duration: 4000 });
     } finally {
       setLogoLoading(false);
     }
@@ -113,7 +120,9 @@ export default function SettingsPage() {
       apiClient.setWorkspaceSlug(null);
       redirectToSelectWorkspace();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to delete workspace');
+      const msg = getErrorMessage(err, 'Failed to delete workspace');
+      setError(msg);
+      toast.error(msg, { duration: 4000 });
     } finally {
       setIsDeleting(false);
     }
@@ -128,7 +137,9 @@ export default function SettingsPage() {
       apiClient.setWorkspaceSlug(null);
       redirectToSelectWorkspace();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to leave workspace');
+      const msg = getErrorMessage(err, 'Failed to leave workspace');
+      setError(msg);
+      toast.error(msg, { duration: 4000 });
     } finally {
       setIsLeaving(false);
     }
@@ -143,7 +154,9 @@ export default function SettingsPage() {
       apiClient.setWorkspaceSlug(null);
       redirectToSelectWorkspace();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to deactivate workspace');
+      const msg = getErrorMessage(err, 'Failed to deactivate workspace');
+      setError(msg);
+      toast.error(msg, { duration: 4000 });
     } finally {
       setIsDeactivating(false);
     }
@@ -158,7 +171,9 @@ export default function SettingsPage() {
       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
       setShowActivateModal(false);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to activate workspace');
+      const msg = getErrorMessage(err, 'Failed to activate workspace');
+      setError(msg);
+      toast.error(msg, { duration: 4000 });
     } finally {
       setIsActivating(false);
     }
@@ -170,6 +185,23 @@ export default function SettingsPage() {
         <WorkspaceHeader title="Workspace Settings" />
         <div className="flex-1 flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (queryError) {
+    return (
+      <div className="flex flex-col h-screen">
+        <WorkspaceHeader title="Workspace Settings" />
+        <div className="flex-1 flex items-center justify-center p-6">
+          <ErrorDisplay
+            error={queryError}
+            fallback="Failed to load workspace"
+            title="Could not load workspace"
+            onRetry={() => window.location.reload()}
+            variant="full"
+          />
         </div>
       </div>
     );
@@ -233,7 +265,7 @@ export default function SettingsPage() {
                     type="button"
                     variant="outline"
                     onClick={() => logoInputRef.current?.click()}
-                    disabled={!isEditing || logoLoading}
+                    disabled={isDeactivated || !isEditing || logoLoading}
                   >
                     {logoLoading ? (
                       <>
@@ -261,7 +293,7 @@ export default function SettingsPage() {
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                disabled={!isEditing}
+                disabled={isDeactivated || !isEditing}
                 required
               />
             </div>
@@ -280,7 +312,11 @@ export default function SettingsPage() {
             </div>
 
             <div className="flex gap-2">
-              {isEditing ? (
+              {isDeactivated ? (
+                <p className="text-sm text-amber-600">
+                  Activate the workspace to edit settings.
+                </p>
+              ) : isEditing ? (
                 <>
                   <Button
                     variant="secondary"
@@ -313,18 +349,21 @@ export default function SettingsPage() {
               <h2 className="text-lg font-bold text-red-600">Danger Zone</h2>
             </div>
             <div className="space-y-4">
-              {/* Leave Workspace - for non-owners */}
+              {/* Leave Workspace - for non-owners (disabled when workspace is deactivated) */}
               {!isOwner && (
                 <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                   <div>
                     <h3 className="font-semibold text-gray-900">Leave Workspace</h3>
                     <p className="text-sm text-gray-500">
-                      You will no longer have access to this workspace
+                      {isDeactivated
+                        ? 'Activate the workspace first to leave'
+                        : 'You will no longer have access to this workspace'}
                     </p>
                   </div>
                   <Button
                     variant="outline"
                     onClick={() => setShowLeaveModal(true)}
+                    disabled={isDeactivated}
                     className="border-gray-300 text-gray-700 hover:bg-gray-100"
                   >
                     <LogOut className="w-4 h-4 mr-2" />

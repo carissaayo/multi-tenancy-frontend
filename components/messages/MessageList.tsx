@@ -6,12 +6,15 @@ import { messagesApi } from '@/lib/api/messages';
 import { MessageItem } from './MessageItem';
 import { useMessageStore } from '@/store/message-store';
 import { MessageSquare, Sparkles } from 'lucide-react';
+import { ErrorDisplay } from '@/components/ui/error-display';
 
 interface MessageListProps {
   channelId: string;
+  /** When true, disables message actions (e.g. workspace deactivated) */
+  disabled?: boolean;
 }
 
-export function MessageList({ channelId }: MessageListProps) {
+export function MessageList({ channelId, disabled = false }: MessageListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { messages, setMessages } = useMessageStore();
   const channelMessages = messages[channelId] || [];
@@ -64,25 +67,13 @@ export function MessageList({ channelId }: MessageListProps) {
   if (error) {
     return (
       <div className="flex-1 flex items-center justify-center bg-white p-6">
-        <div className="text-center space-y-4 max-w-md">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
-            <MessageSquare className="w-8 h-8 text-red-500" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Failed to load messages
-            </h3>
-            <p className="text-sm text-gray-600">
-              We couldn&lsquo;t load the messages. Please try again.
-            </p>
-          </div>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors cursor-pointer"
-          >
-            Retry
-          </button>
-        </div>
+        <ErrorDisplay
+          error={error}
+          fallback="We couldn't load the messages. Please try again."
+          title="Failed to load messages"
+          onRetry={() => window.location.reload()}
+          variant="full"
+        />
       </div>
     );
   }
@@ -126,7 +117,7 @@ export function MessageList({ channelId }: MessageListProps) {
       <div className="mx-4  py-4">
         <div className="space-y-0.5">
           {channelMessages.map((message) => (
-            <MessageItem key={message.id} message={message} />
+            <MessageItem key={message.id} message={message} disabled={disabled} />
           ))}
           <div ref={messagesEndRef} />
         </div>

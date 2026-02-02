@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosError } from 'axios';
+import { getErrorMessage } from '@/lib/utils/api-error';
 
 class ApiClient {
     private client: AxiosInstance;
@@ -88,6 +89,10 @@ class ApiClient {
                 return response;
             },
             (error: AxiosError) => {
+                // Extract custom message from response.data (not response.statusText)
+                const message = getErrorMessage(error, 'An error occurred');
+                (error as AxiosError & { apiMessage?: string }).apiMessage = message;
+
                 if (error.response?.status === 401) {
                     this.clearAuth();
                     if (typeof window !== 'undefined') {

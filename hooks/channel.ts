@@ -1,5 +1,6 @@
 'use client';
 
+import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import {
@@ -9,6 +10,7 @@ import {
   UpdateChannelDto,
   AddChannelMemberDto,
 } from '@/lib/api/channels';
+import { getErrorMessage } from '@/lib/utils/api-error';
 
 // ============================================================================
 // Types
@@ -120,6 +122,9 @@ export function useCreateChannel() {
       queryClient.invalidateQueries({ queryKey: channelKeys.all });
       router.push(`/workspace/channels/${response.channel.id}`);
     },
+    onError: (err) => {
+      toast.error(getErrorMessage(err, 'Failed to create channel'), { duration: 4000 });
+    },
   });
 }
 
@@ -134,6 +139,9 @@ export function useUpdateChannel(channelId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: channelKeys.detail(channelId) });
       queryClient.invalidateQueries({ queryKey: channelKeys.all });
+    },
+    onError: (err) => {
+      toast.error(getErrorMessage(err, 'Failed to update channel'), { duration: 4000 });
     },
   });
 }
@@ -150,6 +158,9 @@ export function useDeleteChannel(channelId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: channelKeys.all });
       router.push('/workspace');
+    },
+    onError: (err) => {
+      toast.error(getErrorMessage(err, 'Failed to delete channel'), { duration: 4000 });
     },
   });
 }
@@ -184,6 +195,9 @@ export function useLeaveChannel(channelId: string) {
       queryClient.invalidateQueries({ queryKey: channelKeys.members(channelId) });
       router.push('/workspace');
     },
+    onError: (err) => {
+      toast.error(getErrorMessage(err, 'Failed to leave channel'), { duration: 4000 });
+    },
   });
 }
 
@@ -198,6 +212,9 @@ export function useAddChannelMember(channelId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: channelKeys.members(channelId) });
     },
+    onError: (err) => {
+      toast.error(getErrorMessage(err, 'Failed to add member'), { duration: 4000 });
+    },
   });
 }
 
@@ -211,6 +228,9 @@ export function useRemoveChannelMember(channelId: string) {
     mutationFn: (memberId: string) => channelsApi.removeMember(channelId, memberId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: channelKeys.members(channelId) });
+    },
+    onError: (err) => {
+      toast.error(getErrorMessage(err, 'Failed to remove member'), { duration: 4000 });
     },
   });
 }

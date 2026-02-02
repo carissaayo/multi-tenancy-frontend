@@ -14,6 +14,7 @@ import {
   DeleteChannelModal,
   LeaveChannelModal,
 } from '@/components/channel';
+import { ErrorDisplay } from '@/components/ui/error-display';
 
 export default function ChannelSettingsPage() {
   const {
@@ -103,11 +104,14 @@ export default function ChannelSettingsPage() {
         <div className="h-16 bg-white border-b border-gray-200 flex items-center px-6">
           <span className="text-gray-600">Channel Settings</span>
         </div>
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <p className="text-red-500">Failed to load channel</p>
-          </div>
+        <div className="flex-1 flex items-center justify-center p-6">
+          <ErrorDisplay
+            error={error ?? (!channel ? new Error('Channel not found') : null)}
+            fallback="Failed to load channel"
+            title="Could not load channel"
+            onRetry={() => window.location.reload()}
+            variant="full"
+          />
         </div>
       </div>
     );

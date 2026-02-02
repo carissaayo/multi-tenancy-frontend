@@ -9,22 +9,30 @@ import { MessageList } from '@/components/messages/MessageList';
 import { MessageInput } from '@/components/messages/MessageInput';
 
 import { ChannelNavbar } from '@/components/workspace/channel-navbar';
+import { ErrorDisplay } from '@/components/ui/error-display';
 import { useSidebarStore } from '@/store/sidebar-store';
 import { useTypingStore, TypingUser } from '@/store/typing-store';
 import { useChannelWebSocket } from '@/hooks/use-channel-websocket';
+import { useWorkspace } from '@/hooks/workspace';
+import { useAuthStore } from '@/store/auth-store';
 
 const EMPTY_TYPING_USERS: TypingUser[] = [];
 
 export default function ChannelPage() {
   const params = useParams();
   const channelId = params.id as string;
+  const { currentWorkspace } = useAuthStore();
+  const { data: workspaceData } = useWorkspace(currentWorkspace?.id ?? null);
+  const workspace = workspaceData?.workspace;
+  const isWorkspaceDeactivated = workspace?.isActive === false;
+
   const { sidebarOpen, toggleSidebar } = useSidebarStore();
   const typingUsers = useTypingStore(
     useShallow((state) => state.typingUsers[channelId] ?? EMPTY_TYPING_USERS)
   );
 
-  useChannelWebSocket(channelId);
-  const { data: channel, isLoading } = useQuery({
+  useChannelWebSocket(channelId, { enabled: !isWorkspaceDeactivated });
+  const { data: channel, isLoading, error } = useQuery({
     queryKey: ['channel', channelId],
     queryFn: async () => {
       const response = await channelsApi.get(channelId);
@@ -44,13 +52,17 @@ export default function ChannelPage() {
     );
   }
 
-  if (!channel) {
+  if (error || !channel) {
     return (
       <div className="flex flex-col h-screen">
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-red-500">Channel not found</p>
-          </div>
+        <div className="flex-1 flex items-center justify-center p-6">
+          <ErrorDisplay
+            error={error ?? (!channel ? new Error('Channel not found') : null)}
+            fallback="Channel not found"
+            title="Could not load channel"
+            onRetry={() => window.location.reload()}
+            variant="full"
+          />
         </div>
       </div>
     );
@@ -69,9 +81,10 @@ export default function ChannelPage() {
         hasNotifications={!!(channel.unreadCount && channel.unreadCount > 0)}
         typingUsers={typingUsers}
         channelId={channelId}
+        disabled={isWorkspaceDeactivated}
       />
-      <MessageList channelId={channelId} />
-      <MessageInput channelId={channelId} />
+      <MessageList channelId={channelId} disabled={isWorkspaceDeactivated} />
+      <MessageInput channelId={channelId} disabled={isWorkspaceDeactivated} />
     </div>
   );
 }

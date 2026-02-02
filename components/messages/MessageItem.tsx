@@ -9,9 +9,11 @@ import { useState } from 'react';
 
 interface MessageItemProps {
   message: Message;
+  /** When true, hides action buttons (e.g. workspace deactivated) */
+  disabled?: boolean;
 }
 
-export function MessageItem({ message }: MessageItemProps) {
+export function MessageItem({ message, disabled = false }: MessageItemProps) {
   const { user: currentUser } = useAuthStore();
   const [showActions, setShowActions] = useState(false);
   const isOwnMessage = currentUser?.id === message.user.id;
@@ -110,7 +112,7 @@ export function MessageItem({ message }: MessageItemProps) {
               </div>
 
               {/* Floating Action Buttons - positioned at the start of the message */}
-              {showActions && (
+              {showActions && !disabled && (
                 <div className="absolute -top-10 left-0 bg-white border border-gray-200 rounded-lg shadow-lg flex items-center divide-x divide-gray-200 z-10">
                   <button
                     className="p-2 hover:bg-gray-50 rounded-l-lg transition-colors cursor-pointer"

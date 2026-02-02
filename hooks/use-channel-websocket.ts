@@ -11,14 +11,16 @@ import { useTypingStore } from '@/store/typing-store';
  * Connects to the messaging WebSocket (if needed), joins the given channel
  * after connection is ready, subscribes to newMessage/error/typing, and updates
  * the message and typing stores. Cleans up on unmount or when channelId/workspace/user change.
+ * Does not connect when workspace is deactivated (isActive: false).
  */
-export function useChannelWebSocket(channelId: string | null) {
+export function useChannelWebSocket(channelId: string | null, options?: { enabled?: boolean }) {
     const { currentWorkspace, user } = useAuthStore();
+    const enabled = options?.enabled !== false;
     const { addMessage, updateMessage } = useMessageStore();
     const { addTypingUser, removeTypingUser, clearTypingUsers } = useTypingStore();
 
     useEffect(() => {
-        if (!currentWorkspace || !user || !channelId) return;
+        if (!enabled || !currentWorkspace || !user || !channelId) return;
         const token =
             typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
         if (!token) {
@@ -87,5 +89,5 @@ export function useChannelWebSocket(channelId: string | null) {
             typingStopUnsubscribe();
             clearTypingUsers(channelId);
         };
-    }, [channelId, currentWorkspace, user, addMessage, updateMessage, addTypingUser, removeTypingUser, clearTypingUsers]);
+    }, [enabled, channelId, currentWorkspace, user, addMessage, updateMessage, addTypingUser, removeTypingUser, clearTypingUsers]);
 }

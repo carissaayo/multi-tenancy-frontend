@@ -4,8 +4,10 @@ import { useState } from 'react';
 import { Modal } from '@/components/ui/modal';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import { channelsApi } from '@/lib/api/channels';
 import { useQueryClient } from '@tanstack/react-query';
+import { getErrorMessage } from '@/lib/utils/api-error';
 
 interface CreateChannelModalProps {
   isOpen: boolean;
@@ -38,7 +40,9 @@ export function CreateChannelModal({ isOpen, onClose, onSuccess }: CreateChannel
       setIsPrivate(false);
       onSuccess();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to create channel');
+      const msg = getErrorMessage(err, 'Failed to create channel');
+      setError(msg);
+      toast.error(msg, { duration: 4000 });
     } finally {
       setLoading(false);
     }

@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
+import { getErrorMessage } from '@/lib/utils/api-error';
 import {
     Hash,
     Lock,
@@ -13,10 +15,15 @@ import {
     Globe
 } from 'lucide-react';
 import { channelsApi } from '@/lib/api/channels';
+import { useAuthStore } from '@/store/auth-store';
+import { useWorkspace } from '@/hooks/workspace';
 
 export default function CreateChannelPage() {
     const router = useRouter();
     const queryClient = useQueryClient();
+    const { currentWorkspace } = useAuthStore();
+    const { data: workspaceData } = useWorkspace(currentWorkspace?.id ?? null);
+    const isWorkspaceDeactivated = workspaceData?.workspace?.isActive === false;
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [isPrivate, setIsPrivate] = useState(false);
@@ -25,6 +32,7 @@ export default function CreateChannelPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (isWorkspaceDeactivated) return;
         setLoading(true);
         setError('');
 
@@ -41,7 +49,9 @@ export default function CreateChannelPage() {
             // Redirect to the newly created channel
             router.push(`/workspace/channels/${response.channel.id}`);
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Failed to create channel');
+            const msg = getErrorMessage(err, 'Failed to create channel');
+            setError(msg);
+            toast.error(msg, { duration: 4000 });
         } finally {
             setLoading(false);
         }
@@ -70,6 +80,19 @@ export default function CreateChannelPage() {
             <div className="flex-1 overflow-y-auto p-6">
                 <div className="max-w-3xl mx-auto">
                     <form onSubmit={handleSubmit} className="space-y-6">
+                        {/* Deactivated workspace notice */}
+                        {isWorkspaceDeactivated && (
+                            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+                                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                                <div>
+                                    <h3 className="font-semibold text-amber-900">Workspace is deactivated</h3>
+                                    <p className="text-sm text-amber-700 mt-1">
+                                        Activate the workspace from settings to create channels.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Error Message */}
                         {error && (
                             <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
@@ -97,7 +120,8 @@ export default function CreateChannelPage() {
                                     placeholder="e.g. general, announcements, team-updates"
                                     required
                                     maxLength={50}
-                                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
+                                    disabled={isWorkspaceDeactivated}
+                                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 disabled:bg-gray-100 disabled:cursor-not-allowed"
                                 />
                             </div>
                             <p className="text-sm text-gray-500 mt-2">
@@ -123,7 +147,8 @@ export default function CreateChannelPage() {
                                 placeholder="What's this channel about?"
                                 maxLength={200}
                                 rows={4}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 resize-none"
+                                disabled={isWorkspaceDeactivated}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                             />
                             <div className="flex items-center justify-between mt-2">
                                 <p className="text-sm text-gray-500">
@@ -145,7 +170,8 @@ export default function CreateChannelPage() {
                                 {/* Public Option */}
                                 <button
                                     type="button"
-                                    onClick={() => setIsPrivate(false)}
+                                    onClick={() => !isWorkspaceDeactivated && setIsPrivate(false)}
+                                    disabled={isWorkspaceDeactivated}
                                     className={`w-full p-4 border-2 rounded-xl transition-all text-left ${!isPrivate
                                             ? 'border-purple-500 bg-purple-50'
                                             : 'border-gray-200 hover:border-gray-300'
@@ -173,7 +199,8 @@ export default function CreateChannelPage() {
                                 {/* Private Option */}
                                 <button
                                     type="button"
-                                    onClick={() => setIsPrivate(true)}
+                                    onClick={() => !isWorkspaceDeactivated && setIsPrivate(true)}
+                                    disabled={isWorkspaceDeactivated}
                                     className={`w-full p-4 border-2 rounded-xl transition-all text-left cursor-pointer ${isPrivate
                                             ? 'border-purple-500 bg-purple-50'
                                             : 'border-gray-200 hover:border-gray-300'
@@ -227,7 +254,7 @@ export default function CreateChannelPage() {
                             </button>
                             <button
                                 type="submit"
-                                disabled={loading || !name.trim()}
+                                disabled={isWorkspaceDeactivated || loading || !name.trim()}
                                 className="flex-1 px-6 py-3 bg-linear-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-xl transition-all cursor-pointer enabled:hover:from-purple-700 enabled:hover:to-purple-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                                 {loading ? (
