@@ -221,7 +221,7 @@ export function WorkspaceSidebar() {
       <div className="p-4 border-t border-purple-700/50">
         <button
           onClick={() => {
-            router.push('/workspace/profile');
+            router.push('/profile');
             setSidebarOpen(false);
           }}
           className="w-full flex items-center gap-3 mb-3 hover:bg-purple-700/30 rounded-lg p-2 -m-2 transition-colors cursor-pointer"

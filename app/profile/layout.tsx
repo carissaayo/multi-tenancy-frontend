@@ -1,6 +1,6 @@
 import { SidebarLayout } from '@/components/layout/sidebar-layout';
 
-export default function WorkspaceLayout({
+export default function ProfileLayout({
   children,
 }: {
   children: React.ReactNode;
