@@ -10,6 +10,7 @@ import {
   MessageSquare,
   Star,
   Plus,
+  Mail,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -17,7 +18,7 @@ import { ChannelList } from '@/components/channels/channel-list';
 import { getErrorMessage } from '@/lib/utils/api-error';
 import { useAuthStore } from '@/store/auth-store';
 import { authApi } from '@/lib/api/auth';
-import { useWorkspaces } from '@/hooks/workspace';
+import { useWorkspaces, useWorkspace } from '@/hooks/workspace';
 
 import { useSidebarStore } from '@/store/sidebar-store';
 
@@ -39,7 +40,10 @@ export function WorkspaceSidebar() {
     return workspacesData.workspaces.find(ws => ws.slug === workspaceSlug) || null;
   }, [workspacesData, workspaceSlug]);
 
+  const { data: workspaceDetail } = useWorkspace(currentWorkspace?.id ?? null);
+  const userRole = workspaceDetail?.workspace?.userRole ?? currentWorkspace?.userRole ?? '';
   const isWorkspaceDeactivated = currentWorkspace?.isActive === false;
+  const canManageInvitations = ['owner', 'admin'].includes(userRole.toLowerCase());
 
   const handleLogout = () => {
     logout();
@@ -172,6 +176,18 @@ export function WorkspaceSidebar() {
               </span>
             )}
           </button>
+          {canManageInvitations && (
+            <button
+              onClick={() => {
+                router.push('/workspace/invitations');
+                setSidebarOpen(false);
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 hover:bg-purple-700/30 rounded-lg transition-colors text-sm cursor-pointer"
+            >
+              <Mail className="w-5 h-5" />
+              <span>Invitations</span>
+            </button>
+          )}
           <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-purple-700/30 rounded-lg transition-colors text-sm cursor-pointer">
             <Star className="w-5 h-5" />
             <span>Saved Items</span>
