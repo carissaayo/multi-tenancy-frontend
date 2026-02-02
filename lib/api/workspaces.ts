@@ -16,6 +16,10 @@ export interface Workspace {
   logoUrl?: string;
   createdAt: string;
   updatedAt: string;
+  /** Whether workspace is active (not deactivated) */
+  isActive?: boolean;
+  /** Workspace owner user ID */
+  createdBy?: string;
   /** From stats; only present when workspace list includes stats */
   membersCount?: number;
   channelCount?: number;
@@ -51,6 +55,13 @@ export interface CreateWorkspaceResponse {
 
 export interface WorkspacesResponse {
   workspaces: Workspace[];
+}
+
+/** Response from delete, deactivate, activate, leave - includes new tokens */
+export interface WorkspaceSettingsResponse {
+  accessToken?: string;
+  refreshToken?: string;
+  message: string;
 }
 
 export const workspacesApi = {
@@ -98,5 +109,29 @@ export const workspacesApi = {
 
   delete: async (id: string): Promise<void> => {
     await apiClient.instance.delete(`/workspaces/${id}`);
+  },
+
+  /** Delete workspace (soft delete) - owner only. Uses workspace-scoped /settings. */
+  deleteFromSettings: async (): Promise<WorkspaceSettingsResponse> => {
+    const response = await apiClient.instance.delete<WorkspaceSettingsResponse>('/settings');
+    return response.data;
+  },
+
+  /** Leave workspace - redirects to workspace selection after. */
+  leave: async (): Promise<WorkspaceSettingsResponse> => {
+    const response = await apiClient.instance.patch<WorkspaceSettingsResponse>('/settings/leave');
+    return response.data;
+  },
+
+  /** Deactivate workspace - owner only. */
+  deactivate: async (): Promise<WorkspaceSettingsResponse> => {
+    const response = await apiClient.instance.patch<WorkspaceSettingsResponse>('/settings/deactivate');
+    return response.data;
+  },
+
+  /** Activate workspace - owner only. */
+  activate: async (): Promise<WorkspaceSettingsResponse> => {
+    const response = await apiClient.instance.patch<WorkspaceSettingsResponse>('/settings/activate');
+    return response.data;
   },
 };
