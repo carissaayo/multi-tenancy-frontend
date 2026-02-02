@@ -118,7 +118,6 @@ export default function MembersPage() {
   );
   const currentUserRole =
     currentUserMember?.role ??
-    (currentUserMember as any)?.member?.role ??
     workspaceData?.workspace?.userRole ??
     '';
   const canManageMembers = ['owner', 'admin'].includes(currentUserRole?.toLowerCase());
@@ -136,7 +135,7 @@ export default function MembersPage() {
       (currentUserRole?.toLowerCase() === 'admin' &&
         ['member', 'guest'].includes((member.role ?? '').toLowerCase())));
 
-  const getRole = (member: WorkspaceMember) => member.role ?? (member as any).member?.role ?? '';
+  const getRole = (member: WorkspaceMember) => member.role ?? '';
   const getDisplayName = (member: WorkspaceMember) =>
     member.user?.fullName || member.user?.email || 'Unknown';
 

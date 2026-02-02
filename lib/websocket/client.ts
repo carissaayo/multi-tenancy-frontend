@@ -1,9 +1,10 @@
 import { io, Socket } from 'socket.io-client';
 import { Message } from '../api/messages';
+import type { Workspace } from '../api/workspaces';
 
 type MessageEventHandler = (message: Message) => void;
 type ErrorEventHandler = (error: { message: string; code?: string }) => void;
-type WorkspaceEventHandler = (workspace: any) => void;
+type WorkspaceEventHandler = (workspace: Workspace) => void;
 
 export interface TypingEventData {
     channelId: string;

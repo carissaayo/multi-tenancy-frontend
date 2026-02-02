@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosError } from 'axios';
+import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosError, AxiosHeaders } from 'axios';
 import { getErrorMessage } from '@/lib/utils/api-error';
 
 class ApiClient {
@@ -21,7 +21,7 @@ class ApiClient {
         this.client.interceptors.request.use(
             (config: InternalAxiosRequestConfig) => {
                 if (!config.headers) {
-                    config.headers = {} as any;
+                    config.headers = {} as AxiosHeaders;
                 }
 
                 // When sending FormData, remove Content-Type so axios sets multipart/form-data with boundary

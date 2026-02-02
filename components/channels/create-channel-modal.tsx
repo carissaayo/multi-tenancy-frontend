@@ -39,7 +39,7 @@ export function CreateChannelModal({ isOpen, onClose, onSuccess }: CreateChannel
       setDescription('');
       setIsPrivate(false);
       onSuccess();
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg = getErrorMessage(err, 'Failed to create channel');
       setError(msg);
       toast.error(msg, { duration: 4000 });

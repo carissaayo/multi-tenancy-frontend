@@ -61,7 +61,6 @@ export default function InvitationsPage() {
     );
     return (
       member?.role ??
-      (member as any)?.member?.role ??
       workspaceData?.workspace?.userRole ??
       ''
     );

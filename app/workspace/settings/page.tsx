@@ -82,7 +82,7 @@ export default function SettingsPage() {
       await workspacesApi.update(currentWorkspace.id, formData);
       queryClient.invalidateQueries({ queryKey: ['workspace', currentWorkspace.id] });
       setIsEditing(false);
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg = getErrorMessage(err, 'Failed to update workspace');
       setError(msg);
       toast.error(msg, { duration: 4000 });
@@ -107,7 +107,7 @@ export default function SettingsPage() {
       queryClient.invalidateQueries({ queryKey: ['workspace', currentWorkspace.id] });
       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
       if (logoInputRef.current) logoInputRef.current.value = '';
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg = getErrorMessage(err, 'Failed to update logo');
       setLogoError(msg);
       toast.error(msg, { duration: 4000 });
@@ -124,7 +124,7 @@ export default function SettingsPage() {
       setCurrentWorkspace(null);
       apiClient.setWorkspaceSlug(null);
       redirectToSelectWorkspace();
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg = getErrorMessage(err, 'Failed to delete workspace');
       setError(msg);
       toast.error(msg, { duration: 4000 });
@@ -141,7 +141,7 @@ export default function SettingsPage() {
       setCurrentWorkspace(null);
       apiClient.setWorkspaceSlug(null);
       redirectToSelectWorkspace();
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg = getErrorMessage(err, 'Failed to leave workspace');
       setError(msg);
       toast.error(msg, { duration: 4000 });
@@ -158,7 +158,7 @@ export default function SettingsPage() {
       setCurrentWorkspace(null);
       apiClient.setWorkspaceSlug(null);
       redirectToSelectWorkspace();
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg = getErrorMessage(err, 'Failed to deactivate workspace');
       setError(msg);
       toast.error(msg, { duration: 4000 });
@@ -175,7 +175,7 @@ export default function SettingsPage() {
       queryClient.invalidateQueries({ queryKey: ['workspace', currentWorkspace?.id] });
       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
       setShowActivateModal(false);
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg = getErrorMessage(err, 'Failed to activate workspace');
       setError(msg);
       toast.error(msg, { duration: 4000 });
@@ -196,7 +196,7 @@ export default function SettingsPage() {
       setShowTransferModal(false);
       setSelectedTransferTarget(null);
       toast.success('Ownership transferred successfully', { duration: 3000 });
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg = getErrorMessage(err, 'Failed to transfer ownership');
       setError(msg);
       toast.error(msg, { duration: 4000 });

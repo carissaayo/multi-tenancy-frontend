@@ -76,7 +76,7 @@ export function WorkspaceSidebar() {
 
   if (isLoadingWorkspaces) {
     return (
-      <div className="w-64 bg-gradient-to-b from-purple-900 to-purple-800 text-white flex flex-col h-screen items-center justify-center">
+      <div className="w-64 bg-linear-to-b from-purple-900 to-purple-800 text-white flex flex-col h-screen items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
         <p className="mt-4 text-sm text-purple-300">Loading workspace...</p>
       </div>
@@ -86,7 +86,7 @@ export function WorkspaceSidebar() {
   if (workspacesError) {
     const msg = getErrorMessage(workspacesError, 'Failed to load workspace');
     return (
-      <div className="w-64 bg-gradient-to-b from-purple-900 to-purple-800 text-white flex flex-col h-screen items-center justify-center p-4">
+      <div className="w-64 bg-linear-to-b from-purple-900 to-purple-800 text-white flex flex-col h-screen items-center justify-center p-4">
         <div className="text-center space-y-2">
           <p className="text-sm text-red-300">{msg}</p>
           <button
@@ -101,7 +101,7 @@ export function WorkspaceSidebar() {
   }
 
   return (
-    <div className="w-64 bg-gradient-to-b from-purple-900 to-purple-800 text-white flex flex-col h-screen">
+    <div className="w-64 bg-linear-to-b from-purple-900 to-purple-800 text-white flex flex-col h-screen">
       {/* Workspace Header */}
       <div className="p-4 border-b border-purple-700/50">
         <button
@@ -221,7 +221,7 @@ export function WorkspaceSidebar() {
       <div className="p-4 border-t border-purple-700/50">
         <div className="flex items-center gap-3 mb-3">
           <div className="relative shrink-0">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">{userInitials}</span>
             </div>
             <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-purple-900"></div>

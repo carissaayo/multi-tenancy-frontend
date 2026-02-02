@@ -48,7 +48,7 @@ export default function CreateChannelPage() {
 
             // Redirect to the newly created channel
             router.push(`/workspace/channels/${response.channel.id}`);
-        } catch (err: any) {
+        } catch (err: unknown) {
             const msg = getErrorMessage(err, 'Failed to create channel');
             setError(msg);
             toast.error(msg, { duration: 4000 });
