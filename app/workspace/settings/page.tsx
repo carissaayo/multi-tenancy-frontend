@@ -74,6 +74,7 @@ export default function SettingsPage() {
     try {
       await workspacesApi.updateLogo(file);
       queryClient.invalidateQueries({ queryKey: ['workspace', currentWorkspace.id] });
+      queryClient.invalidateQueries({ queryKey: ['workspaces'] });
       if (logoInputRef.current) logoInputRef.current.value = '';
     } catch (err: any) {
       setLogoError(err.response?.data?.message || 'Failed to update logo');
@@ -129,7 +130,7 @@ export default function SettingsPage() {
                 <div className="w-20 h-20 rounded-xl border-2 border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50 shrink-0">
                   {workspace?.logoUrl ? (
                     <Image
-                      src={workspace.logoUrl}
+                      src={`${workspace.logoUrl}${workspace.updatedAt ? `?v=${workspace.updatedAt}` : ''}`}
                       alt="Workspace logo"
                       width={80}
                       height={80}

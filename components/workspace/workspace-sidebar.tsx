@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import Image from 'next/image';
 import {
   ChevronDown,
   Settings,
@@ -84,8 +85,18 @@ export function WorkspaceSidebar() {
           className="w-full flex items-center justify-between hover:bg-purple-700/30 rounded-lg p-3 transition-colors group"
         >
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shrink-0">
-              <span className="text-purple-900 font-bold text-lg">{workspaceInitial}</span>
+            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+              {currentWorkspace?.logoUrl ? (
+                <Image
+                  src={`${currentWorkspace.logoUrl}${currentWorkspace.updatedAt ? `?v=${currentWorkspace.updatedAt}` : ''}`}
+                  alt={currentWorkspace.name || 'Workspace'}
+                  width={40}
+                  height={40}
+                  className="object-cover w-full h-full"
+                />
+              ) : (
+                <span className="text-purple-900 font-bold text-lg">{workspaceInitial}</span>
+              )}
             </div>
             <div className="text-left min-w-0">
               <h2 className="font-bold text-base truncate">
