@@ -249,7 +249,7 @@ export default function CreateWorkspacePage() {
                     </button>
                   )}
                   <p className="text-sm text-gray-500 mt-2">
-                    PNG, JPG or GIF. Will be uploaded to AWS.
+                    PNG, JPG or GIF.
                   </p>
                 </div>
               </div>

@@ -35,6 +35,13 @@ export interface WorkspaceResponse {
   workspace: Workspace;
 }
 
+export interface UpdateWorkspaceResponse {
+  workspace: Workspace;
+  message: string;
+  accessToken?: string;
+  refreshToken?: string;
+}
+
 export interface CreateWorkspaceResponse {
   workspace: Workspace;
   accessToken: string;
@@ -77,8 +84,15 @@ export const workspacesApi = {
     return response.data;
   },
 
-  update: async (id: string, data: Partial<CreateWorkspaceDto>): Promise<WorkspaceResponse> => {
+  update: async (id: string, data: { name?: string; description?: string; plan?: WorkspacePlan }): Promise<UpdateWorkspaceResponse> => {
     const response = await apiClient.instance.patch(`/workspaces/${id}`, data);
+    return response.data;
+  },
+
+  updateLogo: async (file: File): Promise<UpdateWorkspaceResponse> => {
+    const formData = new FormData();
+    formData.append('logo', file);
+    const response = await apiClient.instance.patch('/settings/logo', formData);
     return response.data;
   },
 

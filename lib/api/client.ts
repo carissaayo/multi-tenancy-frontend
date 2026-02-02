@@ -23,6 +23,11 @@ class ApiClient {
                     config.headers = {} as any;
                 }
 
+                // When sending FormData, remove Content-Type so axios sets multipart/form-data with boundary
+                if (config.data instanceof FormData) {
+                    delete config.headers['Content-Type'];
+                }
+
                 // Reset to original baseURL
                 config.baseURL = process.env.NEXT_PUBLIC_API_URL;
 

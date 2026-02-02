@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { membersApi, MemberRole } from '@/lib/api/members';
-import { WorkspaceHeader } from '@/components/workspace/channel-navbar';
+import { WorkspaceHeader } from '@/components/workspace/workspace-header';
 import { useAuthStore } from '@/store/auth-store';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -47,7 +47,7 @@ export default function MembersPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col h-screen">
-        <WorkspaceHeader />
+        <WorkspaceHeader title="Members" />
         <div className="flex-1 p-6">
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
@@ -62,7 +62,7 @@ export default function MembersPage() {
   if (error) {
     return (
       <div className="flex flex-col h-screen">
-        <WorkspaceHeader />
+        <WorkspaceHeader title="Members" />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-red-500">Failed to load members</div>
         </div>
@@ -75,7 +75,7 @@ export default function MembersPage() {
 
   return (
     <div className="flex flex-col h-screen">
-      <WorkspaceHeader />
+      <WorkspaceHeader title="Members" />
       <div className="flex-1 overflow-y-auto p-6">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold mb-6">Workspace Members</h2>
