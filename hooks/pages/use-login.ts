@@ -8,8 +8,8 @@ const initialFormData = {
     password: '',
 };
 
-export function useLoginPage() {
-    const login = useLogin();
+export function useLoginPage(redirectTo?: string) {
+    const login = useLogin(redirectTo);
     const [formData, setFormData] = useState(initialFormData);
     const [error, setError] = useState('');
 

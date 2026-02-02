@@ -19,7 +19,7 @@ export function useRegister() {
     });
 }
 
-export function useLogin() {
+export function useLogin(redirectTo?: string) {
     const router = useRouter();
     const queryClient = useQueryClient();
 
@@ -44,7 +44,7 @@ export function useLogin() {
                 updatedAt: profile.updatedAt,
             });
             queryClient.invalidateQueries({ queryKey: queryKeys.auth });
-            router.push('/select-workspace');
+            router.push(redirectTo || '/select-workspace');
         },
     });
 }

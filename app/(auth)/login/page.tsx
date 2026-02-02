@@ -1,5 +1,6 @@
 'use client';
 
+import { useSearchParams } from 'next/navigation';
 import { Loader2, Sparkles, Users, Zap, Shield, Mail, Lock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -7,7 +8,9 @@ import { Input } from '@/components/ui/input';
 import { useLoginPage } from '@/hooks/pages/use-login';
 
 export default function LoginPage() {
-    const { formData, setFormData, error, loading, handleSubmit } = useLoginPage();
+    const searchParams = useSearchParams();
+    const next = searchParams.get('next') ?? undefined;
+    const { formData, setFormData, error, loading, handleSubmit } = useLoginPage(next);
 
 
     return (
