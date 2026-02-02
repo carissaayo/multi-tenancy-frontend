@@ -88,12 +88,11 @@ export const membersApi = {
     });
   },
 
-  /** Invite a user to the workspace by email. Sends invitation email. */
-  invite: async (email: string, role?: MemberRole): Promise<{ message: string }> => {
-    const body = role ? { email, role: role.toLowerCase() } : { email };
+  /** Invite a user to the workspace by email. Sends invitation email. Role is required. */
+  invite: async (email: string, role: MemberRole): Promise<{ message: string }> => {
     const response = await apiClient.instance.post<{ message: string }>(
-      '/management/invitations',
-      body
+      '/invitations',
+      { email, role: role.toLowerCase() }
     );
     return response.data;
   },

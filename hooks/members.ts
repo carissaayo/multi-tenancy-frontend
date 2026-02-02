@@ -87,7 +87,7 @@ export function useInviteMember() {
   const workspaceId = currentWorkspace?.id;
 
   return useMutation({
-    mutationFn: ({ email, role }: { email: string; role?: MemberRole }) =>
+    mutationFn: ({ email, role }: { email: string; role: MemberRole }) =>
       membersApi.invite(email, role),
     onSuccess: (data) => {
       if (workspaceId) {
