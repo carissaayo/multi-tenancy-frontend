@@ -87,4 +87,14 @@ export const membersApi = {
       data: { userId },
     });
   },
+
+  /** Invite a user to the workspace by email. Sends invitation email. */
+  invite: async (email: string, role?: MemberRole): Promise<{ message: string }> => {
+    const body = role ? { email, role: role.toLowerCase() } : { email };
+    const response = await apiClient.instance.post<{ message: string }>(
+      '/management/invitations',
+      body
+    );
+    return response.data;
+  },
 };

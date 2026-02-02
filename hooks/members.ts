@@ -81,4 +81,24 @@ export function useRemoveMember() {
   });
 }
 
+export function useInviteMember() {
+  const queryClient = useQueryClient();
+  const { currentWorkspace } = useAuthStore();
+  const workspaceId = currentWorkspace?.id;
+
+  return useMutation({
+    mutationFn: ({ email, role }: { email: string; role?: MemberRole }) =>
+      membersApi.invite(email, role),
+    onSuccess: (data) => {
+      if (workspaceId) {
+        queryClient.invalidateQueries({ queryKey: memberKeys.list(workspaceId) });
+      }
+      toast.success(data?.message ?? 'Invitation sent successfully', { duration: 4000 });
+    },
+    onError: (err) => {
+      toast.error(getErrorMessage(err, 'Failed to send invitation'), { duration: 4000 });
+    },
+  });
+}
+
 export type { WorkspaceMember, MemberRole };

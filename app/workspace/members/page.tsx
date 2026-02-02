@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useWorkspaceMembers, useUpdateMemberRole, useRemoveMember, memberKeys, type MemberRole, type WorkspaceMember } from '@/hooks/members';
+import { useWorkspaceMembers, useUpdateMemberRole, useRemoveMember, useInviteMember, memberKeys, type MemberRole, type WorkspaceMember } from '@/hooks/members';
 import { WorkspaceHeader } from '@/components/workspace/workspace-header';
 import { ErrorDisplay } from '@/components/ui/error-display';
 import { useAuthStore } from '@/store/auth-store';
@@ -17,7 +17,8 @@ import { workspacesApi } from '@/lib/api/workspaces';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { getErrorMessage } from '@/lib/utils/api-error';
-import { Crown, Loader2 } from 'lucide-react';
+import { Crown, Loader2, UserPlus } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 export default function MembersPage() {
   const { user, currentWorkspace } = useAuthStore();
@@ -25,7 +26,11 @@ export default function MembersPage() {
   const { data, isLoading, error } = useWorkspaceMembers();
   const updateRole = useUpdateMemberRole();
   const removeMember = useRemoveMember();
+  const inviteMember = useInviteMember();
   const [showTransferModal, setShowTransferModal] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState<MemberRole>('Member');
   const [isTransferring, setIsTransferring] = useState(false);
   const [selectedTransferTarget, setSelectedTransferTarget] = useState<string | null>(null);
 
@@ -57,6 +62,21 @@ export default function MembersPage() {
   };
 
   const adminMembers = data?.filter((m) => m.role === 'Admin') ?? [];
+
+  const handleInvite = () => {
+    const email = inviteEmail.trim();
+    if (!email) return;
+    inviteMember.mutate(
+      { email, role: inviteRole },
+      {
+        onSuccess: () => {
+          setShowInviteModal(false);
+          setInviteEmail('');
+          setInviteRole('Member');
+        },
+      }
+    );
+  };
 
   if (isLoading) {
     return (
@@ -192,6 +212,73 @@ export default function MembersPage() {
           </div>
         </div>
       </div>
+
+      {/* Invite to Workspace Modal */}
+      {showInviteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <UserPlus className="w-6 h-6 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">Invite to Workspace</h3>
+            </div>
+            <p className="text-gray-600 mb-4">
+              Send an invitation email to add a user to this workspace.
+            </p>
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <Input
+                  type="email"
+                  placeholder="colleague@example.com"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as MemberRole)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Guest">Guest</SelectItem>
+                    <SelectItem value="Member">Member</SelectItem>
+                    <SelectItem value="Admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                onClick={handleInvite}
+                disabled={!inviteEmail.trim() || inviteMember.isPending}
+                className="flex-1"
+              >
+                {inviteMember.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  'Send Invite'
+                )}
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setShowInviteModal(false);
+                  setInviteEmail('');
+                  setInviteRole('Member');
+                }}
+                disabled={inviteMember.isPending}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Transfer Ownership Modal */}
       {showTransferModal && (
