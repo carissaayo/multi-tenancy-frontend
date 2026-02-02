@@ -219,7 +219,13 @@ export function WorkspaceSidebar() {
 
       {/* User Profile Footer */}
       <div className="p-4 border-t border-purple-700/50">
-        <div className="flex items-center gap-3 mb-3">
+        <button
+          onClick={() => {
+            router.push('/workspace/profile');
+            setSidebarOpen(false);
+          }}
+          className="w-full flex items-center gap-3 mb-3 hover:bg-purple-700/30 rounded-lg p-2 -m-2 transition-colors cursor-pointer"
+        >
           <div className="relative shrink-0">
             <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">{userInitials}</span>
@@ -230,7 +236,7 @@ export function WorkspaceSidebar() {
             <p className="font-semibold text-sm truncate">{user?.fullName || user?.email}</p>
             <p className="text-xs text-purple-300 truncate">Active</p>
           </div>
-        </div>
+        </button>
 
         <div className="space-y-1">
           <button
