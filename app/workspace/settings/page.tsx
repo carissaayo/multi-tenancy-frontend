@@ -239,7 +239,7 @@ export default function SettingsPage() {
     <div className="flex flex-col h-screen">
       <WorkspaceHeader title="Workspace Settings" />
       <div className="flex-1 overflow-y-auto p-6">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold mb-6">Workspace Settings</h2>
           
           <div className="bg-white rounded-lg shadow p-6 space-y-6">
