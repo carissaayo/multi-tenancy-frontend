@@ -37,7 +37,7 @@ export function ChannelHeader({
       {canEdit && (
         <button
           onClick={onToggleEdit}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
         >
           {isEditing ? (
             <X className="w-5 h-5 text-gray-600" />

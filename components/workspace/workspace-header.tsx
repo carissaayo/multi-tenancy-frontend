@@ -18,7 +18,7 @@ export function WorkspaceHeader({ title }: WorkspaceHeaderProps) {
           variant="ghost"
           size="icon"
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="lg:hidden cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
+          className="lg:hidden hover:bg-gray-100 rounded-lg transition-colors"
           aria-label="Toggle sidebar"
         >
           {sidebarOpen ? (

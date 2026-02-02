@@ -28,7 +28,7 @@ export function ChannelItem({ channel }: ChannelItemProps) {
       onClick={handleClick}
       className={`
       w-full flex items-center justify-between px-3 py-2 rounded-lg 
-      transition-colors text-sm group
+      transition-colors text-sm group cursor-pointer
       ${isActive
           ? 'bg-purple-700/50 text-white'
           : 'hover:bg-purple-700/30 text-purple-100'

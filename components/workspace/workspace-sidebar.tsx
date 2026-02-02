@@ -82,7 +82,7 @@ export function WorkspaceSidebar() {
       <div className="p-4 border-b border-purple-700/50">
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="w-full flex items-center justify-between hover:bg-purple-700/30 rounded-lg p-3 transition-colors group"
+          className="w-full flex items-center justify-between hover:bg-purple-700/30 rounded-lg p-3 transition-colors group cursor-pointer"
         >
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
@@ -115,7 +115,7 @@ export function WorkspaceSidebar() {
           <div className="mt-2 bg-purple-800/50 backdrop-blur-sm rounded-lg border border-purple-700/50 overflow-hidden">
             <button
               onClick={handleSwitchWorkspace}
-              className="w-full px-4 py-2 text-sm text-left hover:bg-purple-700/30 transition-colors"
+              className="w-full px-4 py-2 text-sm text-left hover:bg-purple-700/30 transition-colors cursor-pointer"
             >
               Switch Workspace
             </button>
@@ -124,7 +124,7 @@ export function WorkspaceSidebar() {
                 router.push('/workspace/settings');
                 setSidebarOpen(false);
               }}
-              className="w-full px-4 py-2 text-sm text-left hover:bg-purple-700/30 transition-colors"
+              className="w-full px-4 py-2 text-sm text-left hover:bg-purple-700/30 transition-colors cursor-pointer"
             >
               Workspace Settings
             </button>
@@ -136,13 +136,13 @@ export function WorkspaceSidebar() {
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {/* Quick Actions */}
         <div className="space-y-1">
-          <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-purple-700/30 rounded-lg transition-colors text-sm">
+          <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-purple-700/30 rounded-lg transition-colors text-sm cursor-pointer">
             <MessageSquare className="w-5 h-5" />
             <span>Threads</span>
           </button>
           <button
             onClick={() => router.push('/workspace/members')}
-            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-purple-700/30 rounded-lg transition-colors text-sm"
+            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-purple-700/30 rounded-lg transition-colors text-sm cursor-pointer"
           >
             <Users className="w-5 h-5" />
             <span>Members</span>
@@ -152,7 +152,7 @@ export function WorkspaceSidebar() {
               </span>
             )}
           </button>
-          <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-purple-700/30 rounded-lg transition-colors text-sm">
+          <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-purple-700/30 rounded-lg transition-colors text-sm cursor-pointer">
             <Star className="w-5 h-5" />
             <span>Saved Items</span>
           </button>
@@ -166,7 +166,7 @@ export function WorkspaceSidebar() {
             </span>
             <button
               onClick={handleCreateChannel}
-              className="p-1 hover:bg-purple-700/30 rounded transition-colors group"
+              className="p-1 hover:bg-purple-700/30  rounded transition-colors group cursor-pointer"
               title="Create channel"
             >
               <Plus className="w-4 h-4 text-purple-300 group-hover:text-white" />
@@ -194,14 +194,14 @@ export function WorkspaceSidebar() {
         <div className="space-y-1">
           <button
             onClick={() => router.push('/workspace/settings')}
-            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-purple-700/30 rounded-lg transition-colors text-sm"
+            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-purple-700/30 rounded-lg transition-colors text-sm cursor-pointer"
           >
             <Settings className="w-4 h-4" />
             <span>Settings</span>
           </button>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-purple-700/30 rounded-lg transition-colors text-sm text-red-300 hover:text-red-200"
+            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-purple-700/30 rounded-lg transition-colors text-sm text-red-300 hover:text-red-200 cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             <span>Logout</span>

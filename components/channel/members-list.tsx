@@ -103,7 +103,7 @@ export function MembersList({
               <button
                 onClick={() => onRemoveMember(member.memberId)}
                 disabled={isRemovingMember}
-                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed enabled:hover:bg-red-50"
               >
                 {isRemovingMember ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

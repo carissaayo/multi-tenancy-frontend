@@ -54,7 +54,7 @@ export default function CreateChannelPage() {
                 <div className="max-w-3xl mx-auto">
                     <button
                         onClick={() => router.back()}
-                        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-4"
+                        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-4 cursor-pointer"
                     >
                         <ArrowLeft className="w-5 h-5" />
                         <span className="font-medium">Back</span>
@@ -174,7 +174,7 @@ export default function CreateChannelPage() {
                                 <button
                                     type="button"
                                     onClick={() => setIsPrivate(true)}
-                                    className={`w-full p-4 border-2 rounded-xl transition-all text-left ${isPrivate
+                                    className={`w-full p-4 border-2 rounded-xl transition-all text-left cursor-pointer ${isPrivate
                                             ? 'border-purple-500 bg-purple-50'
                                             : 'border-gray-200 hover:border-gray-300'
                                         }`}
@@ -221,14 +221,14 @@ export default function CreateChannelPage() {
                             <button
                                 type="button"
                                 onClick={() => router.back()}
-                                className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-300 transition-colors"
+                                className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-300 transition-colors cursor-pointer"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={loading || !name.trim()}
-                                className="flex-1 px-6 py-3 bg-linear-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="flex-1 px-6 py-3 bg-linear-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-xl transition-all cursor-pointer enabled:hover:from-purple-700 enabled:hover:to-purple-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                                 {loading ? (
                                     <>

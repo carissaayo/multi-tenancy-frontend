@@ -92,7 +92,7 @@ export default function SelectWorkspacePage() {
                   key={workspace.id}
                   onClick={() => handleSelectWorkspace(workspace)}
                   disabled={selectWorkspace.isPending}
-                  className="group relative p-6 border-2 border-gray-200 rounded-2xl hover:border-blue-500 hover:shadow-lg transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed bg-white hover:bg-linear-to-br hover:from-blue-50 hover:to-purple-50"
+                  className="group relative p-6 border-2 border-gray-200 rounded-2xl transition-all text-left cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed enabled:hover:border-blue-500 enabled:hover:shadow-lg enabled:hover:bg-linear-to-br enabled:hover:from-blue-50 enabled:hover:to-purple-50 bg-white"
                 >
                   {selectWorkspace.isPending && selectedId === workspace.id && (
                     <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-2xl flex items-center justify-center z-10">
@@ -144,7 +144,7 @@ export default function SelectWorkspacePage() {
 
               <button
                 onClick={handleCreateWorkspace}
-                className="group relative p-6 border-2 border-dashed border-gray-300 rounded-2xl hover:border-blue-500 hover:bg-linear-to-br hover:from-blue-50 hover:to-purple-50 transition-all text-left"
+                className="group relative p-6 border-2 border-dashed border-gray-300 rounded-2xl hover:border-blue-500 hover:bg-linear-to-br hover:from-blue-50 hover:to-purple-50 transition-all text-left cursor-pointer"
               >
                 <div className="flex flex-col items-center justify-center h-full min-h-[200px] text-center">
                   <div className="w-14 h-14 bg-linear-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
@@ -166,7 +166,7 @@ export default function SelectWorkspacePage() {
               </p>
               <button
                 onClick={handleCreateWorkspace}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all cursor-pointer"
               >
                 <Plus className="w-5 h-5" /> Create Workspace
               </button>

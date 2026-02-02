@@ -113,25 +113,25 @@ export function MessageItem({ message }: MessageItemProps) {
               {showActions && (
                 <div className="absolute -top-10 left-0 bg-white border border-gray-200 rounded-lg shadow-lg flex items-center divide-x divide-gray-200 z-10">
                   <button
-                    className="p-2 hover:bg-gray-50 rounded-l-lg transition-colors"
+                    className="p-2 hover:bg-gray-50 rounded-l-lg transition-colors cursor-pointer"
                     title="Add reaction"
                   >
                     <Smile className="w-4 h-4 text-gray-600" />
                   </button>
                   <button
-                    className="p-2 hover:bg-gray-50 transition-colors"
+                    className="p-2 hover:bg-gray-50 transition-colors cursor-pointer"
                     title="Reply in thread"
                   >
                     <Reply className="w-4 h-4 text-gray-600" />
                   </button>
                   <button
-                    className="p-2 hover:bg-gray-50 transition-colors"
+                    className="p-2 hover:bg-gray-50 transition-colors cursor-pointer"
                     title="Save message"
                   >
                     <Bookmark className="w-4 h-4 text-gray-600" />
                   </button>
                   <button
-                    className="p-2 hover:bg-gray-50 rounded-r-lg transition-colors"
+                    className="p-2 hover:bg-gray-50 rounded-r-lg transition-colors cursor-pointer"
                     title="More actions"
                   >
                     <MoreVertical className="w-4 h-4 text-gray-600" />
@@ -227,25 +227,25 @@ export function MessageItem({ message }: MessageItemProps) {
             {showActions && (
               <div className="absolute -top-10 right-0 bg-white border border-gray-200 rounded-lg shadow-lg flex items-center divide-x divide-gray-200 z-10">
                 <button
-                  className="p-2 hover:bg-gray-50 rounded-l-lg transition-colors"
+                  className="p-2 hover:bg-gray-50 rounded-l-lg transition-colors cursor-pointer"
                   title="Add reaction"
                 >
                   <Smile className="w-4 h-4 text-gray-600" />
                 </button>
                 <button
-                  className="p-2 hover:bg-gray-50 transition-colors"
+                  className="p-2 hover:bg-gray-50 transition-colors cursor-pointer"
                   title="Reply in thread"
                 >
                   <Reply className="w-4 h-4 text-gray-600" />
                 </button>
                 <button
-                  className="p-2 hover:bg-gray-50 transition-colors"
+                  className="p-2 hover:bg-gray-50 transition-colors cursor-pointer"
                   title="Save message"
                 >
                   <Bookmark className="w-4 h-4 text-gray-600" />
                 </button>
                 <button
-                  className="p-2 hover:bg-gray-50 rounded-r-lg transition-colors"
+                  className="p-2 hover:bg-gray-50 rounded-r-lg transition-colors cursor-pointer"
                   title="More actions"
                 >
                   <MoreVertical className="w-4 h-4 text-gray-600" />

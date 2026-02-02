@@ -65,7 +65,7 @@ export function ChannelEditForm({
         <button
           onClick={onSave}
           disabled={isSaving}
-          className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+          className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed enabled:hover:bg-purple-700"
         >
           {isSaving ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -76,7 +76,7 @@ export function ChannelEditForm({
         </button>
         <button
           onClick={onCancel}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors cursor-pointer"
         >
           Cancel
         </button>
