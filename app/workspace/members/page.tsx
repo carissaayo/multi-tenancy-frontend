@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { workspacesApi } from '@/lib/api/workspaces';
+import { useWorkspace } from '@/hooks/workspace';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { getErrorMessage } from '@/lib/utils/api-error';
@@ -24,6 +25,7 @@ export default function MembersPage() {
   const { user, currentWorkspace } = useAuthStore();
   const queryClient = useQueryClient();
   const { data, isLoading, error } = useWorkspaceMembers();
+  const { data: workspaceData } = useWorkspace(currentWorkspace?.id ?? null);
   const updateRole = useUpdateMemberRole();
   const removeMember = useRemoveMember();
   const inviteMember = useInviteMember();
@@ -113,19 +115,25 @@ export default function MembersPage() {
   const currentUserMember = data?.find(
     (m) => m.userId === user?.id || m.user?.id === user?.id
   );
-  const canManageMembers = currentUserMember?.role === 'Owner' || currentUserMember?.role === 'Admin';
+  const currentUserRole =
+    currentUserMember?.role ??
+    (currentUserMember as any)?.member?.role ??
+    workspaceData?.workspace?.userRole ??
+    '';
+  const canManageMembers = ['owner', 'admin'].includes(currentUserRole?.toLowerCase());
 
 
   const canChangeRole = (member: WorkspaceMember) =>
     member.userId !== user?.id &&
-    (currentUserMember?.role === 'Owner' ||
-      (currentUserMember?.role === 'Admin' && (member.role === 'Member' || member.role === 'Guest')));
-
+    (currentUserRole?.toLowerCase() === 'owner' ||
+      (currentUserRole?.toLowerCase() === 'admin' &&
+        ['member', 'guest'].includes((member.role ?? '').toLowerCase())));
 
   const canRemoveMember = (member: WorkspaceMember) =>
     member.userId !== user?.id &&
-    (currentUserMember?.role === 'Owner' ||
-      (currentUserMember?.role === 'Admin' && (member.role === 'Member' || member.role === 'Guest')));
+    (currentUserRole?.toLowerCase() === 'owner' ||
+      (currentUserRole?.toLowerCase() === 'admin' &&
+        ['member', 'guest'].includes((member.role ?? '').toLowerCase())));
 
   const getRole = (member: WorkspaceMember) => member.role ?? (member as any).member?.role ?? '';
   const getDisplayName = (member: WorkspaceMember) =>
@@ -136,7 +144,15 @@ export default function MembersPage() {
       <WorkspaceHeader title="Members" />
       <div className="flex-1 overflow-y-auto p-6">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold mb-6">Workspace Members</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold">Workspace Members</h2>
+            {canManageMembers && (
+              <Button onClick={() => setShowInviteModal(true)}>
+                <UserPlus className="w-4 h-4 mr-2" />
+                Invite to Workspace
+              </Button>
+            )}
+          </div>
           <div className="bg-white rounded-lg shadow">
             <div className="divide-y">
               {data?.map((member) => (
@@ -154,7 +170,7 @@ export default function MembersPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    {member.userId === user?.id && currentUserMember?.role === 'Owner' ? (
+                    {member.userId === user?.id && currentUserRole?.toLowerCase() === 'owner' ? (
                       <>
                         <span className="px-3 py-1 bg-gray-100 rounded-md text-sm capitalize">
                           {getRole(member) || '—'}
