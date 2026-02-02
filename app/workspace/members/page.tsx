@@ -18,8 +18,9 @@ import { useWorkspace } from '@/hooks/workspace';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { getErrorMessage } from '@/lib/utils/api-error';
-import { Crown, Loader2, UserPlus } from 'lucide-react';
+import { Crown, Loader2, UserPlus, Mail } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import Link from 'next/link';
 
 export default function MembersPage() {
   const { user, currentWorkspace } = useAuthStore();
@@ -147,10 +148,18 @@ export default function MembersPage() {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">Workspace Members</h2>
             {canManageMembers && (
-              <Button onClick={() => setShowInviteModal(true)}>
-                <UserPlus className="w-4 h-4 mr-2" />
-                Invite to Workspace
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" asChild>
+                  <Link href="/workspace/invitations">
+                    <Mail className="w-4 h-4 mr-2" />
+                    Invitations
+                  </Link>
+                </Button>
+                <Button onClick={() => setShowInviteModal(true)}>
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Invite to Workspace
+                </Button>
+              </div>
             )}
           </div>
           <div className="bg-white rounded-lg shadow">
