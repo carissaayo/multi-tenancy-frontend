@@ -1,50 +1,31 @@
 'use client';
 
-import { toast } from 'sonner';
-import { useQuery } from '@tanstack/react-query';
-import { membersApi, MemberRole } from '@/lib/api/members';
-import { getErrorMessage } from '@/lib/utils/api-error';
+import { useWorkspaceMembers, useUpdateMemberRole, useRemoveMember, type MemberRole, type WorkspaceMember } from '@/hooks/members';
 import { WorkspaceHeader } from '@/components/workspace/workspace-header';
 import { ErrorDisplay } from '@/components/ui/error-display';
 import { useAuthStore } from '@/store/auth-store';
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { useQueryClient } from '@tanstack/react-query';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function MembersPage() {
   const { user } = useAuthStore();
-  const [updatingRole, setUpdatingRole] = useState<string | null>(null);
-  const queryClient = useQueryClient();
+  const { data, isLoading, error } = useWorkspaceMembers();
+  const updateRole = useUpdateMemberRole();
+  const removeMember = useRemoveMember();
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['members'],
-    queryFn: async () => {
-      const response = await membersApi.list();
-      return response.members;
-    },
-  });
-
-  const handleRoleChange = async (userId: string, newRole: MemberRole) => {
-    setUpdatingRole(userId);
-    try {
-      await membersApi.updateRole(userId, { role: newRole });
-      queryClient.invalidateQueries({ queryKey: ['members'] });
-    } catch (error: any) {
-      toast.error(getErrorMessage(error, 'Failed to update role'), { duration: 4000 });
-    } finally {
-      setUpdatingRole(null);
-    }
+  const handleRoleChange = (userId: string, newRole: MemberRole) => {
+    updateRole.mutate({ userId, role: newRole });
   };
 
-  const handleRemoveMember = async (userId: string) => {
+  const handleRemoveMember = (userId: string) => {
     if (!confirm('Are you sure you want to remove this member?')) return;
-    
-    try {
-      await membersApi.remove(userId);
-      queryClient.invalidateQueries({ queryKey: ['members'] });
-    } catch (error: any) {
-      toast.error(getErrorMessage(error, 'Failed to remove member'), { duration: 4000 });
-    }
+    removeMember.mutate(userId);
   };
 
   if (isLoading) {
@@ -79,8 +60,26 @@ export default function MembersPage() {
     );
   }
 
-  const currentUserMember = data?.find((m) => m.userId === user?.id);
+  const currentUserMember = data?.find(
+    (m) => m.userId === user?.id || m.user?.id === user?.id
+  );
   const canManageMembers = currentUserMember?.role === 'Owner' || currentUserMember?.role === 'Admin';
+
+  // Owner can change anyone except self. Admin can change only Member/Guest.
+  const canChangeRole = (member: WorkspaceMember) =>
+    member.userId !== user?.id &&
+    (currentUserMember?.role === 'Owner' ||
+      (currentUserMember?.role === 'Admin' && (member.role === 'Member' || member.role === 'Guest')));
+
+  // Owner can remove anyone except self. Admin can remove only Member/Guest (not Owner or other Admins).
+  const canRemoveMember = (member: WorkspaceMember) =>
+    member.userId !== user?.id &&
+    (currentUserMember?.role === 'Owner' ||
+      (currentUserMember?.role === 'Admin' && (member.role === 'Member' || member.role === 'Guest')));
+
+  const getRole = (member: WorkspaceMember) => member.role ?? (member as any).member?.role ?? '';
+  const getDisplayName = (member: WorkspaceMember) =>
+    member.user?.fullName || member.user?.email || 'Unknown';
 
   return (
     <div className="flex flex-col h-screen">
@@ -97,40 +96,51 @@ export default function MembersPage() {
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
-                      {member.user.fullName.charAt(0).toUpperCase()}
+                      {(getDisplayName(member).charAt(0) || '?').toUpperCase()}
                     </div>
                     <div>
-                      <div className="font-semibold">{member.user.fullName}</div>
-                      <div className="text-sm text-gray-500">{member.user.email}</div>
+                      <div className="font-semibold">{getDisplayName(member)}</div>
+                      <div className="text-sm text-gray-500">{member.user?.email ?? ''}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    {canManageMembers && member.userId !== user?.id ? (
+                    {canManageMembers && member.userId !== user?.id && canChangeRole(member) ? (
                       <>
-                        <select
-                          value={member.role}
-                          onChange={(e) => handleRoleChange(member.userId, e.target.value as MemberRole)}
-                          disabled={updatingRole === member.userId}
-                          className="px-3 py-1 border rounded-md"
+                        <Select
+                          value={getRole(member)}
+                          onValueChange={(value: string) =>
+                            handleRoleChange(member.userId ?? member.user?.id ?? '', value as MemberRole)
+                          }
                         >
-                          <option value="Guest">Guest</option>
-                          <option value="Member">Member</option>
-                          <option value="Admin">Admin</option>
-                          {currentUserMember?.role === 'Owner' && (
-                            <option value="Owner">Owner</option>
-                          )}
-                        </select>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => handleRemoveMember(member.userId)}
-                        >
-                          Remove
-                        </Button>
+                          <SelectTrigger
+                            className="w-[120px] h-8"
+                            disabled={updateRole.isPending && updateRole.variables?.userId === member.userId}
+                          >
+                            <SelectValue placeholder="Role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Guest">Guest</SelectItem>
+                            <SelectItem value="Member">Member</SelectItem>
+                            <SelectItem value="Admin">Admin</SelectItem>
+                            {currentUserMember?.role === 'Owner' && (
+                              <SelectItem value="Owner">Owner</SelectItem>
+                            )}
+                          </SelectContent>
+                        </Select>
+                        {canRemoveMember(member) && (
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleRemoveMember(member.userId ?? member.user?.id ?? '')}
+                            disabled={removeMember.isPending}
+                          >
+                            Remove
+                          </Button>
+                        )}
                       </>
                     ) : (
-                      <span className="px-3 py-1 bg-gray-100 rounded-md text-sm">
-                        {member.role}
+                      <span className="px-3 py-1 bg-gray-100 rounded-md text-sm capitalize">
+                        {getRole(member) || '—'}
                       </span>
                     )}
                   </div>

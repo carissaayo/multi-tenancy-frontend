@@ -1,8 +1,10 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { membersApi, WorkspaceMember } from '@/lib/api/members';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { membersApi, WorkspaceMember, MemberRole, normalizeWorkspaceMember } from '@/lib/api/members';
 import { useAuthStore } from '@/store/auth-store';
+import { toast } from 'sonner';
+import { getErrorMessage } from '@/lib/utils/api-error';
 
 // ============================================================================
 // Query Keys
@@ -30,10 +32,52 @@ export function useWorkspaceMembers() {
     queryFn: async () => {
       if (!workspaceId) throw new Error('No workspace selected');
       const response = await membersApi.list(workspaceId);
-      return response.members;
+      const members = response.members ?? [];
+      return members.map(normalizeWorkspaceMember);
     },
     enabled: !!workspaceId,
   });
 }
 
-export type { WorkspaceMember };
+// ============================================================================
+// Mutations
+// ============================================================================
+
+export function useUpdateMemberRole() {
+  const queryClient = useQueryClient();
+  const { currentWorkspace } = useAuthStore();
+  const workspaceId = currentWorkspace?.id;
+
+  return useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: MemberRole }) =>
+      membersApi.updateRole(userId, { role }),
+    onSuccess: () => {
+      if (workspaceId) {
+        queryClient.invalidateQueries({ queryKey: memberKeys.list(workspaceId) });
+      }
+    },
+    onError: (err) => {
+      toast.error(getErrorMessage(err, 'Failed to update role'), { duration: 4000 });
+    },
+  });
+}
+
+export function useRemoveMember() {
+  const queryClient = useQueryClient();
+  const { currentWorkspace } = useAuthStore();
+  const workspaceId = currentWorkspace?.id;
+
+  return useMutation({
+    mutationFn: (userId: string) => membersApi.remove(userId),
+    onSuccess: () => {
+      if (workspaceId) {
+        queryClient.invalidateQueries({ queryKey: memberKeys.list(workspaceId) });
+      }
+    },
+    onError: (err) => {
+      toast.error(getErrorMessage(err, 'Failed to remove member'), { duration: 4000 });
+    },
+  });
+}
+
+export type { WorkspaceMember, MemberRole };
