@@ -41,9 +41,9 @@ function formatDate(dateStr: string): string {
 }
 
 function getInviterName(inv: WorkspaceInvitation): string {
-  const inviter = inv.inviter;
-  if (!inviter) return '—';
-  return inviter.fullName?.trim() || inviter.email || 'Unknown';
+  const invitedBy = inv.invitedBy;
+  if (!invitedBy) return '—';
+  return invitedBy.fullName?.trim() || invitedBy.email || 'Unknown';
 }
 
 export default function InvitationsPage() {

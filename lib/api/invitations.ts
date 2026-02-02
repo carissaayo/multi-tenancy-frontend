@@ -26,7 +26,7 @@ export interface WorkspaceInvitation {
   expiresAt: string;
   acceptedAt?: string | null;
   revokedAt?: string | null;
-  inviter?: {
+  invitedBy?: {
     id: string;
     fullName?: string | null;
     email: string;
