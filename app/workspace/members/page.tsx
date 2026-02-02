@@ -115,13 +115,13 @@ export default function MembersPage() {
   );
   const canManageMembers = currentUserMember?.role === 'Owner' || currentUserMember?.role === 'Admin';
 
-  // Owner can change anyone except self. Admin can change only Member/Guest.
+
   const canChangeRole = (member: WorkspaceMember) =>
     member.userId !== user?.id &&
     (currentUserMember?.role === 'Owner' ||
       (currentUserMember?.role === 'Admin' && (member.role === 'Member' || member.role === 'Guest')));
 
-  // Owner can remove anyone except self. Admin can remove only Member/Guest (not Owner or other Admins).
+
   const canRemoveMember = (member: WorkspaceMember) =>
     member.userId !== user?.id &&
     (currentUserMember?.role === 'Owner' ||
