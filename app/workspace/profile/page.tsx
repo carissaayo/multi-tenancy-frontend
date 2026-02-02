@@ -19,6 +19,7 @@ import {
   Shield,
   Trash2,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { useAuthStore } from '@/store/auth-store';
 import { usersApi } from '@/lib/api/users';
 import { getErrorMessage } from '@/lib/utils/api-error';
@@ -31,8 +32,6 @@ export default function UserProfilePage() {
   const { user, setUser } = useAuthStore();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   const [formData, setFormData] = useState({
     fullName: user?.fullName || '',
@@ -59,6 +58,7 @@ export default function UserProfilePage() {
   });
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -73,8 +73,6 @@ export default function UserProfilePage() {
 
   const handleSaveProfile = async () => {
     setLoading(true);
-    setError('');
-    setSuccess('');
 
     try {
       const { user: updatedUser } = await usersApi.updateProfile({
@@ -82,11 +80,10 @@ export default function UserProfilePage() {
         phoneNumber: formData.phoneNumber || undefined,
       });
       setUser(updatedUser as Parameters<typeof setUser>[0]);
-      setSuccess('Profile updated successfully!');
+      toast.success('Profile updated successfully!', { duration: 3000 });
       setIsEditing(false);
-      setTimeout(() => setSuccess(''), 3000);
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to update profile'));
+      toast.error(getErrorMessage(err, 'Failed to update profile'), { duration: 4000 });
     } finally {
       setLoading(false);
     }
@@ -95,13 +92,24 @@ export default function UserProfilePage() {
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!passwordData.password?.trim()) {
+      toast.error('Current password is required', { duration: 4000 });
+      return;
+    }
+    if (!passwordData.newPassword?.trim()) {
+      toast.error('New password is required', { duration: 4000 });
+      return;
+    }
+    if (passwordData.newPassword.length < 6) {
+      toast.error('New password must be at least 6 characters', { duration: 4000 });
+      return;
+    }
     if (passwordData.newPassword !== passwordData.confirmNewPassword) {
-      setError('Passwords do not match');
+      toast.error('Passwords do not match', { duration: 4000 });
       return;
     }
 
-    setLoading(true);
-    setError('');
+    setPasswordLoading(true);
 
     try {
       await usersApi.changePassword({
@@ -109,14 +117,13 @@ export default function UserProfilePage() {
         newPassword: passwordData.newPassword,
         confirmNewPassword: passwordData.confirmNewPassword,
       });
-      setSuccess('Password changed successfully!');
+      toast.success('Password changed successfully!', { duration: 3000 });
       setShowPasswordForm(false);
       setPasswordData({ password: '', newPassword: '', confirmNewPassword: '' });
-      setTimeout(() => setSuccess(''), 3000);
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to change password'));
+      toast.error(getErrorMessage(err, 'Failed to change password'), { duration: 4000 });
     } finally {
-      setLoading(false);
+      setPasswordLoading(false);
     }
   };
 
@@ -125,16 +132,14 @@ export default function UserProfilePage() {
     if (!file || !file.type.startsWith('image/')) return;
 
     setAvatarLoading(true);
-    setError('');
 
     try {
       const { user: updatedUser } = await usersApi.updateAvatar(file);
       setUser(updatedUser as Parameters<typeof setUser>[0]);
       setFormData((prev) => ({ ...prev, avatarUrl: updatedUser?.avatarUrl || prev.avatarUrl }));
-      setSuccess('Avatar updated successfully!');
-      setTimeout(() => setSuccess(''), 3000);
+      toast.success('Avatar updated successfully!', { duration: 3000 });
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to update avatar'));
+      toast.error(getErrorMessage(err, 'Failed to update avatar'), { duration: 4000 });
     } finally {
       setAvatarLoading(false);
     }
@@ -156,20 +161,6 @@ export default function UserProfilePage() {
             <ArrowLeft className="w-5 h-5" />
             <span className="font-medium">Back</span>
           </button>
-
-          {success && (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-start gap-3">
-              <Check className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
-              <p className="text-green-800">{success}</p>
-            </div>
-          )}
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
-              <p className="text-red-800">{error}</p>
-            </div>
-          )}
 
           {/* Profile Section */}
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -327,7 +318,11 @@ export default function UserProfilePage() {
               </div>
 
               {showPasswordForm && (
-                <form onSubmit={handleChangePassword} className="p-4 bg-gray-50 rounded-lg space-y-4">
+                <form
+                  onSubmit={handleChangePassword}
+                  className="p-4 bg-gray-50 rounded-lg space-y-4"
+                  noValidate
+                >
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Current Password</label>
                     <Input
@@ -337,6 +332,8 @@ export default function UserProfilePage() {
                         setPasswordData({ ...passwordData, password: e.target.value })
                       }
                       required
+                      minLength={1}
+                      autoComplete="current-password"
                     />
                   </div>
                   <div>
@@ -346,6 +343,8 @@ export default function UserProfilePage() {
                       value={passwordData.newPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
                       required
+                      minLength={8}
+                      autoComplete="new-password"
                     />
                   </div>
                   <div>
@@ -354,16 +353,29 @@ export default function UserProfilePage() {
                     </label>
                     <Input
                       type="password"
-                      value={passwordData.confirmPassword}
+                      value={passwordData.confirmNewPassword}
                       onChange={(e) =>
                         setPasswordData({ ...passwordData, confirmNewPassword: e.target.value })
                       }
                       required
+                      minLength={8}
+                      autoComplete="new-password"
                     />
                   </div>
-                  <Button type="submit" disabled={loading}>
-                    Update Password
-                  </Button>
+                  <button
+                    type="submit"
+                    disabled={passwordLoading}
+                    className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 rounded-md text-sm font-medium bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 disabled:pointer-events-none transition-colors cursor-pointer"
+                  >
+                    {passwordLoading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Updating...
+                      </>
+                    ) : (
+                      'Update Password'
+                    )}
+                  </button>
                 </form>
               )}
             </div>
