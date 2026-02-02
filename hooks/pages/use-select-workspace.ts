@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { useSelectWorkspace } from '@/hooks/auth';
-import {  useWorkspacesForSelect } from '../workspace';
+import { useWorkspacesForSelect } from '../workspace';
 
 export function useSelectWorkspacePage() {
+    const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -30,7 +32,7 @@ export function useSelectWorkspacePage() {
     };
 
     const handleCreateWorkspace = () => {
-        // TODO: open create modal or navigate to create page
+        router.push('/create-workspace');
     };
 
     return {

@@ -2,6 +2,12 @@ import { apiClient } from './client';
 
 export type WorkspaceUserRole = 'Owner' | 'Admin' | 'Member' | 'Guest';
 
+export enum WorkspacePlan {
+  FREE = 'free',
+  PRO = 'pro',
+  ENTERPRISE = 'enterprise',
+}
+
 export interface Workspace {
   id: string;
   slug: string;
@@ -21,10 +27,19 @@ export interface CreateWorkspaceDto {
   name: string;
   slug: string;
   description?: string;
+  plan?: WorkspacePlan;
+  logo?: File;
 }
 
 export interface WorkspaceResponse {
   workspace: Workspace;
+}
+
+export interface CreateWorkspaceResponse {
+  workspace: Workspace;
+  accessToken: string;
+  refreshToken: string;
+  message: string;
 }
 
 export interface WorkspacesResponse {
@@ -42,8 +57,23 @@ export const workspacesApi = {
     return response.data;
   },
 
-  create: async (data: CreateWorkspaceDto): Promise<WorkspaceResponse> => {
-    const response = await apiClient.instance.post('/workspaces', data);
+  create: async (data: CreateWorkspaceDto): Promise<CreateWorkspaceResponse> => {
+    if (data.logo) {
+      const formData = new FormData();
+      formData.append('name', data.name);
+      formData.append('slug', data.slug);
+      if (data.description) formData.append('description', data.description);
+      if (data.plan) formData.append('plan', data.plan);
+      formData.append('logo', data.logo);
+      const response = await apiClient.instance.post('/workspaces', formData);
+      return response.data;
+    }
+    const response = await apiClient.instance.post('/workspaces', {
+      name: data.name,
+      slug: data.slug,
+      description: data.description,
+      plan: data.plan,
+    });
     return response.data;
   },
 
