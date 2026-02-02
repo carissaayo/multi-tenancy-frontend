@@ -68,6 +68,7 @@ export function useChannelSettings() {
   };
 
   const handleAddMember = (memberId: string) => {
+    if (!memberId || typeof memberId !== 'string') return;
     addMemberMutation.mutate(
       { memberId },
       {

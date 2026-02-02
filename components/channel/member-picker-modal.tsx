@@ -80,7 +80,10 @@ export function MemberPickerModal({
     });
   }, [workspaceMembers, channelMemberIds, currentUserId, searchQuery]);
 
-  const handleAddMember = (memberId: string) => {
+  const handleAddMember = (member: WorkspaceMember) => {
+    // Workspace member ID: flat structure uses member.id, nested uses member.member?.id
+    const memberId = member.id ?? (member as { member?: { id: string } }).member?.id;
+    if (!memberId || typeof memberId !== 'string') return;
     setAddingMemberId(memberId);
     onAddMember(memberId);
   };
@@ -132,7 +135,8 @@ export function MemberPickerModal({
           ) : (
             <div className="space-y-2">
               {availableMembers.map((member) => {
-                const isAddingThis = isAdding && addingMemberId === member.id;
+                const memberId = member.id ?? (member as { member?: { id: string } }).member?.id;
+                const isAddingThis = isAdding && addingMemberId === memberId;
                 return (
                   <div
                     key={member.id}
@@ -162,7 +166,7 @@ export function MemberPickerModal({
                       </div>
                     </div>
                     <button
-                      onClick={() => handleAddMember(member.id)}
+                      onClick={() => handleAddMember(member)}
                       disabled={isAdding}
                       className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 disabled:opacity-50 text-sm"
                     >

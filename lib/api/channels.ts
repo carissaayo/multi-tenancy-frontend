@@ -109,7 +109,8 @@ export const channelsApi = {
   },
 
   addMember: async (channelId: string, data: AddChannelMemberDto): Promise<{ message: string }> => {
-    const response = await apiClient.instance.post(`/channels/${channelId}/members`, data);
+    const body = { memberId: data.memberId };
+    const response = await apiClient.instance.post(`/channels/${channelId}/members/add`, body);
     return response.data;
   },
 
