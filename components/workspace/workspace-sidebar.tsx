@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import Image from 'next/image';
 import {
   ChevronDown,
@@ -15,20 +15,21 @@ import {
 import { useRouter } from 'next/navigation';
 
 import { ChannelList } from '@/components/channels/channel-list';
-import { LogoutModal } from '@/components/workspace/logout-modal';
 import { getErrorMessage } from '@/lib/utils/api-error';
 import { useAuthStore } from '@/store/auth-store';
-import { authApi } from '@/lib/api/auth';
 import { useWorkspaces, useWorkspace } from '@/hooks/workspace';
 
 import { useSidebarStore } from '@/store/sidebar-store';
 
-export function WorkspaceSidebar() {
-  const { user, logout } = useAuthStore();
+interface WorkspaceSidebarProps {
+  /** Called when the user clicks Logout; the layout should show the logout confirmation modal. */
+  onLogoutClick?: () => void;
+}
+
+export function WorkspaceSidebar({ onLogoutClick }: WorkspaceSidebarProps) {
+  const { user } = useAuthStore();
   const router = useRouter();
   const { sidebarOpen, setSidebarOpen } = useSidebarStore();
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const { data: workspacesData, isLoading: isLoadingWorkspaces, error: workspacesError } = useWorkspaces();
 
@@ -47,18 +48,6 @@ export function WorkspaceSidebar() {
   const userRole = workspaceDetail?.workspace?.userRole ?? currentWorkspace?.userRole ?? '';
   const isWorkspaceDeactivated = currentWorkspace?.isActive === false;
   const canManageInvitations = ['owner', 'admin'].includes(userRole.toLowerCase());
-
-  const handleLogoutClick = () => {
-    setShowLogoutModal(true);
-  };
-
-  const handleLogoutConfirm = async (logoutFromAllDevices: boolean) => {
-    setIsLoggingOut(true);
-    logout();
-    await authApi.logout(logoutFromAllDevices);
-    setShowLogoutModal(false);
-    setIsLoggingOut(false);
-  };
 
   const handleSwitchWorkspace = () => {
     // Navigate to workspace selection page
@@ -257,7 +246,8 @@ export function WorkspaceSidebar() {
             <span>Settings</span>
           </button>
           <button
-            onClick={handleLogoutClick}
+            type="button"
+            onClick={() => onLogoutClick?.()}
             className="w-full flex items-center gap-3 px-3 py-2 hover:bg-sidebar-accent rounded-lg transition-colors text-sm text-destructive hover:text-destructive/90 cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
@@ -265,13 +255,6 @@ export function WorkspaceSidebar() {
           </button>
         </div>
       </div>
-
-      <LogoutModal
-        isOpen={showLogoutModal}
-        isLoggingOut={isLoggingOut}
-        onConfirm={handleLogoutConfirm}
-        onCancel={() => setShowLogoutModal(false)}
-      />
     </div>
   );
 }

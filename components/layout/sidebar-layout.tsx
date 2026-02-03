@@ -1,17 +1,29 @@
 'use client';
 
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useAuthStore } from '@/store/auth-store';
 import { useSidebarStore } from '@/store/sidebar-store';
 import { WorkspaceSidebar } from '@/components/workspace/workspace-sidebar';
+import { LogoutModal } from '@/components/workspace/logout-modal';
+import { authApi } from '@/lib/api/auth';
 
 interface SidebarLayoutProps {
   children: ReactNode;
 }
 
 export function SidebarLayout({ children }: SidebarLayoutProps) {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, logout } = useAuthStore();
   const { sidebarOpen, setSidebarOpen } = useSidebarStore();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogoutConfirm = async (logoutFromAllDevices: boolean) => {
+    setIsLoggingOut(true);
+    logout();
+    await authApi.logout(logoutFromAllDevices);
+    setShowLogoutModal(false);
+    setIsLoggingOut(false);
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -55,12 +67,21 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
-        <WorkspaceSidebar />
+        <WorkspaceSidebar onLogoutClick={() => setShowLogoutModal(true)} />
       </div>
 
       <main className="flex-1 flex flex-col overflow-hidden min-w-0">
         {children}
       </main>
+
+      <div className="fixed inset-0 z-9999 pointer-events-none *:pointer-events-auto">
+        <LogoutModal
+          isOpen={showLogoutModal}
+          isLoggingOut={isLoggingOut}
+          onConfirm={handleLogoutConfirm}
+          onCancel={() => setShowLogoutModal(false)}
+        />
+      </div>
     </div>
   );
 }
