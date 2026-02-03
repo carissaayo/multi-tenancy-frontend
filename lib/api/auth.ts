@@ -86,11 +86,23 @@ export const authApi = {
         return response.data;
     },
 
-    logout: () => {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('workspaceSlug');
-        window.location.href = '/login';
+    /** Call backend to invalidate token(s), then clear local state and redirect to login. */
+    logout: async (logoutFromAllDevices: boolean = false) => {
+        try {
+            const url = logoutFromAllDevices
+                ? '/auth/logout?logoutFromAllDevices=true'
+                : '/auth/logout';
+            await apiClient.instance.post(url);
+        } catch {
+            // Still clear local state and redirect even if the request fails (e.g. network or already invalid)
+        } finally {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('workspaceSlug');
+            if (typeof window !== 'undefined') {
+                window.location.href = '/login';
+            }
+        }
     },
 
     verifyEmail: async (emailCode: string) => {
