@@ -51,10 +51,10 @@ export function CreateChannelModal({ isOpen, onClose, onSuccess }: CreateChannel
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Create Channel">
       <form onSubmit={handleSubmit} className="space-y-4">
-        {error && <div className="text-red-500 text-sm">{error}</div>}
+        {error && <div className="text-destructive text-sm">{error}</div>}
         
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-foreground mb-1">
             Channel Name
           </label>
           <Input
@@ -67,7 +67,7 @@ export function CreateChannelModal({ isOpen, onClose, onSuccess }: CreateChannel
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-foreground mb-1">
             Description (optional)
           </label>
           <Input
@@ -86,7 +86,7 @@ export function CreateChannelModal({ isOpen, onClose, onSuccess }: CreateChannel
             onChange={(e) => setIsPrivate(e.target.checked)}
             className="mr-2"
           />
-          <label htmlFor="private" className="text-sm text-gray-700">
+          <label htmlFor="private" className="text-sm text-foreground">
             Make this channel private
           </label>
         </div>

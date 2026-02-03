@@ -22,15 +22,15 @@ export function DeleteWorkspaceModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl p-6 max-w-md w-full">
+      <div className="bg-card rounded-2xl p-6 max-w-md w-full border border-border">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-            <Trash2 className="w-6 h-6 text-red-600" />
+          <div className="w-12 h-12 bg-destructive/20 rounded-full flex items-center justify-center">
+            <Trash2 className="w-6 h-6 text-destructive" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900">Delete Workspace?</h3>
+          <h3 className="text-xl font-bold text-card-foreground">Delete Workspace?</h3>
         </div>
-        <p className="text-gray-600 mb-6">
-          Are you sure you want to delete <strong>{workspaceName}</strong>? This action cannot be
+        <p className="text-muted-foreground mb-6">
+          Are you sure you want to delete <strong className="text-foreground">{workspaceName}</strong>? This action cannot be
           undone and all data will be permanently deleted.
         </p>
         <div className="flex gap-3">

@@ -23,26 +23,26 @@ export function SecuritySection({
   onSubmit,
 }: SecuritySectionProps) {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+    <div className="bg-card rounded-2xl p-6 shadow-sm border border-border">
       <div className="flex items-center gap-2 mb-4">
-        <Shield className="w-5 h-5 text-gray-600" />
-        <h2 className="text-xl font-bold text-gray-900">Security</h2>
+        <Shield className="w-5 h-5 text-muted-foreground" />
+        <h2 className="text-xl font-bold text-card-foreground">Security</h2>
       </div>
 
       <div className="space-y-4">
-        <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+        <div className="flex items-center justify-between p-4 border border-border rounded-lg">
           <div className="flex items-center gap-3">
-            <Lock className="w-5 h-5 text-gray-600" />
+            <Lock className="w-5 h-5 text-muted-foreground" />
             <div>
-              <h3 className="font-semibold text-gray-900">Password</h3>
-              <p className="text-sm text-gray-500">Change your password</p>
+              <h3 className="font-semibold text-card-foreground">Password</h3>
+              <p className="text-sm text-muted-foreground">Change your password</p>
             </div>
           </div>
           <Button
             variant="ghost"
             size="sm"
             onClick={togglePasswordForm}
-            className="text-purple-600 hover:bg-purple-50"
+            className="text-primary hover:bg-accent"
           >
             {showPasswordForm ? 'Cancel' : 'Change'}
           </Button>
@@ -66,7 +66,7 @@ export function SecuritySection({
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">New Password</label>
+              <label className="block text-sm font-semibold text-foreground mb-2">New Password</label>
               <Input
                 type="password"
                 value={passwordData.newPassword}
@@ -96,7 +96,7 @@ export function SecuritySection({
             <button
               type="submit"
               disabled={passwordLoading}
-              className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 rounded-md text-sm font-medium bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 disabled:pointer-events-none transition-colors cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:pointer-events-none transition-colors cursor-pointer"
             >
               {passwordLoading ? (
                 <>

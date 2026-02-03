@@ -27,18 +27,18 @@ export function TransferOwnershipModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl p-6 max-w-md w-full">
+      <div className="bg-card rounded-2xl p-6 max-w-md w-full border border-border">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-            <Crown className="w-6 h-6 text-purple-600" />
+          <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
+            <Crown className="w-6 h-6 text-primary" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900">Transfer Ownership</h3>
+          <h3 className="text-xl font-bold text-card-foreground">Transfer Ownership</h3>
         </div>
-        <p className="text-gray-600 mb-4">
+        <p className="text-muted-foreground mb-4">
           Select an admin to transfer workspace ownership to. You will become an admin.
         </p>
         {adminMembers.length === 0 ? (
-          <p className="text-sm text-amber-600 mb-4">
+          <p className="text-sm text-amber-600 dark:text-amber-400 mb-4">
             No admins available. Promote a member to admin first from the Members page.
           </p>
         ) : (
@@ -50,18 +50,18 @@ export function TransferOwnershipModal({
                 onClick={() => onSelectTarget(member.userId)}
                 className={`w-full flex items-center gap-3 p-3 rounded-lg border text-left transition-colors cursor-pointer ${
                   selectedTransferTarget === member.userId
-                    ? 'border-purple-500 bg-purple-50'
-                    : 'border-gray-200 hover:bg-gray-50'
+                    ? 'border-primary bg-accent'
+                    : 'border-border hover:bg-muted'
                 }`}
               >
-                <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-semibold shrink-0">
+                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold shrink-0">
                   {(member.user?.fullName || member.user?.email || '?').charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0">
-                  <div className="font-medium text-gray-900 truncate">
+                  <div className="font-medium text-card-foreground truncate">
                     {member.user?.fullName || member.user?.email || 'Unknown'}
                   </div>
-                  <div className="text-sm text-gray-500 truncate">{member.user?.email}</div>
+                  <div className="text-sm text-muted-foreground truncate">{member.user?.email}</div>
                 </div>
               </button>
             ))}
@@ -71,7 +71,7 @@ export function TransferOwnershipModal({
           <Button
             onClick={onConfirm}
             disabled={!selectedTransferTarget || adminMembers.length === 0 || isTransferring}
-            className="flex-1 bg-purple-600 hover:bg-purple-700"
+            className="flex-1"
           >
             {isTransferring ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Transfer'}
           </Button>

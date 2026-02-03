@@ -23,7 +23,7 @@ export function ChannelList({ disabled = false }: ChannelListProps) {
     return (
       <div className="space-y-1">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-8 bg-purple-700/30 rounded animate-pulse" />
+          <div key={i} className="h-8 bg-sidebar-accent rounded animate-pulse" />
         ))}
       </div>
     );
@@ -44,7 +44,7 @@ export function ChannelList({ disabled = false }: ChannelListProps) {
 
   if (!data || data.length === 0) {
     return (
-      <div className="px-3 py-2 text-sm text-purple-300">
+      <div className="px-3 py-2 text-sm text-sidebar-foreground/80">
         No channels yet
       </div>
     );

@@ -93,19 +93,19 @@ export function MessageItem({ message, disabled = false }: MessageItemProps) {
             {/* Header */}
             <div className="flex items-baseline gap-2 mb-1 justify-end">
               {message.isEdited && (
-                <span className="text-xs text-gray-400 italic">(edited)</span>
+                <span className="text-xs text-muted-foreground italic">(edited)</span>
               )}
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-muted-foreground">
                 {formatDate(message.createdAt)}
               </span>
-              <span className="font-semibold text-sm text-purple-600">
+              <span className="font-semibold text-sm text-primary">
                 You
               </span>
             </div>
 
             {/* Message Body */}
             <div className="relative">
-              <div className="bg-gradient-to-br from-purple-600 to-purple-700 text-white px-4 py-2.5 rounded-2xl rounded-tr-sm shadow-sm w-fit max-w-full">
+              <div className="bg-primary text-primary-foreground px-4 py-2.5 rounded-2xl rounded-tr-sm shadow-sm w-fit max-w-full">
                 <div className="text-[15px] leading-relaxed whitespace-pre-wrap break-words">
                   {message.content}
                 </div>
@@ -113,30 +113,30 @@ export function MessageItem({ message, disabled = false }: MessageItemProps) {
 
               {/* Floating Action Buttons - positioned at the start of the message */}
               {showActions && !disabled && (
-                <div className="absolute -top-10 left-0 bg-white border border-gray-200 rounded-lg shadow-lg flex items-center divide-x divide-gray-200 z-10">
+                <div className="absolute -top-10 left-0 bg-card border border-border rounded-lg shadow-lg flex items-center divide-x divide-border z-10">
                   <button
-                    className="p-2 hover:bg-gray-50 rounded-l-lg transition-colors cursor-pointer"
+                    className="p-2 hover:bg-muted rounded-l-lg transition-colors cursor-pointer"
                     title="Add reaction"
                   >
-                    <Smile className="w-4 h-4 text-gray-600" />
+                    <Smile className="w-4 h-4 text-muted-foreground" />
                   </button>
                   <button
-                    className="p-2 hover:bg-gray-50 transition-colors cursor-pointer"
+                    className="p-2 hover:bg-muted transition-colors cursor-pointer"
                     title="Reply in thread"
                   >
-                    <Reply className="w-4 h-4 text-gray-600" />
+                    <Reply className="w-4 h-4 text-muted-foreground" />
                   </button>
                   <button
-                    className="p-2 hover:bg-gray-50 transition-colors cursor-pointer"
+                    className="p-2 hover:bg-muted transition-colors cursor-pointer"
                     title="Save message"
                   >
-                    <Bookmark className="w-4 h-4 text-gray-600" />
+                    <Bookmark className="w-4 h-4 text-muted-foreground" />
                   </button>
                   <button
-                    className="p-2 hover:bg-gray-50 rounded-r-lg transition-colors cursor-pointer"
+                    className="p-2 hover:bg-muted rounded-r-lg transition-colors cursor-pointer"
                     title="More actions"
                   >
-                    <MoreVertical className="w-4 h-4 text-gray-600" />
+                    <MoreVertical className="w-4 h-4 text-muted-foreground" />
                   </button>
                 </div>
               )}
@@ -151,22 +151,22 @@ export function MessageItem({ message, disabled = false }: MessageItemProps) {
                     href={attachment.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 bg-purple-50 border border-purple-200 rounded-lg hover:border-purple-300 hover:bg-purple-100 transition-all group/attachment max-w-sm"
+                    className="flex items-center gap-3 p-3 bg-accent border border-border rounded-lg hover:bg-accent/80 transition-all group/attachment max-w-sm"
                   >
-                    <div className="shrink-0 w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg flex items-center justify-center text-purple-600">
+                    <div className="shrink-0 w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center text-primary">
                       {getFileIcon(attachment.filename)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-purple-900 truncate group-hover/attachment:text-purple-700">
+                      <p className="text-sm font-medium text-foreground truncate group-hover/attachment:text-primary">
                         {attachment.filename}
                       </p>
                       {attachment.size && (
-                        <p className="text-xs text-purple-600">
+                        <p className="text-xs text-muted-foreground">
                           {(attachment.size / 1024).toFixed(1)} KB
                         </p>
                       )}
                     </div>
-                    <Download className="w-4 h-4 text-purple-600 group-hover/attachment:text-purple-700 shrink-0" />
+                    <Download className="w-4 h-4 text-primary group-hover/attachment:text-primary/90 shrink-0" />
                   </a>
                 ))}
               </div>
@@ -206,51 +206,51 @@ export function MessageItem({ message, disabled = false }: MessageItemProps) {
         <div className="flex flex-col items-start min-w-0">
           {/* Header */}
           <div className="flex items-baseline gap-2 mb-1">
-            <span className="font-semibold text-sm text-gray-900">
+            <span className="font-semibold text-sm text-foreground">
               {message.user.fullName}
             </span>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-muted-foreground">
               {formatDate(message.createdAt)}
             </span>
             {message.isEdited && (
-              <span className="text-xs text-gray-400 italic">(edited)</span>
+              <span className="text-xs text-muted-foreground italic">(edited)</span>
             )}
           </div>
 
           {/* Message Body */}
           <div className="relative">
-            <div className="bg-white border border-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-sm shadow-sm w-fit max-w-full">
-              <div className="text-gray-800 text-[15px] leading-relaxed whitespace-pre-wrap break-words">
+            <div className="bg-card border border-border px-4 py-2.5 rounded-2xl rounded-tl-sm shadow-sm w-fit max-w-full">
+              <div className="text-card-foreground text-[15px] leading-relaxed whitespace-pre-wrap break-words">
                 {message.content}
               </div>
             </div>
 
             {/* Floating Action Buttons - positioned at the end of the message */}
             {showActions && (
-              <div className="absolute -top-10 right-0 bg-white border border-gray-200 rounded-lg shadow-lg flex items-center divide-x divide-gray-200 z-10">
+              <div className="absolute -top-10 right-0 bg-card border border-border rounded-lg shadow-lg flex items-center divide-x divide-border z-10">
                 <button
-                  className="p-2 hover:bg-gray-50 rounded-l-lg transition-colors cursor-pointer"
+                  className="p-2 hover:bg-muted rounded-l-lg transition-colors cursor-pointer"
                   title="Add reaction"
                 >
-                  <Smile className="w-4 h-4 text-gray-600" />
+                  <Smile className="w-4 h-4 text-muted-foreground" />
                 </button>
                 <button
-                  className="p-2 hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="p-2 hover:bg-muted transition-colors cursor-pointer"
                   title="Reply in thread"
                 >
-                  <Reply className="w-4 h-4 text-gray-600" />
+                  <Reply className="w-4 h-4 text-muted-foreground" />
                 </button>
                 <button
-                  className="p-2 hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="p-2 hover:bg-muted transition-colors cursor-pointer"
                   title="Save message"
                 >
-                  <Bookmark className="w-4 h-4 text-gray-600" />
+                  <Bookmark className="w-4 h-4 text-muted-foreground" />
                 </button>
                 <button
-                  className="p-2 hover:bg-gray-50 rounded-r-lg transition-colors cursor-pointer"
+                  className="p-2 hover:bg-muted rounded-r-lg transition-colors cursor-pointer"
                   title="More actions"
                 >
-                  <MoreVertical className="w-4 h-4 text-gray-600" />
+                  <MoreVertical className="w-4 h-4 text-muted-foreground" />
                 </button>
               </div>
             )}
@@ -265,22 +265,22 @@ export function MessageItem({ message, disabled = false }: MessageItemProps) {
                   href={attachment.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50/50 transition-all group/attachment max-w-sm"
+                  className="flex items-center gap-3 p-3 bg-card border border-border rounded-lg hover:border-primary/50 hover:bg-accent/50 transition-all group/attachment max-w-sm"
                 >
-                  <div className="shrink-0 w-10 h-10 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center text-gray-600">
+                  <div className="shrink-0 w-10 h-10 bg-muted rounded-lg flex items-center justify-center text-muted-foreground">
                     {getFileIcon(attachment.filename)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate group-hover/attachment:text-blue-600">
+                    <p className="text-sm font-medium text-foreground truncate group-hover/attachment:text-primary">
                       {attachment.filename}
                     </p>
                     {attachment.size && (
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted-foreground">
                         {(attachment.size / 1024).toFixed(1)} KB
                       </p>
                     )}
                   </div>
-                  <Download className="w-4 h-4 text-gray-400 group-hover/attachment:text-blue-600 shrink-0" />
+                  <Download className="w-4 h-4 text-muted-foreground group-hover/attachment:text-primary shrink-0" />
                 </a>
               ))}
             </div>

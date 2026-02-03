@@ -33,11 +33,11 @@ export function ChannelItem({ channel, disabled = false }: ChannelItemProps) {
       disabled={disabled}
       className={`
       w-full flex items-center justify-between px-3 py-2 rounded-lg 
-      transition-colors text-sm group
-      ${disabled ? 'opacity-50 cursor-not-allowed pointer-events-none text-purple-100' : 'cursor-pointer'}
+      transition-colors text-sm group text-sidebar-foreground
+      ${disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}
       ${isActive
-          ? 'bg-purple-700/50 text-white'
-          : 'hover:bg-purple-700/30 text-purple-100'
+          ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+          : 'hover:bg-sidebar-accent/70'
         }
     `}
     >
@@ -51,7 +51,7 @@ export function ChannelItem({ channel, disabled = false }: ChannelItemProps) {
       </div>
 
       {channel.unreadCount && channel.unreadCount > 0 && (
-        <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shrink-0">
+        <span className="bg-destructive text-white text-xs font-bold px-2 py-0.5 rounded-full shrink-0">
           {channel.unreadCount}
         </span>
       )}

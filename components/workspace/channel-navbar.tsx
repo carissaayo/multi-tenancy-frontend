@@ -63,7 +63,7 @@ export function ChannelNavbar({
   const router = useRouter();
   const navBtn =
     'rounded-lg transition-colors ' +
-    (disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'cursor-pointer hover:bg-gray-100');
+    (disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'cursor-pointer hover:bg-muted');
 
 
   const getDisplayName = (user: TypingUser) => {
@@ -79,7 +79,7 @@ export function ChannelNavbar({
 
 
   return (
-    <div className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 shrink-0 gap-2">
+    <div className="h-16 bg-card border-b border-border flex items-center justify-between px-4 md:px-6 shrink-0 gap-2">
       {/* Left - Channel info */}
       <div className="flex items-center gap-2 min-w-0 shrink-0">
         {onToggleSidebar && (
@@ -100,12 +100,12 @@ export function ChannelNavbar({
 
         <div className="flex items-center gap-2 min-w-0">
           {isPrivate ? (
-            <Lock className="w-5 h-5 text-gray-600 shrink-0" />
+            <Lock className="w-5 h-5 text-muted-foreground shrink-0" />
           ) : (
-            <Hash className="w-5 h-5 text-gray-600 shrink-0" />
+            <Hash className="w-5 h-5 text-muted-foreground shrink-0" />
           )}
           <h1
-            className={`text-lg md:text-xl font-bold text-gray-900 truncate max-w-[120px] sm:max-w-[200px] md:max-w-none ${disabled ? 'cursor-not-allowed' : 'hover:cursor-pointer'}`}
+            className={`text-lg md:text-xl font-bold text-foreground truncate max-w-[120px] sm:max-w-[200px] md:max-w-none ${disabled ? 'cursor-not-allowed' : 'hover:cursor-pointer'}`}
             onClick={redirectToSettings}
           >
             {channelName}
@@ -133,11 +133,11 @@ export function ChannelNavbar({
       {/* Center - Description or Typing indicator */}
       <div className="flex-1 min-w-0 flex justify-center">
         {typingUsers.length > 0 ? (
-          <div className="flex items-center gap-1.5 text-sm text-gray-500">
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <span className="flex gap-0.5">
-              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
             </span>
             <span className="truncate max-w-[100px] sm:max-w-[200px]">
               {typingUsers.length === 1
@@ -148,7 +148,7 @@ export function ChannelNavbar({
             </span>
           </div>
         ) : channelDescription ? (
-          <p className="hidden lg:block text-sm text-gray-500 truncate max-w-md">
+          <p className="hidden lg:block text-sm text-muted-foreground truncate max-w-md">
             {channelDescription}
           </p>
         ) : null}
@@ -162,7 +162,7 @@ export function ChannelNavbar({
           className={`hidden md:flex ${navBtn}`}
           aria-label="Start audio call"
         >
-          <Phone className="w-5 h-5 text-gray-600" />
+          <Phone className="w-5 h-5 text-muted-foreground" />
         </Button>
 
         <Button
@@ -171,10 +171,10 @@ export function ChannelNavbar({
           className={`hidden md:flex ${navBtn}`}
           aria-label="Start video call"
         >
-          <Video className="w-5 h-5 text-gray-600" />
+          <Video className="w-5 h-5 text-muted-foreground" />
         </Button>
 
-        <div className="hidden md:block h-6 w-px bg-gray-200 mx-1" />
+        <div className="hidden md:block h-6 w-px bg-border mx-1" />
 
         <Button
           variant="ghost"
@@ -182,7 +182,7 @@ export function ChannelNavbar({
           className={`hidden sm:flex ${navBtn}`}
           aria-label="Pinned messages"
         >
-          <Pin className="w-5 h-5 text-gray-600" />
+          <Pin className="w-5 h-5 text-muted-foreground" />
         </Button>
 
         <Button
@@ -191,9 +191,9 @@ export function ChannelNavbar({
           className={`relative ${navBtn}`}
           aria-label="Notifications"
         >
-          <Bell className="w-5 h-5 text-gray-600" />
+          <Bell className="w-5 h-5 text-muted-foreground" />
           {hasNotifications && (
-            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500" />
+            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-destructive" />
           )}
         </Button>
 
@@ -203,7 +203,7 @@ export function ChannelNavbar({
           className={navBtn}
           aria-label="Search"
         >
-          <Search className="w-5 h-5 text-gray-600" />
+          <Search className="w-5 h-5 text-muted-foreground" />
         </Button>
 
         {/* Mobile overflow */}
@@ -236,7 +236,7 @@ export function ChannelNavbar({
               <DropdownMenuItem className='hover:cursor-pointer'>
                 <Star
                   className={`mr-2 h-4 w-4 ${isFavorite
-                      ? 'fill-yellow-400 text-yellow-400'
+                      ? 'fill-yellow-500 text-yellow-500 dark:fill-yellow-400 dark:text-yellow-400'
                       : ''
                     }`}
                 />

@@ -41,19 +41,19 @@ export function MessageList({ channelId, disabled = false }: MessageListProps) {
   // Loading State
   if (isLoading) {
     return (
-      <div className="flex-1 overflow-y-auto p-6 bg-white">
+      <div className="flex-1 overflow-y-auto p-6 bg-background">
         <div className="max-w-4xl mx-auto space-y-6">
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="flex gap-4 animate-pulse">
-              <div className="w-10 h-10 bg-linear-to-br from-gray-200 to-gray-300 rounded-lg shrink-0" />
+              <div className="w-10 h-10 bg-muted rounded-lg shrink-0" />
               <div className="flex-1 space-y-3">
                 <div className="flex items-center gap-2">
-                  <div className="h-4 bg-gray-200 rounded w-32" />
-                  <div className="h-3 bg-gray-200 rounded w-16" />
+                  <div className="h-4 bg-muted rounded w-32" />
+                  <div className="h-3 bg-muted rounded w-16" />
                 </div>
                 <div className="space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-full" />
-                  <div className="h-4 bg-gray-200 rounded w-5/6" />
+                  <div className="h-4 bg-muted rounded w-full" />
+                  <div className="h-4 bg-muted rounded w-5/6" />
                 </div>
               </div>
             </div>
@@ -66,7 +66,7 @@ export function MessageList({ channelId, disabled = false }: MessageListProps) {
   // Error State
   if (error) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-white p-6">
+      <div className="flex-1 flex items-center justify-center bg-background p-6">
         <ErrorDisplay
           error={error}
           fallback="We couldn't load the messages. Please try again."
@@ -81,29 +81,29 @@ export function MessageList({ channelId, disabled = false }: MessageListProps) {
   // Empty State
   if (channelMessages.length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-linear-to-br from-gray-50 to-white p-6">
+      <div className="flex-1 flex items-center justify-center bg-background p-6">
         <div className="text-center space-y-6 max-w-md">
           <div className="relative">
-            <div className="w-20 h-20 bg-linear-to-br from-purple-500 to-blue-500 rounded-2xl mx-auto flex items-center justify-center transform rotate-3 shadow-xl">
-              <MessageSquare className="w-10 h-10 text-white" />
+            <div className="w-20 h-20 bg-primary rounded-2xl mx-auto flex items-center justify-center transform rotate-3 shadow-xl text-primary-foreground">
+              <MessageSquare className="w-10 h-10" />
             </div>
-            <div className="absolute -top-2 -right-2 w-10 h-10 bg-linear-to-br from-yellow-400 to-orange-400 rounded-lg flex items-center justify-center transform -rotate-12 shadow-lg">
-              <Sparkles className="w-5 h-5 text-white" />
+            <div className="absolute -top-2 -right-2 w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center transform -rotate-12 shadow-lg text-white">
+              <Sparkles className="w-5 h-5" />
             </div>
           </div>
 
           <div className="space-y-2">
-            <h3 className="text-2xl font-bold text-gray-900">
+            <h3 className="text-2xl font-bold text-foreground">
               Start the conversation!
             </h3>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               Be the first to share your thoughts in this channel
             </p>
           </div>
 
-          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-            <p className="text-sm text-gray-500">
-              💡 <span className="font-medium">Pro tip:</span> Use @ to mention someone and get their attention
+          <div className="bg-card rounded-xl p-4 shadow-sm border border-border">
+            <p className="text-sm text-muted-foreground">
+              💡 <span className="font-medium text-foreground">Pro tip:</span> Use @ to mention someone and get their attention
             </p>
           </div>
         </div>
@@ -113,7 +113,7 @@ export function MessageList({ channelId, disabled = false }: MessageListProps) {
 
   // Messages List
   return (
-    <div className="flex-1 overflow-y-auto bg-white">
+    <div className="flex-1 overflow-y-auto bg-background">
       <div className="mx-4  py-4">
         <div className="space-y-0.5">
           {channelMessages.map((message) => (

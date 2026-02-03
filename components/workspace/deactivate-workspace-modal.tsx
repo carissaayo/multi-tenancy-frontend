@@ -22,15 +22,15 @@ export function DeactivateWorkspaceModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl p-6 max-w-md w-full">
+      <div className="bg-card rounded-2xl p-6 max-w-md w-full border border-border">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
-            <PowerOff className="w-6 h-6 text-amber-600" />
+          <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
+            <PowerOff className="w-6 h-6 text-amber-600 dark:text-amber-400" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900">Deactivate Workspace?</h3>
+          <h3 className="text-xl font-bold text-card-foreground">Deactivate Workspace?</h3>
         </div>
-        <p className="text-gray-600 mb-6">
-          Are you sure you want to deactivate <strong>{workspaceName}</strong>? The workspace will
+        <p className="text-muted-foreground mb-6">
+          Are you sure you want to deactivate <strong className="text-foreground">{workspaceName}</strong>? The workspace will
           be temporarily disabled. You can reactivate it later from workspace settings.
         </p>
         <div className="flex gap-3">
@@ -38,7 +38,7 @@ export function DeactivateWorkspaceModal({
             variant="outline"
             onClick={onConfirm}
             disabled={isDeactivating}
-            className="flex-1 border-amber-500 text-amber-700 hover:bg-amber-50"
+            className="flex-1 border-amber-500 text-amber-700 hover:bg-amber-50 dark:border-amber-400 dark:text-amber-300 dark:hover:bg-amber-900/30"
           >
             {isDeactivating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Deactivate'}
           </Button>

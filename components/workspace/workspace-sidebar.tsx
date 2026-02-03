@@ -76,9 +76,9 @@ export function WorkspaceSidebar() {
 
   if (isLoadingWorkspaces) {
     return (
-      <div className="w-64 bg-linear-to-b from-purple-900 to-purple-800 text-white flex flex-col h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-        <p className="mt-4 text-sm text-purple-300">Loading workspace...</p>
+      <div className="w-64 bg-sidebar text-sidebar-foreground flex flex-col h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sidebar-foreground"></div>
+        <p className="mt-4 text-sm text-sidebar-foreground/80">Loading workspace...</p>
       </div>
     );
   }
@@ -86,12 +86,12 @@ export function WorkspaceSidebar() {
   if (workspacesError) {
     const msg = getErrorMessage(workspacesError, 'Failed to load workspace');
     return (
-      <div className="w-64 bg-linear-to-b from-purple-900 to-purple-800 text-white flex flex-col h-screen items-center justify-center p-4">
+      <div className="w-64 bg-sidebar text-sidebar-foreground flex flex-col h-screen items-center justify-center p-4">
         <div className="text-center space-y-2">
-          <p className="text-sm text-red-300">{msg}</p>
+          <p className="text-sm text-destructive">{msg}</p>
           <button
             onClick={() => window.location.reload()}
-            className="text-xs text-purple-300 hover:text-white underline cursor-pointer"
+            className="text-xs text-sidebar-foreground/80 hover:text-sidebar-foreground underline cursor-pointer"
           >
             Retry
           </button>
@@ -101,15 +101,15 @@ export function WorkspaceSidebar() {
   }
 
   return (
-    <div className="w-64 bg-linear-to-b from-purple-900 to-purple-800 text-white flex flex-col h-screen">
+    <div className="w-64 bg-sidebar text-sidebar-foreground flex flex-col h-screen">
       {/* Workspace Header */}
-      <div className="p-4 border-b border-purple-700/50">
+      <div className="p-4 border-b border-sidebar-border">
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="w-full flex items-center justify-between hover:bg-purple-700/30 rounded-lg p-3 transition-colors group cursor-pointer"
+          className="w-full flex items-center justify-between hover:bg-sidebar-accent rounded-lg p-3 transition-colors group cursor-pointer"
         >
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+            <div className="w-10 h-10 bg-sidebar-primary rounded-lg flex items-center justify-center shrink-0 overflow-hidden text-sidebar-primary-foreground">
               {currentWorkspace?.logoUrl ? (
                 <Image
                   src={`${currentWorkspace.logoUrl}${currentWorkspace.updatedAt ? `?v=${currentWorkspace.updatedAt}` : ''}`}
@@ -119,27 +119,27 @@ export function WorkspaceSidebar() {
                   className="object-cover w-full h-full"
                 />
               ) : (
-                <span className="text-purple-900 font-bold text-lg">{workspaceInitial}</span>
+                <span className="font-bold text-lg">{workspaceInitial}</span>
               )}
             </div>
             <div className="text-left min-w-0">
               <h2 className="font-bold text-base truncate">
                 {currentWorkspace?.name || 'Workspace'}
               </h2>
-              <p className="text-xs text-purple-300 truncate">
+              <p className="text-xs text-sidebar-foreground/80 truncate">
                 {currentWorkspace?.description || user?.email || ''}
               </p>
             </div>
           </div>
-          <ChevronDown className="w-5 h-5 text-purple-300 group-hover:text-white shrink-0" />
+          <ChevronDown className="w-5 h-5 text-sidebar-foreground/80 group-hover:text-sidebar-foreground shrink-0" />
         </button>
 
         {/* Workspace Dropdown Menu */}
         {sidebarOpen && (
-          <div className="mt-2 bg-purple-800/50 backdrop-blur-sm rounded-lg border border-purple-700/50 overflow-hidden">
+          <div className="mt-2 bg-sidebar-accent/50 backdrop-blur-sm rounded-lg border border-sidebar-border overflow-hidden">
             <button
               onClick={handleSwitchWorkspace}
-              className="w-full px-4 py-2 text-sm text-left hover:bg-purple-700/30 transition-colors cursor-pointer"
+              className="w-full px-4 py-2 text-sm text-left hover:bg-sidebar-accent transition-colors cursor-pointer text-sidebar-foreground"
             >
               Switch Workspace
             </button>
@@ -148,7 +148,7 @@ export function WorkspaceSidebar() {
                 router.push('/workspace/settings');
                 setSidebarOpen(false);
               }}
-              className="w-full px-4 py-2 text-sm text-left hover:bg-purple-700/30 transition-colors cursor-pointer"
+              className="w-full px-4 py-2 text-sm text-left hover:bg-sidebar-accent transition-colors cursor-pointer text-sidebar-foreground"
             >
               Workspace Settings
             </button>
@@ -160,18 +160,18 @@ export function WorkspaceSidebar() {
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {/* Quick Actions */}
         <div className="space-y-1">
-          <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-purple-700/30 rounded-lg transition-colors text-sm cursor-pointer">
+          <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-sidebar-accent rounded-lg transition-colors text-sm cursor-pointer text-sidebar-foreground">
             <MessageSquare className="w-5 h-5" />
             <span>Threads</span>
           </button>
           <button
             onClick={() => router.push('/workspace/members')}
-            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-purple-700/30 rounded-lg transition-colors text-sm cursor-pointer"
+            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-sidebar-accent rounded-lg transition-colors text-sm cursor-pointer text-sidebar-foreground"
           >
             <Users className="w-5 h-5" />
             <span>Members</span>
             {currentWorkspace?.membersCount !== undefined && (
-              <span className="ml-auto text-xs text-purple-300">
+              <span className="ml-auto text-xs text-sidebar-foreground/80">
                 {currentWorkspace.membersCount}
               </span>
             )}
@@ -182,13 +182,13 @@ export function WorkspaceSidebar() {
                 router.push('/workspace/invitations');
                 setSidebarOpen(false);
               }}
-              className="w-full flex items-center gap-3 px-3 py-2 hover:bg-purple-700/30 rounded-lg transition-colors text-sm cursor-pointer"
+              className="w-full flex items-center gap-3 px-3 py-2 hover:bg-sidebar-accent rounded-lg transition-colors text-sm cursor-pointer text-sidebar-foreground"
             >
               <Mail className="w-5 h-5" />
               <span>Invitations</span>
             </button>
           )}
-          <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-purple-700/30 rounded-lg transition-colors text-sm cursor-pointer">
+          <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-sidebar-accent rounded-lg transition-colors text-sm cursor-pointer text-sidebar-foreground">
             <Star className="w-5 h-5" />
             <span>Saved Items</span>
           </button>
@@ -197,7 +197,7 @@ export function WorkspaceSidebar() {
         {/* Channels Section */}
         <div>
           <div className="flex items-center justify-between px-3 mb-2">
-            <span className="text-xs font-semibold text-purple-300 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-sidebar-foreground/80 uppercase tracking-wider">
               Channels
             </span>
             <button
@@ -206,11 +206,11 @@ export function WorkspaceSidebar() {
               className={`p-1 rounded transition-colors group ${
                 isWorkspaceDeactivated
                   ? 'opacity-50 cursor-not-allowed pointer-events-none'
-                  : 'hover:bg-purple-700/30 cursor-pointer'
+                  : 'hover:bg-sidebar-accent cursor-pointer'
               }`}
               title={isWorkspaceDeactivated ? 'Workspace is deactivated' : 'Create channel'}
             >
-              <Plus className="w-4 h-4 text-purple-300 group-hover:text-white" />
+              <Plus className="w-4 h-4 text-sidebar-foreground/80 group-hover:text-sidebar-foreground" />
             </button>
           </div>
           <ChannelList disabled={isWorkspaceDeactivated} />
@@ -218,37 +218,37 @@ export function WorkspaceSidebar() {
       </div>
 
       {/* User Profile Footer */}
-      <div className="p-4 border-t border-purple-700/50">
+      <div className="p-4 border-t border-sidebar-border">
         <button
           onClick={() => {
             router.push('/profile');
             setSidebarOpen(false);
           }}
-          className="w-full flex items-center gap-3 mb-3 hover:bg-purple-700/30 rounded-lg p-2 -m-2 transition-colors cursor-pointer"
+          className="w-full flex items-center gap-3 mb-3 hover:bg-sidebar-accent rounded-lg p-2 -m-2 transition-colors cursor-pointer text-sidebar-foreground"
         >
           <div className="relative shrink-0">
-            <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">{userInitials}</span>
+            <div className="w-10 h-10 bg-sidebar-primary rounded-lg flex items-center justify-center text-sidebar-primary-foreground">
+              <span className="font-bold text-sm">{userInitials}</span>
             </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-purple-900"></div>
+            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-sidebar"></div>
           </div>
           <div className="flex-1 text-left min-w-0">
             <p className="font-semibold text-sm truncate">{user?.fullName || user?.email}</p>
-            <p className="text-xs text-purple-300 truncate">Active</p>
+            <p className="text-xs text-sidebar-foreground/80 truncate">Active</p>
           </div>
         </button>
 
         <div className="space-y-1">
           <button
             onClick={() => router.push('/workspace/settings')}
-            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-purple-700/30 rounded-lg transition-colors text-sm cursor-pointer"
+            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-sidebar-accent rounded-lg transition-colors text-sm cursor-pointer text-sidebar-foreground"
           >
             <Settings className="w-4 h-4" />
             <span>Settings</span>
           </button>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-purple-700/30 rounded-lg transition-colors text-sm text-red-300 hover:text-red-200 cursor-pointer"
+            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-sidebar-accent rounded-lg transition-colors text-sm text-destructive hover:text-destructive/90 cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             <span>Logout</span>

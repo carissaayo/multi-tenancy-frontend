@@ -37,23 +37,23 @@ export function ProfileInformationSection({
   onAvatarUpload,
 }: ProfileInformationSectionProps) {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+    <div className="bg-card rounded-2xl p-6 shadow-sm border border-border">
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Profile Information</h2>
-          <p className="text-sm text-gray-500 mt-1">Update your personal details</p>
+          <h2 className="text-xl font-bold text-card-foreground">Profile Information</h2>
+          <p className="text-sm text-muted-foreground mt-1">Update your personal details</p>
         </div>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => (isEditing ? setIsEditing(false) : setIsEditing(true))}
-          className="text-purple-600 hover:text-purple-700"
+          className="text-primary hover:text-primary/90"
         >
           {isEditing ? 'Cancel' : 'Edit'}
         </Button>
       </div>
 
-      <div className="flex items-center gap-6 mb-6 pb-6 border-b border-gray-200">
+      <div className="flex items-center gap-6 mb-6 pb-6 border-b border-border">
         <div className="relative">
           {formData.avatarUrl ? (
             <Image
@@ -64,16 +64,16 @@ export function ProfileInformationSection({
               className="rounded-2xl object-cover"
             />
           ) : (
-            <div className="w-20 h-20 bg-linear-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl">
+            <div className="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center text-primary-foreground font-bold text-2xl">
               {getInitials(formData.fullName || 'User')}
             </div>
           )}
           {isEditing && (
             <label
-              className={`absolute -bottom-2 -right-2 w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center transition-colors shadow-lg ${
+              className={`absolute -bottom-2 -right-2 w-10 h-10 bg-primary rounded-full flex items-center justify-center transition-colors shadow-lg text-primary-foreground ${
                 avatarLoading
                   ? 'opacity-50 cursor-not-allowed pointer-events-none'
-                  : 'cursor-pointer hover:bg-purple-700'
+                  : 'cursor-pointer hover:bg-primary/90'
               }`}
             >
               {avatarLoading ? (
@@ -92,10 +92,10 @@ export function ProfileInformationSection({
           )}
         </div>
         <div>
-          <h3 className="font-semibold text-lg text-gray-900">{formData.fullName}</h3>
-          <p className="text-sm text-gray-500">{formData.email}</p>
+          <h3 className="font-semibold text-lg text-card-foreground">{formData.fullName}</h3>
+          <p className="text-sm text-muted-foreground">{formData.email}</p>
           {isEditing && (
-            <p className="text-xs text-gray-400 mt-2">Click the camera icon to change your avatar</p>
+            <p className="text-xs text-muted-foreground mt-2">Click the camera icon to change your avatar</p>
           )}
         </div>
       </div>
@@ -103,7 +103,7 @@ export function ProfileInformationSection({
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+            <label className="flex items-center gap-2 text-sm font-semibold text-foreground mb-2">
               <User className="w-4 h-4" />
               Full Name
             </label>
@@ -114,7 +114,7 @@ export function ProfileInformationSection({
             />
           </div>
           <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+            <label className="flex items-center gap-2 text-sm font-semibold text-foreground mb-2">
               <Mail className="w-4 h-4" />
               Email
             </label>
@@ -123,14 +123,14 @@ export function ProfileInformationSection({
               value={formData.email}
               onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
               disabled
-              className="bg-gray-50"
+              className="bg-muted"
             />
-            <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+            <p className="text-xs text-muted-foreground mt-1">Email cannot be changed</p>
           </div>
         </div>
 
         <div>
-          <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+          <label className="flex items-center gap-2 text-sm font-semibold text-foreground mb-2">
             <Phone className="w-4 h-4" />
             Phone Number
           </label>

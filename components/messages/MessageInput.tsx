@@ -139,7 +139,7 @@ export function MessageInput({ channelId, disabled = false }: MessageInputProps)
   };
 
   return (
-    <div className="border-t p-4 bg-white">
+    <div className="border-t border-border p-4 bg-card">
       <form onSubmit={handleSubmit} className="flex gap-2">
         <textarea
           ref={textareaRef}
@@ -147,7 +147,7 @@ export function MessageInput({ channelId, disabled = false }: MessageInputProps)
           onChange={handleInput}
           onKeyDown={handleKeyDown}
           placeholder={disabled ? 'Workspace is deactivated' : 'Type a message... (Press Enter to send, Shift+Enter for new line)'}
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none max-h-[200px] disabled:bg-gray-100 disabled:cursor-not-allowed"
+          className="flex-1 px-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none max-h-[200px] disabled:bg-muted disabled:cursor-not-allowed"
           rows={1}
           disabled={disabled || loading}
         />

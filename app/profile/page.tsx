@@ -35,11 +35,11 @@ export default function UserProfilePage() {
   return (
     <div className="flex flex-col h-screen">
       <WorkspaceHeader title="Account Settings" />
-      <div className="flex-1 overflow-y-auto p-6 bg-linear-to-br from-purple-50 via-white to-blue-50">
+      <div className="flex-1 overflow-y-auto p-6 bg-background">
         <div className="max-w-4xl mx-auto space-y-6">
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-4 cursor-pointer"
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4 cursor-pointer"
           >
             <ArrowLeft className="w-5 h-5" />
             <span className="font-medium">Back</span>

@@ -62,7 +62,7 @@ export default function SettingsPage() {
       <div className="flex flex-col h-screen">
         <WorkspaceHeader title="Workspace Settings" />
         <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
       </div>
     );
@@ -88,27 +88,27 @@ export default function SettingsPage() {
   return (
     <div className="flex flex-col h-screen">
       <WorkspaceHeader title="Workspace Settings" />
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-6 bg-background">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold mb-6">Workspace Settings</h2>
+          <h2 className="text-2xl font-bold mb-6 text-foreground">Workspace Settings</h2>
 
-          <div className="bg-white rounded-lg shadow p-6 space-y-6">
+          <div className="bg-card rounded-lg shadow p-6 space-y-6 border border-border">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+              <div className="bg-destructive/10 border border-destructive/50 text-destructive px-4 py-3 rounded">
                 {error}
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Workspace Slug</label>
-              <Input value={workspace?.slug || ''} disabled className="bg-gray-100" />
-              <p className="mt-1 text-sm text-gray-500">The workspace slug cannot be changed</p>
+              <label className="block text-sm font-medium text-foreground mb-2">Workspace Slug</label>
+              <Input value={workspace?.slug || ''} disabled className="bg-muted" />
+              <p className="mt-1 text-sm text-muted-foreground">The workspace slug cannot be changed</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Logo</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Logo</label>
               <div className="flex items-center gap-4">
-                <div className="w-20 h-20 rounded-xl border-2 border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50 shrink-0">
+                <div className="w-20 h-20 rounded-xl border-2 border-border flex items-center justify-center overflow-hidden bg-muted shrink-0">
                   {workspace?.logoUrl ? (
                     <Image
                       src={`${workspace.logoUrl}${workspace.updatedAt ? `?v=${workspace.updatedAt}` : ''}`}
@@ -118,7 +118,7 @@ export default function SettingsPage() {
                       className="object-cover w-full h-full"
                     />
                   ) : (
-                    <ImageIcon className="w-10 h-10 text-gray-400" />
+                    <ImageIcon className="w-10 h-10 text-muted-foreground" />
                   )}
                 </div>
                 <div className="flex-1">
@@ -144,14 +144,14 @@ export default function SettingsPage() {
                       'Change Logo'
                     )}
                   </Button>
-                  {logoError && <p className="mt-2 text-sm text-red-600">{logoError}</p>}
-                  <p className="mt-1 text-sm text-gray-500">PNG, JPG or GIF.</p>
+                  {logoError && <p className="mt-2 text-sm text-destructive">{logoError}</p>}
+                  <p className="mt-1 text-sm text-muted-foreground">PNG, JPG or GIF.</p>
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Workspace Name</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Workspace Name</label>
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -190,17 +190,17 @@ export default function SettingsPage() {
           </div>
 
           {/* Danger Zone */}
-          <div className="mt-8 bg-white rounded-lg shadow p-6 border border-red-200">
+          <div className="mt-8 bg-card rounded-lg shadow p-6 border border-destructive/50">
             <div className="flex items-center gap-2 mb-4">
-              <AlertCircle className="w-5 h-5 text-red-600" />
-              <h2 className="text-lg font-bold text-red-600">Danger Zone</h2>
+              <AlertCircle className="w-5 h-5 text-destructive" />
+              <h2 className="text-lg font-bold text-destructive">Danger Zone</h2>
             </div>
             <div className="space-y-4">
               {!isOwner && (
-                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div className="flex items-center justify-between p-4 border border-border rounded-lg">
                   <div>
-                    <h3 className="font-semibold text-gray-900">Leave Workspace</h3>
-                    <p className="text-sm text-gray-500">
+                    <h3 className="font-semibold text-foreground">Leave Workspace</h3>
+                    <p className="text-sm text-muted-foreground">
                       {isDeactivated
                         ? 'Activate the workspace first to leave'
                         : 'You will no longer have access to this workspace'}
@@ -210,7 +210,6 @@ export default function SettingsPage() {
                     variant="outline"
                     onClick={() => setShowLeaveModal(true)}
                     disabled={isDeactivated}
-                    className="border-gray-300 text-gray-700 hover:bg-gray-100"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
                     Leave
@@ -219,10 +218,10 @@ export default function SettingsPage() {
               )}
 
               {isOwner && (
-                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div className="flex items-center justify-between p-4 border border-border rounded-lg">
                   <div>
-                    <h3 className="font-semibold text-gray-900">Transfer Ownership</h3>
-                    <p className="text-sm text-gray-500">
+                    <h3 className="font-semibold text-foreground">Transfer Ownership</h3>
+                    <p className="text-sm text-muted-foreground">
                       Transfer workspace ownership to an admin. You will become an admin.
                     </p>
                   </div>
@@ -230,7 +229,7 @@ export default function SettingsPage() {
                     variant="outline"
                     onClick={() => setShowTransferModal(true)}
                     disabled={isDeactivated}
-                    className="border-purple-300 text-purple-700 hover:bg-purple-50"
+                    className="border-primary text-primary hover:bg-accent"
                   >
                     <Crown className="w-4 h-4 mr-2" />
                     Transfer Ownership
@@ -239,12 +238,12 @@ export default function SettingsPage() {
               )}
 
               {isOwner && (
-                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div className="flex items-center justify-between p-4 border border-border rounded-lg">
                   <div>
-                    <h3 className="font-semibold text-gray-900">
+                    <h3 className="font-semibold text-foreground">
                       {isDeactivated ? 'Activate Workspace' : 'Deactivate Workspace'}
                     </h3>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-muted-foreground">
                       {isDeactivated
                         ? 'Reactivate this workspace to make it accessible again'
                         : 'Temporarily disable this workspace. You can reactivate it later'}
@@ -257,8 +256,8 @@ export default function SettingsPage() {
                     }
                     className={
                       isDeactivated
-                        ? 'border-green-300 text-green-700 hover:bg-green-50'
-                        : 'border-amber-300 text-amber-700 hover:bg-amber-50'
+                        ? 'border-green-500 text-green-700 hover:bg-green-50 dark:border-green-400 dark:text-green-300 dark:hover:bg-green-900/30'
+                        : 'border-amber-500 text-amber-700 hover:bg-amber-50 dark:border-amber-400 dark:text-amber-300 dark:hover:bg-amber-900/30'
                     }
                   >
                     {isDeactivated ? (
@@ -277,10 +276,10 @@ export default function SettingsPage() {
               )}
 
               {isOwner && (
-                <div className="flex items-center justify-between p-4 border border-red-200 rounded-lg bg-red-50">
+                <div className="flex items-center justify-between p-4 border border-destructive/50 rounded-lg bg-destructive/10">
                   <div>
-                    <h3 className="font-semibold text-red-600">Delete Workspace</h3>
-                    <p className="text-sm text-red-500">
+                    <h3 className="font-semibold text-destructive">Delete Workspace</h3>
+                    <p className="text-sm text-destructive/90">
                       Permanently delete this workspace and all its data. This cannot be undone.
                     </p>
                   </div>

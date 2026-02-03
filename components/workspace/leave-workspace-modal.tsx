@@ -22,23 +22,23 @@ export function LeaveWorkspaceModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl p-6 max-w-md w-full">
+      <div className="bg-card rounded-2xl p-6 max-w-md w-full border border-border">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-            <LogOut className="w-6 h-6 text-gray-600" />
+          <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
+            <LogOut className="w-6 h-6 text-muted-foreground" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900">Leave Workspace?</h3>
+          <h3 className="text-xl font-bold text-card-foreground">Leave Workspace?</h3>
         </div>
-        <p className="text-gray-600 mb-6">
-          Are you sure you want to leave <strong>{workspaceName}</strong>? You will need to be
+        <p className="text-muted-foreground mb-6">
+          Are you sure you want to leave <strong className="text-foreground">{workspaceName}</strong>? You will need to be
           re-invited to access this workspace again.
         </p>
         <div className="flex gap-3">
           <Button
-            variant="default"
+            variant="secondary"
             onClick={onConfirm}
             disabled={isLeaving}
-            className="flex-1 bg-gray-600 hover:bg-gray-700"
+            className="flex-1"
           >
             {isLeaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Leave'}
           </Button>
