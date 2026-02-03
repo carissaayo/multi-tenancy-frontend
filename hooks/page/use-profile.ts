@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { useAuthStore } from '@/store/auth-store';
 import { usersApi } from '@/lib/api/users';
 import { getErrorMessage } from '@/lib/utils/api-error';
+import { getTheme, setTheme, type ThemePreference } from '@/lib/theme';
 
 export type ProfileFormData = {
   fullName: string;
@@ -20,7 +21,7 @@ export type NotificationPreferences = {
   directMessages: boolean;
 };
 
-export type ThemePreference = 'light' | 'dark' | 'system';
+export type { ThemePreference };
 
 export type Preferences = {
   notifications: NotificationPreferences;
@@ -56,7 +57,10 @@ export function useProfile() {
     phoneNumber: user?.phoneNumber || '',
     avatarUrl: user?.avatarUrl || '',
   });
-  const [preferences, setPreferences] = useState<Preferences>(DEFAULT_PREFERENCES);
+  const [preferences, setPreferences] = useState<Preferences>({
+    ...DEFAULT_PREFERENCES,
+    theme: typeof window !== 'undefined' ? getTheme() : 'light',
+  });
   const [passwordData, setPasswordData] = useState<PasswordData>({
     password: '',
     newPassword: '',
@@ -76,6 +80,16 @@ export function useProfile() {
       });
     }
   }, [user]);
+
+  // Hydrate theme from localStorage on mount (client-only)
+  useEffect(() => {
+    setPreferences((prev) => ({ ...prev, theme: getTheme() }));
+  }, []);
+
+  // Apply and persist theme whenever preference changes
+  useEffect(() => {
+    setTheme(preferences.theme);
+  }, [preferences.theme]);
 
   const handleSaveProfile = async () => {
     setLoading(true);
