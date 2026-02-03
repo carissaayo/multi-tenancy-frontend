@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Loader2, Sparkles, Users, Zap, Shield, Mail, Lock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,11 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useLoginPage } from '@/hooks/pages/use-login';
 
-export default function LoginPage() {
+function LoginContent() {
     const searchParams = useSearchParams();
     const next = searchParams.get('next') ?? undefined;
     const { formData, setFormData, error, loading, handleSubmit } = useLoginPage(next);
-
 
     return (
         <div className="min-h-screen flex bg-linear-to-br from-blue-50 via-white to-purple-50">
@@ -215,5 +215,21 @@ export default function LoginPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+function LoginFallback() {
+    return (
+        <div className="min-h-screen flex bg-linear-to-br from-blue-50 via-white to-purple-50 items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<LoginFallback />}>
+            <LoginContent />
+        </Suspense>
     );
 }

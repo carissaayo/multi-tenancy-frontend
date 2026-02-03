@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { authApi, type RegisterDto, type LoginDto } from '@/lib/api/auth';
+import { authApi, type RegisterDto, type LoginDto, type UserProfile } from '@/lib/api/auth';
 import { queryKeys } from './query-keys';
 import { useAuthStore } from '@/store/auth-store';
 
@@ -27,10 +27,11 @@ export function useLogin(redirectTo?: string) {
         mutationFn: (data: LoginDto) => authApi.login(data),
         onSuccess: (data) => {
             const { profile } = data;
-            useAuthStore.getState().setUser({
+            const user: UserProfile = {
                 id: profile.id,
                 email: profile.email,
                 fullName: profile.fullName,
+                userName: (profile as { userName?: string }).userName ?? profile.email ?? '',
                 phoneNumber: profile.phoneNumber,
                 avatarUrl: profile.avatarUrl,
                 bio: profile.bio,
@@ -42,7 +43,8 @@ export function useLogin(redirectTo?: string) {
                 lastLoginAt: profile.lastLoginAt,
                 createdAt: profile.createdAt,
                 updatedAt: profile.updatedAt,
-            });
+            };
+            useAuthStore.getState().setUser(user);
             queryClient.invalidateQueries({ queryKey: queryKeys.auth });
             router.push(redirectTo || '/select-workspace');
         },
