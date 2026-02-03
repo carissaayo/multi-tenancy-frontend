@@ -88,7 +88,7 @@ export default function MembersPage() {
         <div className="flex-1 p-6">
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded animate-pulse" />
+              <div key={i} className="h-16 bg-muted rounded animate-pulse" />
             ))}
           </div>
         </div>
@@ -142,10 +142,10 @@ export default function MembersPage() {
   return (
     <div className="flex flex-col h-screen">
       <WorkspaceHeader title="Members" />
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-6 bg-background">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">Workspace Members</h2>
+            <h2 className="text-2xl font-bold text-foreground">Workspace Members</h2>
             {canManageMembers && (
               <div className="flex gap-2">
                 <Button variant="outline" asChild>
@@ -161,33 +161,33 @@ export default function MembersPage() {
               </div>
             )}
           </div>
-          <div className="bg-white rounded-lg shadow">
-            <div className="divide-y">
+          <div className="bg-card rounded-lg shadow border border-border">
+            <div className="divide-y divide-border">
               {data?.map((member) => (
                 <div
                   key={member.id}
-                  className="p-4 flex items-center justify-between hover:bg-gray-50"
+                  className="p-4 flex items-center justify-between hover:bg-muted/50"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
+                    <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold">
                       {(getDisplayName(member).charAt(0) || '?').toUpperCase()}
                     </div>
                     <div>
-                      <div className="font-semibold">{getDisplayName(member)}</div>
-                      <div className="text-sm text-gray-500">{member.user?.email ?? ''}</div>
+                      <div className="font-semibold text-foreground">{getDisplayName(member)}</div>
+                      <div className="text-sm text-muted-foreground">{member.user?.email ?? ''}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
                     {member.userId === user?.id && currentUserRole?.toLowerCase() === 'owner' ? (
                       <>
-                        <span className="px-3 py-1 bg-gray-100 rounded-md text-sm capitalize">
+                        <span className="px-3 py-1 bg-muted rounded-md text-sm capitalize text-foreground">
                           {getRole(member) || '—'}
                         </span>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => setShowTransferModal(true)}
-                          className="border-purple-300 text-purple-700 hover:bg-purple-50"
+                          className="border-primary text-primary hover:bg-accent"
                         >
                           <Crown className="w-4 h-4 mr-2" />
                           Transfer Ownership
@@ -225,7 +225,7 @@ export default function MembersPage() {
                         )}
                       </>
                     ) : (
-                      <span className="px-3 py-1 bg-gray-100 rounded-md text-sm capitalize">
+                      <span className="px-3 py-1 bg-muted rounded-md text-sm capitalize text-foreground">
                         {getRole(member) || '—'}
                       </span>
                     )}
@@ -240,19 +240,19 @@ export default function MembersPage() {
       {/* Invite to Workspace Modal */}
       {showInviteModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full">
+          <div className="bg-card rounded-2xl p-6 max-w-md w-full border border-border">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <UserPlus className="w-6 h-6 text-blue-600" />
+              <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
+                <UserPlus className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900">Invite to Workspace</h3>
+              <h3 className="text-xl font-bold text-card-foreground">Invite to Workspace</h3>
             </div>
-            <p className="text-gray-600 mb-4">
+            <p className="text-muted-foreground mb-4">
               Send an invitation email to add a user to this workspace.
             </p>
             <div className="space-y-4 mb-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Email</label>
                 <Input
                   type="email"
                   placeholder="colleague@example.com"
@@ -262,7 +262,7 @@ export default function MembersPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Role</label>
                 <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as MemberRole)}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select role" />
@@ -307,18 +307,18 @@ export default function MembersPage() {
       {/* Transfer Ownership Modal */}
       {showTransferModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full">
+          <div className="bg-card rounded-2xl p-6 max-w-md w-full border border-border">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                <Crown className="w-6 h-6 text-purple-600" />
+              <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
+                <Crown className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900">Transfer Ownership</h3>
+              <h3 className="text-xl font-bold text-card-foreground">Transfer Ownership</h3>
             </div>
-            <p className="text-gray-600 mb-4">
+            <p className="text-muted-foreground mb-4">
               Select an admin to transfer workspace ownership to. You will become an admin.
             </p>
             {adminMembers.length === 0 ? (
-              <p className="text-sm text-amber-600 mb-4">
+              <p className="text-sm text-amber-600 dark:text-amber-400 mb-4">
                 No admins available. Promote a member to admin first.
               </p>
             ) : (
@@ -330,16 +330,16 @@ export default function MembersPage() {
                     onClick={() => setSelectedTransferTarget(member.userId)}
                     className={`w-full flex items-center gap-3 p-3 rounded-lg border text-left transition-colors cursor-pointer ${
                       selectedTransferTarget === member.userId
-                        ? 'border-purple-500 bg-purple-50'
-                        : 'border-gray-200 hover:bg-gray-50'
+                        ? 'border-primary bg-accent'
+                        : 'border-border hover:bg-muted'
                     }`}
                   >
-                    <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-semibold shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold shrink-0">
                       {(getDisplayName(member).charAt(0) || '?').toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                      <div className="font-medium text-gray-900 truncate">{getDisplayName(member)}</div>
-                      <div className="text-sm text-gray-500 truncate">{member.user?.email}</div>
+                      <div className="font-medium text-card-foreground truncate">{getDisplayName(member)}</div>
+                      <div className="text-sm text-muted-foreground truncate">{member.user?.email}</div>
                     </div>
                   </button>
                 ))}
@@ -349,7 +349,7 @@ export default function MembersPage() {
               <Button
                 onClick={handleTransferOwnership}
                 disabled={!selectedTransferTarget || adminMembers.length === 0 || isTransferring}
-                className="flex-1 bg-purple-600 hover:bg-purple-700 cursor-pointer"
+                className="flex-1 cursor-pointer"
               >
                 {isTransferring ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Transfer'}
               </Button>
