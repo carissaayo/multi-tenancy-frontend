@@ -119,7 +119,8 @@ class ApiClient {
     }
 
     /**
-     * Build subdomain URL for workspace-scoped routes
+     * Build subdomain URL for workspace-scoped routes.
+     * Workspace is always a subdomain of the API host (e.g. nerdy-developers.multi-tenancy-backend-9g25.onrender.com).
      */
     private buildSubdomainUrl(workspaceSlug: string): string {
         const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -128,12 +129,9 @@ class ApiClient {
         if (url.hostname === 'localhost' || url.hostname.includes('localhost')) {
             // Development: workspace-slug.localhost:8000
             return `${url.protocol}//${workspaceSlug}.localhost${url.port ? `:${url.port}` : ''}${url.pathname}`;
-        } else {
-            // Production: workspace-slug.yourdomain.com
-            const hostParts = url.hostname.split('.');
-            const rootDomain = hostParts.slice(-2).join('.');
-            return `${url.protocol}//${workspaceSlug}.${rootDomain}${url.port ? `:${url.port}` : ''}${url.pathname}`;
         }
+        // Production: workspace-slug.full-api-host (e.g. nerdy-developers.multi-tenancy-backend-9g25.onrender.com)
+        return `${url.protocol}//${workspaceSlug}.${url.hostname}${url.port ? `:${url.port}` : ''}${url.pathname}`;
     }
 
     /**
