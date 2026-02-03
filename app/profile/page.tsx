@@ -1,153 +1,36 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import {
-  ArrowLeft,
-  User,
-  Mail,
-  Phone,
-  Camera,
-  Check,
-  AlertCircle,
-  Lock,
-  Bell,
-  Globe,
-  Moon,
-  Sun,
-  Shield,
-  Trash2,
-} from 'lucide-react';
-import { toast } from 'sonner';
-import { useAuthStore } from '@/store/auth-store';
-import { usersApi } from '@/lib/api/users';
-import { getErrorMessage } from '@/lib/utils/api-error';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { ArrowLeft } from 'lucide-react';
+import { useProfile } from '@/hooks/page/use-profile';
 import { WorkspaceHeader } from '@/components/workspace/workspace-header';
+import {
+  ProfileInformationSection,
+  SecuritySection,
+  PreferencesSection,
+  DangerZoneSection,
+} from '@/components/profile';
 
 export default function UserProfilePage() {
   const router = useRouter();
-  const { user, setUser } = useAuthStore();
-  const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const [formData, setFormData] = useState({
-    fullName: user?.fullName || '',
-    email: user?.email || '',
-    phoneNumber: user?.phoneNumber || '',
-    avatarUrl: user?.avatarUrl || '',
-  });
-
-  const [preferences, setPreferences] = useState({
-    notifications: {
-      email: true,
-      push: true,
-      mentions: true,
-      directMessages: true,
-    },
-    theme: 'light' as 'light' | 'dark' | 'system',
-    language: 'en',
-  });
-
-  const [passwordData, setPasswordData] = useState({
-    password: '',
-    newPassword: '',
-    confirmNewPassword: '',
-  });
-  const [showPasswordForm, setShowPasswordForm] = useState(false);
-  const [avatarLoading, setAvatarLoading] = useState(false);
-  const [passwordLoading, setPasswordLoading] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      setFormData({
-        fullName: user.fullName || '',
-        email: user.email || '',
-        phoneNumber: user.phoneNumber || '',
-        avatarUrl: user.avatarUrl || '',
-      });
-    }
-  }, [user]);
-
-  const handleSaveProfile = async () => {
-    setLoading(true);
-
-    try {
-      const { user: updatedUser } = await usersApi.updateProfile({
-        fullName: formData.fullName,
-        phoneNumber: formData.phoneNumber || undefined,
-      });
-      setUser(updatedUser as Parameters<typeof setUser>[0]);
-      toast.success('Profile updated successfully!', { duration: 3000 });
-      setIsEditing(false);
-    } catch (err: unknown) {
-      toast.error(getErrorMessage(err, 'Failed to update profile'), { duration: 4000 });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!passwordData.password?.trim()) {
-      toast.error('Current password is required', { duration: 4000 });
-      return;
-    }
-    if (!passwordData.newPassword?.trim()) {
-      toast.error('New password is required', { duration: 4000 });
-      return;
-    }
-    if (passwordData.newPassword.length < 6) {
-      toast.error('New password must be at least 6 characters', { duration: 4000 });
-      return;
-    }
-    if (passwordData.newPassword !== passwordData.confirmNewPassword) {
-      toast.error('Passwords do not match', { duration: 4000 });
-      return;
-    }
-
-    setPasswordLoading(true);
-
-    try {
-      await usersApi.changePassword({
-        password: passwordData.password,
-        newPassword: passwordData.newPassword,
-        confirmNewPassword: passwordData.confirmNewPassword,
-      });
-      toast.success('Password changed successfully!', { duration: 3000 });
-      setShowPasswordForm(false);
-      setPasswordData({ password: '', newPassword: '', confirmNewPassword: '' });
-    } catch (err: unknown) {
-      toast.error(getErrorMessage(err, 'Failed to change password'), { duration: 4000 });
-    } finally {
-      setPasswordLoading(false);
-    }
-  };
-
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !file.type.startsWith('image/')) return;
-
-    setAvatarLoading(true);
-
-    try {
-      const { user: updatedUser } = await usersApi.updateAvatar(file);
-      setUser(updatedUser as Parameters<typeof setUser>[0]);
-      setFormData((prev) => ({ ...prev, avatarUrl: updatedUser?.avatarUrl || prev.avatarUrl }));
-      toast.success('Avatar updated successfully!', { duration: 3000 });
-    } catch (err: unknown) {
-      toast.error(getErrorMessage(err, 'Failed to update avatar'), { duration: 4000 });
-    } finally {
-      setAvatarLoading(false);
-    }
-  };
-
-  const getInitials = (name: string) => {
-    return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
-  };
+  const {
+    formData,
+    setFormData,
+    preferences,
+    setPreferences,
+    passwordData,
+    setPasswordData,
+    isEditing,
+    setIsEditing,
+    loading,
+    avatarLoading,
+    passwordLoading,
+    showPasswordForm,
+    togglePasswordForm,
+    handleSaveProfile,
+    handleChangePassword,
+    handleAvatarUpload,
+  } = useProfile();
 
   return (
     <div className="flex flex-col h-screen">
@@ -162,331 +45,29 @@ export default function UserProfilePage() {
             <span className="font-medium">Back</span>
           </button>
 
-          {/* Profile Section */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-start justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">Profile Information</h2>
-                <p className="text-sm text-gray-500 mt-1">Update your personal details</p>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => (isEditing ? setIsEditing(false) : setIsEditing(true))}
-                className="text-purple-600 hover:text-purple-700"
-              >
-                {isEditing ? 'Cancel' : 'Edit'}
-              </Button>
-            </div>
+          <ProfileInformationSection
+            formData={formData}
+            setFormData={setFormData}
+            isEditing={isEditing}
+            setIsEditing={setIsEditing}
+            loading={loading}
+            avatarLoading={avatarLoading}
+            onSaveProfile={handleSaveProfile}
+            onAvatarUpload={handleAvatarUpload}
+          />
 
-            <div className="flex items-center gap-6 mb-6 pb-6 border-b border-gray-200">
-              <div className="relative">
-                {formData.avatarUrl ? (
-                  <Image
-                    src={formData.avatarUrl}
-                    alt={formData.fullName}
-                    width={80}
-                    height={80}
-                    className="rounded-2xl object-cover"
-                  />
-                ) : (
-                  <div className="w-20 h-20 bg-linear-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl">
-                    {getInitials(formData.fullName || 'User')}
-                  </div>
-                )}
-                {isEditing && (
-                  <label
-                    className={`absolute -bottom-2 -right-2 w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center transition-colors shadow-lg ${
-                      avatarLoading ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'cursor-pointer hover:bg-purple-700'
-                    }`}
-                  >
-                    {avatarLoading ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <Camera className="w-5 h-5 text-white" />
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleAvatarUpload}
-                      disabled={avatarLoading}
-                      className="hidden"
-                    />
-                  </label>
-                )}
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg text-gray-900">{formData.fullName}</h3>
-                <p className="text-sm text-gray-500">{formData.email}</p>
-                {isEditing && (
-                  <p className="text-xs text-gray-400 mt-2">Click the camera icon to change your avatar</p>
-                )}
-              </div>
-            </div>
+          <SecuritySection
+            showPasswordForm={showPasswordForm}
+            togglePasswordForm={togglePasswordForm}
+            passwordData={passwordData}
+            setPasswordData={setPasswordData}
+            passwordLoading={passwordLoading}
+            onSubmit={handleChangePassword}
+          />
 
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                    <User className="w-4 h-4" />
-                    Full Name
-                  </label>
-                  <Input
-                    value={formData.fullName}
-                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                    disabled={!isEditing}
-                  />
-                </div>
+          <PreferencesSection preferences={preferences} setPreferences={setPreferences} />
 
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                    <Mail className="w-4 h-4" />
-                    Email
-                  </label>
-                  <Input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    disabled
-                    className="bg-gray-50"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
-                </div>
-              </div>
-
-              <div>
-                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                  <Phone className="w-4 h-4" />
-                  Phone Number
-                </label>
-                <Input
-                  type="tel"
-                  value={formData.phoneNumber}
-                  onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                  disabled={!isEditing}
-                  placeholder="+1 (555) 000-0000"
-                />
-              </div>
-
-              {isEditing && (
-                <div className="flex gap-3 pt-4">
-                  <Button onClick={handleSaveProfile} disabled={loading}>
-                    {loading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Check className="w-4 h-4" />
-                        Save Changes
-                      </>
-                    )}
-                  </Button>
-                  <Button variant="secondary" onClick={() => setIsEditing(false)}>
-                    Cancel
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Security Section */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-2 mb-4">
-              <Shield className="w-5 h-5 text-gray-600" />
-              <h2 className="text-xl font-bold text-gray-900">Security</h2>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <Lock className="w-5 h-5 text-gray-600" />
-                  <div>
-                    <h3 className="font-semibold text-gray-900">Password</h3>
-                    <p className="text-sm text-gray-500">Change your password</p>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowPasswordForm(!showPasswordForm)}
-                  className="text-purple-600 hover:bg-purple-50"
-                >
-                  {showPasswordForm ? 'Cancel' : 'Change'}
-                </Button>
-              </div>
-
-              {showPasswordForm && (
-                <form
-                  onSubmit={handleChangePassword}
-                  className="p-4 bg-gray-50 rounded-lg space-y-4"
-                  noValidate
-                >
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Current Password</label>
-                    <Input
-                      type="password"
-                      value={passwordData.password}
-                      onChange={(e) =>
-                        setPasswordData({ ...passwordData, password: e.target.value })
-                      }
-                      required
-                      minLength={1}
-                      autoComplete="current-password"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">New Password</label>
-                    <Input
-                      type="password"
-                      value={passwordData.newPassword}
-                      onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                      required
-                      minLength={8}
-                      autoComplete="new-password"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Confirm New Password
-                    </label>
-                    <Input
-                      type="password"
-                      value={passwordData.confirmNewPassword}
-                      onChange={(e) =>
-                        setPasswordData({ ...passwordData, confirmNewPassword: e.target.value })
-                      }
-                      required
-                      minLength={8}
-                      autoComplete="new-password"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={passwordLoading}
-                    className="inline-flex items-center justify-center gap-2 h-9 px-4 py-2 rounded-md text-sm font-medium bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 disabled:pointer-events-none transition-colors cursor-pointer"
-                  >
-                    {passwordLoading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Updating...
-                      </>
-                    ) : (
-                      'Update Password'
-                    )}
-                  </button>
-                </form>
-              )}
-            </div>
-          </div>
-
-          {/* Preferences Section */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-2 mb-4">
-              <Bell className="w-5 h-5 text-gray-600" />
-              <h2 className="text-xl font-bold text-gray-900">Preferences</h2>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-3">Notifications</h3>
-                <div className="space-y-3">
-                  {Object.entries(preferences.notifications).map(([key, value]) => (
-                    <div key={key} className="flex items-center justify-between">
-                      <label className="text-sm text-gray-700 capitalize">
-                        {key.replace(/([A-Z])/g, ' $1').trim()}
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setPreferences({
-                            ...preferences,
-                            notifications: {
-                              ...preferences.notifications,
-                              [key]: !value,
-                            },
-                          })
-                        }
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
-                          value ? 'bg-purple-600' : 'bg-gray-200'
-                        }`}
-                      >
-                        <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            value ? 'translate-x-6' : 'translate-x-1'
-                          }`}
-                        />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-gray-200">
-                <h3 className="font-semibold text-gray-900 mb-3">Theme</h3>
-                <div className="grid grid-cols-3 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setPreferences({ ...preferences, theme: 'light' })}
-                    className={`p-3 border-2 rounded-lg transition-all cursor-pointer ${
-                      preferences.theme === 'light'
-                        ? 'border-purple-500 bg-purple-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <Sun className="w-5 h-5 mx-auto mb-1 text-gray-700" />
-                    <p className="text-xs font-medium text-gray-900">Light</p>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPreferences({ ...preferences, theme: 'dark' })}
-                    className={`p-3 border-2 rounded-lg transition-all cursor-pointer ${
-                      preferences.theme === 'dark'
-                        ? 'border-purple-500 bg-purple-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <Moon className="w-5 h-5 mx-auto mb-1 text-gray-700" />
-                    <p className="text-xs font-medium text-gray-900">Dark</p>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPreferences({ ...preferences, theme: 'system' })}
-                    className={`p-3 border-2 rounded-lg transition-all cursor-pointer ${
-                      preferences.theme === 'system'
-                        ? 'border-purple-500 bg-purple-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <Globe className="w-5 h-5 mx-auto mb-1 text-gray-700" />
-                    <p className="text-xs font-medium text-gray-900">System</p>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Danger Zone */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-red-200">
-            <div className="flex items-center gap-2 mb-4">
-              <AlertCircle className="w-5 h-5 text-red-600" />
-              <h2 className="text-xl font-bold text-red-600">Danger Zone</h2>
-            </div>
-
-            <div className="flex items-center justify-between p-4 border border-red-200 rounded-lg bg-red-50">
-              <div>
-                <h3 className="font-semibold text-red-600">Delete Account</h3>
-                <p className="text-sm text-red-500">
-                  Permanently delete your account and all associated data
-                </p>
-              </div>
-              <Button variant="destructive" className="cursor-pointer">
-                <Trash2 className="w-4 h-4" />
-                Delete
-              </Button>
-            </div>
-          </div>
+          <DangerZoneSection />
         </div>
       </div>
     </div>
