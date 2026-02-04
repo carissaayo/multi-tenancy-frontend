@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMyPendingInvitations, useAcceptInvitationById, type UserPendingInvitation } from '@/hooks/invitations';
+import { useMyPendingInvitations, useAcceptInvitationByToken, type UserPendingInvitation } from '@/hooks/invitations';
+import { toast } from 'sonner';
 import { useAuthStore } from '@/store/auth-store';
 import { authApi } from '@/lib/api/auth';
 import { queryKeys } from '@/hooks/query-keys';
@@ -74,7 +75,7 @@ export default function MyInvitationsPage() {
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
   const { data: invitations, isLoading, error, refetch } = useMyPendingInvitations();
-  const acceptInvitation = useAcceptInvitationById();
+  const acceptInvitation = useAcceptInvitationByToken();
 
   const [invitationToAccept, setInvitationToAccept] = useState<UserPendingInvitation | null>(null);
   const [isAccepting, setIsAccepting] = useState(false);
@@ -85,10 +86,16 @@ export default function MyInvitationsPage() {
 
   const handleAcceptConfirm = async () => {
     if (!invitationToAccept) return;
+    // Use token so we hit PATCH /invitations/accept?token=... (workspace-optional, same as email link)
+    const token = invitationToAccept.token;
+    if (!token) {
+      toast.error('This invitation cannot be accepted here. Please use the link from your email.');
+      return;
+    }
 
     setIsAccepting(true);
     try {
-      const result = await acceptInvitation.mutateAsync(invitationToAccept.id);
+      const result = await acceptInvitation.mutateAsync(token);
 
       // Select the workspace and navigate
       await authApi.selectWorkspace(result.workspace.id);

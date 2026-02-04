@@ -90,4 +90,22 @@ export function useAcceptInvitationById() {
   });
 }
 
+/**
+ * Accept an invitation by token. Uses the same endpoint as the email link (PATCH /invitations/accept?token=...).
+ * Use this when the invitation object includes a token (e.g. from GET /invitations/me) to avoid workspace-scoped routing.
+ */
+export function useAcceptInvitationByToken() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (token: string) => invitationsApi.accept(token),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: invitationKeys.myPending() });
+    },
+    onError: (err) => {
+      toast.error(getErrorMessage(err, 'Failed to accept invitation'), { duration: 4000 });
+    },
+  });
+}
+
 export type { WorkspaceInvitation, UserPendingInvitation };
