@@ -96,10 +96,10 @@ export const invitationsApi = {
     return response.data;
   },
 
-  /** Revoke a pending invitation. Workspace-scoped (subdomain). Owner/Admin only. */
+  /** Revoke a pending invitation. Workspace-scoped (header). Owner/Admin only. */
   revoke: async (invitationId: string): Promise<{ message: string }> => {
     const response = await apiClient.instance.patch<{ message: string }>(
-      `/invitations/${invitationId}/revoke`
+      `/invitations/revoke/${invitationId}`
     );
     return response.data;
   },
