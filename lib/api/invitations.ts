@@ -85,7 +85,7 @@ export const invitationsApi = {
   /** Get pending invitations for the current user (by their email). */
   getMyPendingInvitations: async (): Promise<UserPendingInvitationsResponse> => {
     const response = await apiClient.instance.get<UserPendingInvitationsResponse>(
-      '/invitations/me'
+      '/invitations/my'
     );
     return response.data;
   },
