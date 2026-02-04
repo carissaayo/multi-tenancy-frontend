@@ -1,7 +1,9 @@
 'use client';
 
-import { Loader2, Plus, Building2, Users, ArrowRight, Sparkles, Search, Hash } from 'lucide-react';
+import { Loader2, Plus, Building2, Users, ArrowRight, Sparkles, Search, Hash, Mail } from 'lucide-react';
+import Link from 'next/link';
 import { useSelectWorkspacePage } from '@/hooks/pages/use-select-workspace';
+import { useMyPendingInvitations } from '@/hooks/invitations';
 import { ErrorDisplay } from '@/components/ui/error-display';
 
 // optional: deterministic color from slug
@@ -24,6 +26,11 @@ export default function SelectWorkspacePage() {
     handleSelectWorkspace,
     handleCreateWorkspace,
   } = useSelectWorkspacePage();
+
+  const { data: pendingInvitations } = useMyPendingInvitations();
+  const pendingCount = (pendingInvitations ?? []).filter(
+    (inv) => inv.status === 'pending' && new Date(inv.expiresAt) > new Date()
+  ).length;
 
   if (isLoading) {
     return (
@@ -74,6 +81,27 @@ export default function SelectWorkspacePage() {
             Select a workspace to continue or create a new one
           </p>
         </div>
+
+        {/* Pending Invitations Banner */}
+        {pendingCount > 0 && (
+          <Link
+            href="/my-invitations"
+            className="max-w-2xl mx-auto mb-6 flex items-center gap-4 p-4 bg-blue-50 border border-blue-200 rounded-2xl hover:bg-blue-100 transition-colors group"
+          >
+            <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center shrink-0">
+              <Mail className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-blue-900">
+                You have {pendingCount} pending invitation{pendingCount > 1 ? 's' : ''}
+              </p>
+              <p className="text-sm text-blue-700">
+                Click to view and accept workspace invitations
+              </p>
+            </div>
+            <ArrowRight className="w-5 h-5 text-blue-500 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        )}
 
         {/* Search */}
         <div className="max-w-2xl mx-auto mb-8">
@@ -180,9 +208,13 @@ export default function SelectWorkspacePage() {
           )}
         </div>
 
-        <div className="text-center mt-8">
+        <div className="text-center mt-8 space-y-2">
           <p className="text-sm text-gray-500">
-            Need help? <a href="/support" className="text-blue-600 hover:text-blue-700 font-semibold">Contact Support</a>
+            <Link href="/my-invitations" className="text-blue-600 hover:text-blue-700 font-semibold">
+              View pending invitations
+            </Link>
+            {' · '}
+            <a href="/support" className="text-blue-600 hover:text-blue-700 font-semibold">Contact Support</a>
           </p>
         </div>
       </div>

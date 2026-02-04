@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { invitationsApi, type WorkspaceInvitation } from '@/lib/api/invitations';
+import { invitationsApi, type WorkspaceInvitation, type UserPendingInvitation } from '@/lib/api/invitations';
 import { useAuthStore } from '@/store/auth-store';
 import { toast } from 'sonner';
 import { getErrorMessage } from '@/lib/utils/api-error';
@@ -13,6 +13,7 @@ import { getErrorMessage } from '@/lib/utils/api-error';
 export const invitationKeys = {
   all: ['invitations'] as const,
   lists: () => [...invitationKeys.all, 'list'] as const,
+  myPending: () => [...invitationKeys.all, 'my-pending'] as const,
 };
 
 // ============================================================================
@@ -36,6 +37,23 @@ export function useWorkspaceInvitations() {
   });
 }
 
+/**
+ * Fetch pending invitations for the current user (invitations sent to their email).
+ * Useful when email sending is unavailable (e.g., Render free tier).
+ */
+export function useMyPendingInvitations() {
+  const { isAuthenticated } = useAuthStore();
+
+  return useQuery({
+    queryKey: invitationKeys.myPending(),
+    queryFn: async () => {
+      const response = await invitationsApi.getMyPendingInvitations();
+      return response.invitations ?? [];
+    },
+    enabled: isAuthenticated,
+  });
+}
+
 // ============================================================================
 // Mutations
 // ============================================================================
@@ -55,4 +73,21 @@ export function useRevokeInvitation() {
   });
 }
 
-export type { WorkspaceInvitation };
+/**
+ * Accept an invitation by ID (for UI-based acceptance without email link).
+ */
+export function useAcceptInvitationById() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (invitationId: string) => invitationsApi.acceptById(invitationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: invitationKeys.myPending() });
+    },
+    onError: (err) => {
+      toast.error(getErrorMessage(err, 'Failed to accept invitation'), { duration: 4000 });
+    },
+  });
+}
+
+export type { WorkspaceInvitation, UserPendingInvitation };

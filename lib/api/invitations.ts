@@ -38,6 +38,31 @@ export interface ListInvitationsResponse {
   total?: number;
 }
 
+/** User's pending invitation with workspace info */
+export interface UserPendingInvitation {
+  id: string;
+  email: string;
+  role: WorkspaceInvitationRole;
+  status: WorkspaceInvitationStatus;
+  token: string;
+  invitedAt: string;
+  expiresAt: string;
+  workspace: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  invitedBy?: {
+    id: string;
+    fullName?: string | null;
+    email: string;
+  } | null;
+}
+
+export interface UserPendingInvitationsResponse {
+  invitations: UserPendingInvitation[];
+}
+
 export const invitationsApi = {
   /** Accept a workspace invitation by token. Requires auth. */
   accept: async (token: string): Promise<AcceptInvitationResponse> => {
@@ -45,6 +70,22 @@ export const invitationsApi = {
       '/invitations/accept',
       undefined,
       { params: { token } }
+    );
+    return response.data;
+  },
+
+  /** Accept a workspace invitation by invitation ID (for UI-based acceptance). Requires auth. */
+  acceptById: async (invitationId: string): Promise<AcceptInvitationResponse> => {
+    const response = await apiClient.instance.patch<AcceptInvitationResponse>(
+      `/invitations/${invitationId}/accept`
+    );
+    return response.data;
+  },
+
+  /** Get pending invitations for the current user (by their email). */
+  getMyPendingInvitations: async (): Promise<UserPendingInvitationsResponse> => {
+    const response = await apiClient.instance.get<UserPendingInvitationsResponse>(
+      '/users/me/invitations'
     );
     return response.data;
   },
