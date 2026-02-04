@@ -17,15 +17,15 @@ export function ChannelHeader({
   onToggleEdit,
 }: ChannelHeaderProps) {
   return (
-    <div className="flex items-start justify-between mb-4">
-      <div className="flex items-center gap-3">
+    <div className="flex items-start justify-between gap-2 mb-4">
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
         {channel.isPrivate ? (
-          <Lock className="w-8 h-8 text-gray-600" />
+          <Lock className="w-6 h-6 sm:w-8 sm:h-8 text-gray-600 shrink-0" />
         ) : (
-          <Hash className="w-8 h-8 text-gray-600" />
+          <Hash className="w-6 h-6 sm:w-8 sm:h-8 text-gray-600 shrink-0" />
         )}
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">
             {channel.isPrivate ? '' : '#'}
             {channel.name}
           </h1>
@@ -37,7 +37,7 @@ export function ChannelHeader({
       {canEdit && (
         <button
           onClick={onToggleEdit}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer shrink-0"
         >
           {isEditing ? (
             <X className="w-5 h-5 text-gray-600" />

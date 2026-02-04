@@ -87,10 +87,10 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-col h-screen">
-      <WorkspaceHeader title="Workspace Settings" />
-      <div className="flex-1 overflow-y-auto p-6 bg-background">
+      <WorkspaceHeader title="Workspace Settings" backHref="/workspace" />
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-background">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold mb-6 text-foreground">Workspace Settings</h2>
+          <h2 className="text-xl sm:text-2xl font-bold mb-6 text-foreground">Workspace Settings</h2>
 
           <div className="bg-card rounded-lg shadow p-6 space-y-6 border border-border">
             {error && (
@@ -197,10 +197,10 @@ export default function SettingsPage() {
             </div>
             <div className="space-y-4">
               {!isOwner && (
-                <div className="flex items-center justify-between p-4 border border-border rounded-lg">
-                  <div>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border border-border rounded-lg">
+                  <div className="min-w-0">
                     <h3 className="font-semibold text-foreground">Leave Workspace</h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground mt-0.5">
                       {isDeactivated
                         ? 'Activate the workspace first to leave'
                         : 'You will no longer have access to this workspace'}
@@ -210,6 +210,7 @@ export default function SettingsPage() {
                     variant="outline"
                     onClick={() => setShowLeaveModal(true)}
                     disabled={isDeactivated}
+                    className="shrink-0 w-full sm:w-auto"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
                     Leave
@@ -218,10 +219,10 @@ export default function SettingsPage() {
               )}
 
               {isOwner && (
-                <div className="flex items-center justify-between p-4 border border-border rounded-lg">
-                  <div>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border border-border rounded-lg">
+                  <div className="min-w-0">
                     <h3 className="font-semibold text-foreground">Transfer Ownership</h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground mt-0.5">
                       Transfer workspace ownership to an admin. You will become an admin.
                     </p>
                   </div>
@@ -229,7 +230,7 @@ export default function SettingsPage() {
                     variant="outline"
                     onClick={() => setShowTransferModal(true)}
                     disabled={isDeactivated}
-                    className="border-primary text-primary hover:bg-accent"
+                    className="border-primary text-primary hover:bg-accent shrink-0 w-full sm:w-auto"
                   >
                     <Crown className="w-4 h-4 mr-2" />
                     Transfer Ownership
@@ -238,12 +239,12 @@ export default function SettingsPage() {
               )}
 
               {isOwner && (
-                <div className="flex items-center justify-between p-4 border border-border rounded-lg">
-                  <div>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border border-border rounded-lg">
+                  <div className="min-w-0">
                     <h3 className="font-semibold text-foreground">
                       {isDeactivated ? 'Activate Workspace' : 'Deactivate Workspace'}
                     </h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground mt-0.5">
                       {isDeactivated
                         ? 'Reactivate this workspace to make it accessible again'
                         : 'Temporarily disable this workspace. You can reactivate it later'}
@@ -255,9 +256,10 @@ export default function SettingsPage() {
                       isDeactivated ? setShowActivateModal(true) : setShowDeactivateModal(true)
                     }
                     className={
-                      isDeactivated
+                      'shrink-0 w-full sm:w-auto ' +
+                      (isDeactivated
                         ? 'border-green-500 text-green-700 hover:bg-green-50 dark:border-green-400 dark:text-green-300 dark:hover:bg-green-900/30'
-                        : 'border-amber-500 text-amber-700 hover:bg-amber-50 dark:border-amber-400 dark:text-amber-300 dark:hover:bg-amber-900/30'
+                        : 'border-amber-500 text-amber-700 hover:bg-amber-50 dark:border-amber-400 dark:text-amber-300 dark:hover:bg-amber-900/30')
                     }
                   >
                     {isDeactivated ? (
@@ -276,14 +278,14 @@ export default function SettingsPage() {
               )}
 
               {isOwner && (
-                <div className="flex items-center justify-between p-4 border border-destructive/50 rounded-lg bg-destructive/10">
-                  <div>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border border-destructive/50 rounded-lg bg-destructive/10">
+                  <div className="min-w-0">
                     <h3 className="font-semibold text-destructive">Delete Workspace</h3>
-                    <p className="text-sm text-destructive/90">
+                    <p className="text-sm text-destructive/90 mt-0.5">
                       Permanently delete this workspace and all its data. This cannot be undone.
                     </p>
                   </div>
-                  <Button variant="destructive" onClick={() => setShowDeleteModal(true)}>
+                  <Button variant="destructive" onClick={() => setShowDeleteModal(true)} className="shrink-0 w-full sm:w-auto">
                     <Trash2 className="w-4 h-4 mr-2" />
                     Delete
                   </Button>

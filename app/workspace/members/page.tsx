@@ -141,22 +141,22 @@ export default function MembersPage() {
 
   return (
     <div className="flex flex-col h-screen">
-      <WorkspaceHeader title="Members" />
-      <div className="flex-1 overflow-y-auto p-6 bg-background">
+      <WorkspaceHeader title="Members" backHref="/workspace" />
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-background">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-foreground">Workspace Members</h2>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">Workspace Members</h2>
             {canManageMembers && (
-              <div className="flex gap-2">
-                <Button variant="outline" asChild>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" className="flex-1 sm:flex-none" asChild>
                   <Link href="/workspace/invitations">
                     <Mail className="w-4 h-4 mr-2" />
                     Invitations
                   </Link>
                 </Button>
-                <Button onClick={() => setShowInviteModal(true)}>
+                <Button size="sm" className="flex-1 sm:flex-none" onClick={() => setShowInviteModal(true)}>
                   <UserPlus className="w-4 h-4 mr-2" />
-                  Invite to Workspace
+                  Invite
                 </Button>
               </div>
             )}
@@ -166,18 +166,18 @@ export default function MembersPage() {
               {data?.map((member) => (
                 <div
                   key={member.id}
-                  className="p-4 flex items-center justify-between hover:bg-muted/50"
+                  className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:bg-muted/50"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold">
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold shrink-0 text-sm sm:text-base">
                       {(getDisplayName(member).charAt(0) || '?').toUpperCase()}
                     </div>
-                    <div>
-                      <div className="font-semibold text-foreground">{getDisplayName(member)}</div>
-                      <div className="text-sm text-muted-foreground">{member.user?.email ?? ''}</div>
+                    <div className="min-w-0">
+                      <div className="font-semibold text-foreground truncate">{getDisplayName(member)}</div>
+                      <div className="text-sm text-muted-foreground truncate">{member.user?.email ?? ''}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 sm:gap-4 flex-wrap pl-14 sm:pl-0">
                     {member.userId === user?.id && currentUserRole?.toLowerCase() === 'owner' ? (
                       <>
                         <span className="px-3 py-1 bg-muted rounded-md text-sm capitalize text-foreground">
@@ -202,7 +202,7 @@ export default function MembersPage() {
                           }
                         >
                           <SelectTrigger
-                            className="w-[120px] h-8 cursor-pointer"
+                            className="w-full sm:w-[120px] h-8 cursor-pointer min-w-0"
                             disabled={updateRole.isPending && updateRole.variables?.userId === member.userId}
                           >
                             <SelectValue placeholder="Role" />
@@ -219,6 +219,7 @@ export default function MembersPage() {
                             size="sm"
                             onClick={() => handleRemoveMember(member.userId ?? member.user?.id ?? '')}
                             disabled={removeMember.isPending}
+                            className="shrink-0"
                           >
                             Remove
                           </Button>
@@ -239,8 +240,8 @@ export default function MembersPage() {
 
       {/* Invite to Workspace Modal */}
       {showInviteModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-card rounded-2xl p-6 max-w-md w-full border border-border">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+          <div className="bg-card rounded-t-2xl sm:rounded-2xl p-6 max-w-md w-full border border-border max-h-[90vh] overflow-y-auto">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
                 <UserPlus className="w-6 h-6 text-primary" />
@@ -306,8 +307,8 @@ export default function MembersPage() {
 
       {/* Transfer Ownership Modal */}
       {showTransferModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-card rounded-2xl p-6 max-w-md w-full border border-border">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+          <div className="bg-card rounded-t-2xl sm:rounded-2xl p-6 max-w-md w-full border border-border max-h-[90vh] overflow-y-auto">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
                 <Crown className="w-6 h-6 text-primary" />

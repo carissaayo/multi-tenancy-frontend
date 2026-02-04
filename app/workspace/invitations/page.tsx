@@ -95,7 +95,7 @@ export default function InvitationsPage() {
   if (!canAccess) {
     return (
       <div className="flex flex-col h-screen">
-        <WorkspaceHeader title="Invitations" />
+        <WorkspaceHeader title="Invitations" backHref="/workspace" />
         <div className="flex-1 flex items-center justify-center p-6 bg-background">
           <div className="text-center max-w-md">
             <h2 className="text-xl font-bold text-foreground mb-2">Access Denied</h2>
@@ -114,7 +114,7 @@ export default function InvitationsPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col h-screen">
-        <WorkspaceHeader title="Invitations" />
+        <WorkspaceHeader title="Invitations" backHref="/workspace" />
         <div className="flex-1 p-6 bg-background">
           <div className="space-y-4 max-w-4xl mx-auto">
             {[1, 2, 3, 4].map((i) => (
@@ -129,7 +129,7 @@ export default function InvitationsPage() {
   if (error) {
     return (
       <div className="flex flex-col h-screen">
-        <WorkspaceHeader title="Invitations" />
+        <WorkspaceHeader title="Invitations" backHref="/workspace" />
         <div className="flex-1 flex items-center justify-center p-6">
           <ErrorDisplay
             error={error}
@@ -149,8 +149,8 @@ export default function InvitationsPage() {
 
   return (
     <div className="flex flex-col h-screen">
-      <WorkspaceHeader title="Invitations" />
-      <div className="flex-1 overflow-y-auto p-6 bg-background">
+      <WorkspaceHeader title="Invitations" backHref="/workspace" />
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-background">
         <div className="max-w-4xl mx-auto">
           <Link
             href="/workspace/members"
@@ -159,10 +159,10 @@ export default function InvitationsPage() {
             <ArrowLeft className="w-5 h-5" />
             <span className="font-medium">Back to Members</span>
           </Link>
-          <h2 className="text-2xl font-bold mb-6 text-foreground">Workspace Invitations</h2>
+          <h2 className="text-xl sm:text-2xl font-bold mb-6 text-foreground">Workspace Invitations</h2>
           <div className="bg-card rounded-lg shadow border border-border">
             {sortedInvitations.length === 0 ? (
-              <div className="p-12 text-center text-muted-foreground">
+              <div className="p-8 sm:p-12 text-center text-muted-foreground">
                 <Mail className="w-12 h-12 mx-auto mb-4 text-muted-foreground/60" />
                 <p className="font-medium text-foreground">No invitations yet</p>
                 <p className="text-sm mt-1">
@@ -171,7 +171,7 @@ export default function InvitationsPage() {
               </div>
             ) : (
               <div className="divide-y divide-border overflow-x-auto">
-                <div className="grid grid-cols-12 gap-4 px-4 py-3 bg-muted/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                <div className="hidden sm:grid grid-cols-12 gap-4 px-4 py-3 bg-muted/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   <div className="col-span-3">Email</div>
                   <div className="col-span-2">Role</div>
                   <div className="col-span-2">Status</div>
@@ -182,17 +182,18 @@ export default function InvitationsPage() {
                 {sortedInvitations.map((inv) => (
                   <div
                     key={inv.id}
-                    className="grid grid-cols-12 gap-4 px-4 py-4 items-center hover:bg-muted/50 text-foreground"
+                    className="flex flex-col sm:grid sm:grid-cols-12 gap-2 sm:gap-4 px-4 py-4 sm:items-center hover:bg-muted/50 text-foreground"
                   >
-                    <div className="col-span-3 min-w-0">
-                      <span className="font-medium truncate block">
-                        {inv.email}
-                      </span>
+                    <div className="sm:col-span-3 min-w-0 flex flex-wrap items-center gap-2 sm:block">
+                      <span className="sm:hidden text-xs font-semibold text-muted-foreground">Email</span>
+                      <span className="font-medium truncate block">{inv.email}</span>
                     </div>
-                    <div className="col-span-2">
+                    <div className="sm:col-span-2 flex items-center gap-2 sm:block">
+                      <span className="sm:hidden text-xs font-semibold text-muted-foreground">Role</span>
                       <span className="capitalize">{inv.role}</span>
                     </div>
-                    <div className="col-span-2">
+                    <div className="sm:col-span-2 flex items-center gap-2 sm:block">
+                      <span className="sm:hidden text-xs font-semibold text-muted-foreground">Status</span>
                       <span
                         className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
                           STATUS_COLORS[inv.status] ?? 'bg-muted text-muted-foreground'
@@ -201,22 +202,22 @@ export default function InvitationsPage() {
                         {STATUS_LABELS[inv.status] ?? inv.status}
                       </span>
                     </div>
-                    <div className="col-span-2 min-w-0">
-                      <span className="text-muted-foreground truncate block">
-                        {getInviterName(inv)}
-                      </span>
+                    <div className="sm:col-span-2 min-w-0 flex items-center gap-2 sm:block">
+                      <span className="sm:hidden text-xs font-semibold text-muted-foreground">Invited by</span>
+                      <span className="text-muted-foreground truncate block">{getInviterName(inv)}</span>
                     </div>
-                    <div className="col-span-2 text-sm text-muted-foreground">
+                    <div className="sm:col-span-2 text-sm text-muted-foreground flex items-center gap-2 sm:block">
+                      <span className="sm:hidden text-xs font-semibold text-muted-foreground">Date</span>
                       {formatDate(inv.invitedAt)}
                     </div>
-                    <div className="col-span-1 text-right">
+                    <div className="sm:col-span-1 sm:text-right pt-2 sm:pt-0 border-t sm:border-t-0 border-border sm:border-0">
                       {inv.status === 'pending' && (
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handleRevokeClick(inv)}
                           disabled={revokeInvitation.isPending}
-                          className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+                          className="text-destructive hover:text-destructive/90 hover:bg-destructive/10 w-full sm:w-auto"
                         >
                           {revokeInvitation.isPending &&
                           revokeInvitation.variables === inv.id ? (

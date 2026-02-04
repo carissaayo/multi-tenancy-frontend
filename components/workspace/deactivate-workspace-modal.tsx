@@ -21,8 +21,8 @@ export function DeactivateWorkspaceModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-card rounded-2xl p-6 max-w-md w-full border border-border">
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+      <div className="bg-card rounded-t-2xl sm:rounded-2xl p-6 max-w-md w-full border border-border max-h-[90vh] overflow-y-auto">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
             <PowerOff className="w-6 h-6 text-amber-600 dark:text-amber-400" />

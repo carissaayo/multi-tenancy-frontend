@@ -126,10 +126,10 @@ export default function ChannelSettingsPage() {
         isPrivate={channel.isPrivate}
       />
 
-      <div className="flex-1 overflow-y-auto bg-gray-50 p-6">
+      <div className="flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6">
         <div className="max-w-4xl mx-auto space-y-6">
-          {/* Header Section */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          {/* Header Section - sticky on mobile */}
+          <div className="sticky top-0 z-10 bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100">
             <ChannelHeader
               channel={channel}
               canEdit={canEdit}

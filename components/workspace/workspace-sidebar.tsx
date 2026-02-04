@@ -159,7 +159,10 @@ export function WorkspaceSidebar({ onLogoutClick }: WorkspaceSidebarProps) {
             <span>Threads</span>
           </button>
           <button
-            onClick={() => router.push('/workspace/members')}
+            onClick={() => {
+              router.push('/workspace/members');
+              setSidebarOpen(false);
+            }}
             className="w-full flex items-center gap-3 px-3 py-2 hover:bg-sidebar-accent rounded-lg transition-colors text-sm cursor-pointer text-sidebar-foreground"
           >
             <Users className="w-5 h-5" />
@@ -234,7 +237,10 @@ export function WorkspaceSidebar({ onLogoutClick }: WorkspaceSidebarProps) {
 
         <div className="space-y-1">
           <button
-            onClick={() => router.push('/workspace/settings')}
+            onClick={() => {
+              router.push('/workspace/settings');
+              setSidebarOpen(false);
+            }}
             className="w-full flex items-center gap-3 px-3 py-2 hover:bg-sidebar-accent rounded-lg transition-colors text-sm cursor-pointer text-sidebar-foreground"
           >
             <Settings className="w-4 h-4" />
