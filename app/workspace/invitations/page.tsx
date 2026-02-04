@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWorkspaceInvitations, useRevokeInvitation, type WorkspaceInvitation } from '@/hooks/invitations';
 import { useWorkspaceMembers } from '@/hooks/members';
@@ -9,7 +9,8 @@ import { useAuthStore } from '@/store/auth-store';
 import { WorkspaceHeader } from '@/components/workspace/workspace-header';
 import { ErrorDisplay } from '@/components/ui/error-display';
 import { Button } from '@/components/ui/button';
-import { Loader2, Mail, Ban, ArrowLeft } from 'lucide-react';
+import { Modal } from '@/components/ui/modal';
+import { Loader2, Mail, Ban, ArrowLeft, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 
 const STATUS_LABELS: Record<string, string> = {
@@ -56,6 +57,9 @@ export default function InvitationsPage() {
   const { data: invitations, isLoading, error } = useWorkspaceInvitations();
   const revokeInvitation = useRevokeInvitation();
 
+  // State for revoke confirmation modal
+  const [invitationToRevoke, setInvitationToRevoke] = useState<WorkspaceInvitation | null>(null);
+
   const currentUserRole = useMemo(() => {
     const member = membersData?.find(
       (m) => m.userId === user?.id || m.user?.id === user?.id
@@ -72,9 +76,20 @@ export default function InvitationsPage() {
     [currentUserRole]
   );
 
-  const handleRevoke = (inv: WorkspaceInvitation) => {
-    if (!confirm(`Revoke invitation sent to ${inv.email}?`)) return;
-    revokeInvitation.mutate(inv.id);
+  const handleRevokeClick = (inv: WorkspaceInvitation) => {
+    setInvitationToRevoke(inv);
+  };
+
+  const handleRevokeConfirm = () => {
+    if (invitationToRevoke) {
+      revokeInvitation.mutate(invitationToRevoke.id, {
+        onSuccess: () => setInvitationToRevoke(null),
+      });
+    }
+  };
+
+  const handleRevokeCancel = () => {
+    setInvitationToRevoke(null);
   };
 
   if (!canAccess) {
@@ -199,7 +214,7 @@ export default function InvitationsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleRevoke(inv)}
+                          onClick={() => handleRevokeClick(inv)}
                           disabled={revokeInvitation.isPending}
                           className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
                         >
@@ -222,6 +237,56 @@ export default function InvitationsPage() {
           </div>
         </div>
       </div>
+
+      {/* Revoke Invitation Confirmation Modal */}
+      <Modal
+        isOpen={!!invitationToRevoke}
+        onClose={handleRevokeCancel}
+        title="Revoke Invitation"
+      >
+        <div className="space-y-4">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-destructive/10 rounded-full flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-5 h-5 text-destructive" />
+            </div>
+            <div>
+              <p className="text-foreground">
+                Are you sure you want to revoke the invitation sent to{' '}
+                <span className="font-semibold">{invitationToRevoke?.email}</span>?
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                This action cannot be undone. The recipient will no longer be able to join the workspace using this invitation.
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button
+              variant="outline"
+              onClick={handleRevokeCancel}
+              disabled={revokeInvitation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleRevokeConfirm}
+              disabled={revokeInvitation.isPending}
+            >
+              {revokeInvitation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Revoking...
+                </>
+              ) : (
+                <>
+                  <Ban className="w-4 h-4 mr-2" />
+                  Revoke Invitation
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
