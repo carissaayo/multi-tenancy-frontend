@@ -5,6 +5,9 @@ class ApiClient {
     private client: AxiosInstance;
     private workspaceSlug: string | null = null;
 
+    // Header name for workspace slug (matches backend TenantResolverMiddleware)
+    private readonly WORKSPACE_HEADER = 'x-workspace-slug';
+
     constructor() {
         this.client = axios.create({
             baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -48,13 +51,14 @@ class ApiClient {
                 const requestUrl = config.url || '';
                 const normalizedUrl = this.normalizeUrl(requestUrl);
 
-                // Check if route needs subdomain
-                const shouldUseSubdomain = this.shouldUseSubdomain(normalizedUrl);
+                // Check if route needs workspace context (header-based)
+                const needsWorkspace = this.needsWorkspaceContext(normalizedUrl);
 
-                if (shouldUseSubdomain) {
+                if (needsWorkspace) {
                     const workspaceSlug = this.getWorkspaceSlug();
                     if (workspaceSlug) {
-                        config.baseURL = this.buildSubdomainUrl(workspaceSlug);
+                        // Use header-based tenant resolution (works on all platforms including Render)
+                        config.headers[this.WORKSPACE_HEADER] = workspaceSlug;
                     } else {
                         console.error(`❌ Workspace-scoped route ${normalizedUrl} called without workspace slug!`);
                     }
@@ -119,32 +123,17 @@ class ApiClient {
     }
 
     /**
-     * Build subdomain URL for workspace-scoped routes.
-     * Workspace is always a subdomain of the API host (e.g. nerdy-developers.multi-tenancy-backend-9g25.onrender.com).
+     * Determines if a route requires workspace context (via x-workspace-slug header).
+     * Routes that need workspace context will have the header automatically added.
      */
-    private buildSubdomainUrl(workspaceSlug: string): string {
-        const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        const url = new URL(baseApiUrl);
-
-        if (url.hostname === 'localhost' || url.hostname.includes('localhost')) {
-            // Development: workspace-slug.localhost:8000
-            return `${url.protocol}//${workspaceSlug}.localhost${url.port ? `:${url.port}` : ''}${url.pathname}`;
-        }
-        // Production: workspace-slug.full-api-host (e.g. nerdy-developers.multi-tenancy-backend-9g25.onrender.com)
-        return `${url.protocol}//${workspaceSlug}.${url.hostname}${url.port ? `:${url.port}` : ''}${url.pathname}`;
-    }
-
-    /**
-     * Determines if a route requires workspace subdomain
-     */
-    private shouldUseSubdomain(url: string): boolean {
+    private needsWorkspaceContext(url: string): boolean {
         const fullPath = url.startsWith('/api') ? url : `/api${url}`;
 
         if (!fullPath.startsWith('/api')) {
             return false;
         }
 
-        // Workspace-optional routes - authenticated but NO subdomain
+        // Workspace-optional routes - authenticated but NO workspace header needed
         const workspaceOptionalPatterns = [
             '/api/workspaces',
             '/api/users',
@@ -174,7 +163,7 @@ class ApiClient {
             }
         }
 
-        // All other /api routes are workspace-scoped and need subdomain
+        // All other /api routes are workspace-scoped and need the workspace header
         return true;
     }
 
