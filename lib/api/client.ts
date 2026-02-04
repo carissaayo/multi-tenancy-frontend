@@ -163,6 +163,11 @@ class ApiClient {
             }
         }
 
+        // Accept invitation by ID: /api/invitations/:id/accept (user is not in workspace yet)
+        if (/^\/api\/invitations\/[^/]+\/accept\/?$/.test(fullPath)) {
+            return false;
+        }
+
         // All other /api routes are workspace-scoped and need the workspace header
         return true;
     }
