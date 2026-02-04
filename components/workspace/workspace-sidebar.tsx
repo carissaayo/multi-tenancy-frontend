@@ -50,12 +50,7 @@ export function WorkspaceSidebar({ onLogoutClick }: WorkspaceSidebarProps) {
   const canManageInvitations = ['owner', 'admin'].includes(userRole.toLowerCase());
 
   const handleSwitchWorkspace = () => {
-    // Navigate to workspace selection page
-    if (typeof window !== 'undefined') {
-      const protocol = window.location.protocol;
-      const port = window.location.port ? `:${window.location.port}` : '';
-      window.location.href = `${protocol}//localhost${port}/select-workspace`;
-    }
+    router.push('/select-workspace');
     setSidebarOpen(false);
   };
 
