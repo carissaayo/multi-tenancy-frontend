@@ -96,7 +96,7 @@ export const workspacesApi = {
   },
 
   update: async (id: string, data: { name?: string; description?: string; plan?: WorkspacePlan }): Promise<UpdateWorkspaceResponse> => {
-    const response = await apiClient.instance.patch(`/workspaces/${id}`, data);
+    const response = await apiClient.instance.patch(`/settings`, data);
     return response.data;
   },
 
