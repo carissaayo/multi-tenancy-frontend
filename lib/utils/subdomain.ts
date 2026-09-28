@@ -52,6 +52,13 @@ export function getWorkspaceUrl(slug: string, path = ''): string {
  * Check if current route is a public route
  */
 export function isPublicRoute(pathname: string): boolean {
-  const publicRoutes = ['/login', '/register', '/verify-email', '/select-workspace'];
+  const publicRoutes = [
+    '/login',
+    '/register',
+    '/forgot-password',
+    '/reset-password',
+    '/verify-email',
+    '/select-workspace',
+  ];
   return publicRoutes.some((route) => pathname.startsWith(route));
 }

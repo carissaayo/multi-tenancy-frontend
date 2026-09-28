@@ -109,6 +109,26 @@ export const authApi = {
         const response = await apiClient.instance.post('/auth/verify-email', {
             emailCode,
         });
-        return response.data;
+        return response.data as { message: string };
+    },
+
+    resendVerificationEmail: async () => {
+        const response = await apiClient.instance.post('/auth/resend-verification-email');
+        return response.data as { message: string };
+    },
+
+    requestPasswordReset: async (email: string) => {
+        const response = await apiClient.instance.post('/auth/request-password-reset', { email });
+        return response.data as { message: string };
+    },
+
+    resetPassword: async (data: {
+        email: string;
+        passwordResetCode: string;
+        newPassword: string;
+        confirmNewPassword: string;
+    }) => {
+        const response = await apiClient.instance.post('/auth/password-reset', data);
+        return response.data as { message: string };
     },
 };

@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { authApi, type RegisterDto, type LoginDto, type UserProfile } from '@/lib/api/auth';
+import { usersApi } from '@/lib/api/users';
 import { queryKeys } from './query-keys';
 import { useAuthStore } from '@/store/auth-store';
 
@@ -46,6 +47,10 @@ export function useLogin(redirectTo?: string) {
             };
             useAuthStore.getState().setUser(user);
             queryClient.invalidateQueries({ queryKey: queryKeys.auth });
+            if (profile.isEmailVerified === false) {
+                router.push('/verify-email');
+                return;
+            }
             router.push(redirectTo || '/select-workspace');
         },
     });
@@ -72,12 +77,51 @@ export function useSelectWorkspace() {
 
 export function useVerifyEmail() {
     const queryClient = useQueryClient();
+    const router = useRouter();
 
     return useMutation({
         mutationFn: (emailCode: string) => authApi.verifyEmail(emailCode),
         onSuccess: () => {
+            const current = useAuthStore.getState().user;
+            if (current) {
+                useAuthStore.getState().setUser({ ...current, isEmailVerified: true });
+            }
             queryClient.invalidateQueries({ queryKey: queryKeys.auth });
+            router.push('/select-workspace');
         },
+    });
+}
+
+export function useResendVerificationEmail() {
+    return useMutation({
+        mutationFn: () => authApi.resendVerificationEmail(),
+    });
+}
+
+export function useRequestPasswordReset() {
+    return useMutation({
+        mutationFn: (email: string) => authApi.requestPasswordReset(email),
+    });
+}
+
+export function useResetPassword() {
+    const router = useRouter();
+
+    return useMutation({
+        mutationFn: authApi.resetPassword,
+        onSuccess: () => {
+            router.push('/login');
+        },
+    });
+}
+
+export function useChangePassword() {
+    return useMutation({
+        mutationFn: (data: {
+            password: string;
+            newPassword: string;
+            confirmNewPassword: string;
+        }) => usersApi.changePassword(data),
     });
 }
 

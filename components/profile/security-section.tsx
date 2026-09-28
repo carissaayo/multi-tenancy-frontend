@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Lock, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,7 +36,9 @@ export function SecuritySection({
             <Lock className="w-5 h-5 text-muted-foreground" />
             <div>
               <h3 className="font-semibold text-card-foreground">Password</h3>
-              <p className="text-sm text-muted-foreground">Change your password</p>
+              <Link href="/change-password" className="text-sm text-primary hover:underline">
+                Change your password
+              </Link>
             </div>
           </div>
           <Button
