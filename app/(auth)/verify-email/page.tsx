@@ -24,6 +24,18 @@ export default function VerifyEmailPage() {
     const resend = useResendVerificationEmail();
     const [code, setCode] = useState('');
     const [error, setError] = useState('');
+    const [cooldownUntil, setCooldownUntil] = useState<number | null>(null);
+    const [now, setNow] = useState(() => Date.now());
+
+    useEffect(() => {
+        if (!cooldownUntil) return;
+        const timer = setInterval(() => setNow(Date.now()), 1000);
+        return () => clearInterval(timer);
+    }, [cooldownUntil]);
+
+    const secondsLeft = cooldownUntil
+        ? Math.max(0, Math.ceil((cooldownUntil - now) / 1000))
+        : 0;
 
     useEffect(() => {
         if (!localStorage.getItem('accessToken')) {
@@ -47,8 +59,12 @@ export default function VerifyEmailPage() {
         try {
             const result = await resend.mutateAsync();
             toast.success(result.message || 'A new code is on the way.');
+            setCooldownUntil(Date.now() + 60_000);
         } catch (err) {
-            setError(getErrorMessage(err, 'Could not resend the code.'));
+            const message = getErrorMessage(err, 'Could not resend the code.');
+            setError(message);
+            const wait = message.match(/(\d+) seconds/);
+            if (wait) setCooldownUntil(Date.now() + Number(wait[1]) * 1000);
         }
     };
 
@@ -77,10 +93,14 @@ export default function VerifyEmailPage() {
                 <button
                     type="button"
                     onClick={handleResend}
-                    disabled={resend.isPending}
+                    disabled={resend.isPending || secondsLeft > 0}
                     className="mt-4 w-full text-center text-sm font-semibold text-blue-600 hover:text-blue-700 disabled:opacity-60"
                 >
-                    {resend.isPending ? 'Sending...' : 'Resend code'}
+                    {resend.isPending
+                        ? 'Sending...'
+                        : secondsLeft > 0
+                          ? `Resend code in ${secondsLeft}s`
+                          : 'Resend code'}
                 </button>
             </AuthCard>
         </AuthShell>
