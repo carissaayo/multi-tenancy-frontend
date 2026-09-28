@@ -20,6 +20,8 @@ const nextConfig: NextConfig = {
   },
   // Configure image domains for Next.js Image component
   images: {
+    // Next aborts the optimizer fetch after 7s. S3 from here is slower than that, so the avatar request 500s.
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
